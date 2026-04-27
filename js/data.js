@@ -414,26 +414,26 @@ const WD = [
 // ===== 远行目的地 =====
 const EXD = {
   nearHill: {
-    n: '近丘', days: 30,
-    cost: [{ r: 'berry', a: 50 }, { r: 'coin', a: 2 }],
-    uq: { b: { trailroad: 2, watchtower: 1 } },
+    n: '荒丘', days: 100,
+    cost: [{ r: 'berry', a: 200 }, { r: 'coin', a: 8 }, { r: 'charm', a: 4 }],
+    uq: { b: { trailroad: 3, watchtower: 1 } },
     rewards: [
       { r: 'stone', min: 10, max: 20, prob: 1 },
       { r: 'leather', min: 1, max: 3, prob: 1 },
       { r: 'spice', min: 1, max: 1, prob: .4 },
     ],
     logs: [
-      '近丘的落日把狐狸们的尾巴染成橘色，像举着一排小旗子回来。',
+      '荒丘的落日把狐狸们的尾巴染成橘色，像举着一排小旗子回来。',
       '碎石兜了满兜，还有一阵不紧不慢的风跟着一起进了村。',
       '皮毛上沾着苍耳，一只狐狸边走边揪，揪了半路也没揪完。',
       '这次捡回来的石头里有一颗是圆的，圆得很可疑，像月亮掉下来的渣。',
       '刺猬从草丛里探头看了一眼，又缩回去了。狐狸们假装没看见。',
-      '近丘不远，但每次回来都像出了一趟远门。尾巴上的灰是证据。',
+      '荒丘不近，每次回来都像出了一趟远门。尾巴上的灰是证据。',
     ],
   },
   forest: {
-    n: '密林', days: 60,
-    cost: [{ r: 'berry', a: 100 }, { r: 'coin', a: 5 }, { r: 'charm', a: 1 }],
+    n: '密林', days: 150,
+    cost: [{ r: 'berry', a: 300 }, { r: 'coin', a: 10 }, { r: 'charm', a: 8 }],
     uq: { b: { trailroad: 3, shrine: 2 } },
     rewards: [
       { r: 'wood', min: 15, max: 25, prob: 1 },
@@ -450,8 +450,8 @@ const EXD = {
     ],
   },
   oldRuin: {
-    n: '旧墟', days: 100, narrative: true,
-    cost: [{ r: 'berry', a: 200 }, { r: 'coin', a: 8 }, { r: 'charm', a: 4 }],
+    n: '旧墟', days: 30, narrative: true,
+    cost: [{ r: 'berry', a: 50 }, { r: 'coin', a: 2 }],
     uq: { b: { trailroad: 1 } },
     rewards: [
       { r: 'iron', min: 3, max: 6, prob: 1 },
@@ -468,9 +468,9 @@ const EXD = {
     ],
   },
   cloudRidge: {
-    n: '云岭', days: 150, narrative: true,
-    cost: [{ r: 'berry', a: 300 }, { r: 'coin', a: 10 }, { r: 'charm', a: 8 }],
-    uq: { b: { trailroad: 2, watchtower: 1 }, u: { longJourney: 1 } },
+    n: '云岭', days: 60, narrative: true,
+    cost: [{ r: 'berry', a: 100 }, { r: 'coin', a: 5 }, { r: 'charm', a: 1 }],
+    uq: { b: { trailroad: 1, watchtower: 1 }, u: { longJourney: 1 } },
     rewards: [
       { r: 'charm', min: 3, max: 5, prob: 1 },
       { r: 'ancCoin', min: 2, max: 3, prob: 1 },
