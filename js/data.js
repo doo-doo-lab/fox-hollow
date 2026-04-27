@@ -526,6 +526,11 @@ const CVD = {
       { n: '兽皮', give: [{ r: 'leather', a: 3 }], cost: [{ r: 'coin', a: 5 }] },
     ],
     buy: { n: '收购圆木', take: [{ r: 'wood', a: 30 }], give: [{ r: 'coin', a: 3 }] },
+    blueprintPool: [
+      { target: 'berryPatch', type: 'bld' }, { target: 'lumberYard', type: 'bld' },
+      { target: 'quarry', type: 'bld' }, { target: 'gatherer', type: 'job' },
+    ],
+    bpCost: [{ r: 'coin', a: 12 }, { r: 'spice', a: 1 }],
     arriveLog: '一只背着大包的山猫出现在村口，朝最近的狐狸点了点头。',
     leaveLog: '山猫行商收拾好包袱走了，临走在地上留了一撮香料当茶钱。',
   },
@@ -537,6 +542,12 @@ const CVD = {
       { n: '矿铁', give: [{ r: 'iron', a: 3 }], cost: [{ r: 'coin', a: 8 }] },
     ],
     buy: { n: '收购木板', take: [{ r: 'plank', a: 2 }], give: [{ r: 'coin', a: 5 }] },
+    blueprintPool: [
+      { target: 'tannery', type: 'bld' }, { target: 'smithy', type: 'bld' },
+      { target: 'warehouse', type: 'bld' }, { target: 'woodcutter', type: 'job' },
+      { target: 'miner', type: 'job' },
+    ],
+    bpCost: [{ r: 'coin', a: 15 }, { r: 'silk', a: 1 }],
     arriveLog: '几只河獭沿着溪流摸上来了，推着满载丝帛的小木筏。',
     leaveLog: '河獭商队顺水滑走了，尾巴在水面拍了两下算是告别。',
   },
@@ -548,6 +559,11 @@ const CVD = {
       { n: '符咒', give: [{ r: 'charm', a: 2 }], cost: [{ r: 'coin', a: 10 }] },
     ],
     buy: { n: '收购砖块', take: [{ r: 'brick', a: 3 }], give: [{ r: 'coin', a: 5 }] },
+    blueprintPool: [
+      { target: 'library', type: 'bld' }, { target: 'shrine', type: 'bld' },
+      { target: 'scholar', type: 'job' }, { target: 'smith', type: 'job' },
+    ],
+    bpCost: [{ r: 'coin', a: 18 }, { r: 'ancCoin', a: 1 }],
     arriveLog: '一只白鹤落在灵狐祠的檐角上，脚上绑着一个小布包。',
     leaveLog: '白鹤信使展翅飞走了，盘旋了一圈像是在记路。',
   },
@@ -559,8 +575,110 @@ const CVD = {
       { n: '符咒', give: [{ r: 'charm', a: 3 }], cost: [{ r: 'coin', a: 12 }] },
     ],
     buy: null,
+    blueprintPool: [
+      { target: 'hunter', type: 'job' }, { target: 'merchant', type: 'job' },
+    ],
+    bpCost: [{ r: 'coin', a: 20 }, { r: 'ancCoin', a: 2 }],
     arriveLog: '几只灰毛狐狸从驿道尽头走来，披着旧墟式样的斗篷。',
     leaveLog: '旧墟遗民沿来路返回了，走之前朝山谷的方向鞠了一躬。',
+  },
+};
+
+// ===== 建筑专精定义 =====
+const SPEC_BD = {
+  berryPatch: {
+    A: { n: '沃土', d: '产量 +40%，造价 +25%', prodMul: 1.4, costMul: 1.25,
+      tip: ['根扎得深了，莓子就甜得不讲道理。'] },
+    B: { n: '野蔓', d: '造价 -20%，产量 +10%', prodMul: 1.1, costMul: 0.8,
+      tip: ['便宜、快、到处长——三个优点恰好凑成一个缺点。'] },
+  },
+  lumberYard: {
+    A: { n: '深林', d: '圆木 +50%，每座消耗碎石 0.005/s', prodMul: 1.5, drain: { stone: 0.005 },
+      tip: ['砍得越深，回来的路就越长。'] },
+    B: { n: '杂伐', d: '圆木 +15%，额外产兽皮 0.002/s', prodMul: 1.15, extraP: { leather: 0.002 },
+      tip: ['树皮底下藏着的不只是虫子。'] },
+  },
+  quarry: {
+    A: { n: '掘脉', d: '碎石 +50%，每座消耗圆木 0.005/s', prodMul: 1.5, drain: { wood: 0.005 },
+      tip: ['石头越挖越多，撑坑的木头越来越少。'] },
+    B: { n: '拾遗', d: '碎石 +20%，额外产矿铁 0.001/s', prodMul: 1.2, extraP: { iron: 0.001 },
+      tip: ['挖着挖着，碎石里露出了不一样的颜色。'] },
+  },
+  tannery: {
+    A: { n: '厚韧', d: '兽皮 +60%，全村野莓消耗 +10%', prodMul: 1.6, foxEatMul: 1.1,
+      tip: ['皮子好了，肚子饿了——鞣革坊的辩证法。'] },
+    B: { n: '薄削', d: '兽皮 +20%，持续转化兽皮为铜钱', prodMul: 1.2, convert: { from: 'leather', to: 'coin', drainRate: 0.01, gainRate: 0.005 },
+      tip: ['薄薄地片，慢慢地卖，钱就这么一点点攒起来了。'] },
+  },
+  smithy: {
+    A: { n: '烈焰', d: '矿铁 +60%，每座消耗圆木 0.01/s', prodMul: 1.6, drain: { wood: 0.01 },
+      tip: ['火烧得越旺，铁就越听话，木头就越委屈。'] },
+    B: { n: '巧工', d: '矿铁 +25%，所有建筑矿铁造价 -15%', prodMul: 1.25, costReduce: { res: 'iron', mul: 0.85 },
+      tip: ['省下来的铁，比多炼出来的铁更值钱。'] },
+  },
+  warehouse: {
+    A: { n: '深窖', d: '上限效果翻倍', mxMul: 2,
+      tip: ['挖深一尺，心里就多踏实一分。'] },
+    B: { n: '霜藏', d: '野莓上限 +50%，寒冬产量倍率提升', berryMxMul: 1.5, winterBuff: 0.1,
+      tip: ['冬天没那么可怕了——只要窖里还有存货。'] },
+  },
+  library: {
+    A: { n: '穷卷', d: '学识 +50%，卷轴产出 +30%', loreProdMul: 1.5, scrollProdMul: 1.3,
+      tip: ['读完最后一页的时候，发现第一页的意思变了。'] },
+    B: { n: '秘阁', d: '学识上限翻倍，学识 +15%', loreMxMul: 2, loreProdMul: 1.15,
+      tip: ['有些书不让借，有些架子不让碰，有些知识只在暗处生长。'] },
+  },
+  shrine: {
+    A: { n: '福佑', d: '满意度额外 +3%/座', hapBonus: 0.03,
+      tip: ['狐狸们说不清为什么开心，但就是开心了。'] },
+    B: { n: '引灵', d: '符咒 +40%，灵术消耗 -20%', charmProdMul: 1.4, spellCostMul: 0.8,
+      tip: ['灵气浓了，连打喷嚏都带着光。'] },
+  },
+};
+
+// ===== 职业天赋定义 =====
+const SPEC_JD = {
+  gatherer: {
+    A: { n: '勤爪', d: '产量 +30%，每人多消耗野莓 0.05/s', prodMul: 1.3, extraEat: 0.05,
+      tip: ['爪子停不下来的狐狸，肚子也停不下来。'] },
+    B: { n: '轻手', d: '产量 +15%，手动采集量 +50%', prodMul: 1.15, gatherMul: 1.5,
+      tip: ['轻拿轻放，连莓果都来不及叫疼。'] },
+  },
+  woodcutter: {
+    A: { n: '老斧', d: '产量 +40%', prodMul: 1.4,
+      tip: ['斧刃上的缺口，每一道都是经验。'] },
+    B: { n: '兼顾', d: '产量 +15%，额外产碎石 0.01/s', prodMul: 1.15, extraP: { stone: 0.01 },
+      tip: ['砍树的时候顺便踢两脚石头，不浪费脚力。'] },
+  },
+  miner: {
+    A: { n: '稳镐', d: '产量 +40%', prodMul: 1.4,
+      tip: ['一镐下去稳稳的，连石头都服气。'] },
+    B: { n: '探脉', d: '产量 +15%，额外产矿铁 0.002/s', prodMul: 1.15, extraP: { iron: 0.002 },
+      tip: ['石头的颜色不对——这不是坏消息。'] },
+  },
+  hunter: {
+    A: { n: '循迹', d: '兽皮 +50%', prodMul: 1.5,
+      tip: ['草丛里的脚印会说话，只要你蹲得够低。'] },
+    B: { n: '哨眼', d: '兽皮 +20%，远行奖励额外 +10%/猎手', prodMul: 1.2, expBonusPerHunter: 0.1,
+      tip: ['猎手的眼睛在林子里是武器，在路上是地图。'] },
+  },
+  scholar: {
+    A: { n: '沉思', d: '学识 +40%，卷轴 +30%', loreProdMul: 1.4, scrollProdMul: 1.3,
+      tip: ['发呆是学者的工作，走神是学者的加班。'] },
+    B: { n: '通览', d: '学识 +20%，研究费用 -10%', loreProdMul: 1.2, resCostMul: 0.9,
+      tip: ['读得多了，什么都觉得见过——包括答案。'] },
+  },
+  smith: {
+    A: { n: '锤淬', d: '矿铁 +50%', prodMul: 1.5,
+      tip: ['锤子敲一百下是练习，敲一万下是手艺。'] },
+    B: { n: '省料', d: '矿铁 +20%，锻造炉造价 -15%', prodMul: 1.2, bldCostReduce: { bld: 'smithy', mul: 0.85 },
+      tip: ['好铁匠不是炼得多，是废得少。'] },
+  },
+  merchant: {
+    A: { n: '精算', d: '铜钱 +50%', prodMul: 1.5,
+      tip: ['数钱的声音是世界上第二好听的声音。第一是进账。'] },
+    B: { n: '广路', d: '铜钱 +20%，商队图纸出现概率提升', prodMul: 1.2, bpChanceBonus: 0.10,
+      tip: ['认识的人多了，好东西就自己找上门了。'] },
   },
 };
 

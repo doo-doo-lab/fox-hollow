@@ -86,7 +86,6 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* LOG */
 #log-panel{width:230px;border-left:1px solid #ddd;padding:8px;overflow-y:auto;flex-shrink:0;}
-#log-panel h3{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
 .log{font-size:12px;color:#999;padding:1px 0;border-bottom:1px solid #f8f8f8;line-height:1.4;}
 .log.important{color:#333;}
 .log.event{color:#b8860b;}
@@ -136,8 +135,30 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .narr-unlocked{color:#556;font-style:italic;}
 .narr-locked{color:#ccc;}
 
+/* COLLAPSE TOGGLES */
+.collapse-toggle{cursor:pointer;user-select:none;font-size:12px;color:#888;padding:2px 0;margin-bottom:4px;}
+.collapse-toggle:hover{color:#333;}
+#log-panel .collapse-toggle{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;}
+#log-panel .collapse-toggle:hover{color:#333;}
+
+/* SPEC / TALENT TAGS */
+.spec-tag{color:#9a7b4f;font-size:11px;font-weight:normal;margin-left:2px;}
+.talent-tag{color:#9a7b4f;font-size:11px;font-weight:normal;margin-left:2px;}
+
+/* BLUEPRINT ITEMS (caravan) */
+.bp-item{background:#faf8f2;border-bottom-color:#e8e0cc !important;}
+.bp-item-name{font-weight:bold;color:#9a7b4f !important;}
+.bp-target{font-size:11px;color:#888;margin-left:4px;}
+
+/* BLUEPRINT INVENTORY (craft tab) */
+.bp-inv-row{background:#faf8f2;}
+.bp-target-label{font-size:12px;color:#888;margin-left:4px;}
+.bp-disable-reason{font-size:11px;color:#b00;margin-left:auto;margin-right:4px;}
+
 @media(max-width:860px){
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  #left-panel.collapsed,#log-panel.collapsed{max-height:none;height:auto;overflow:hidden;}
+  #center-panel.collapsed{flex:0 0 auto;}
   .job-row .jd{display:none;}
 }

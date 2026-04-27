@@ -27,6 +27,10 @@ const G = {
   pendingChoice: null,  // { idx: number } 当前待选择的事件
   choicesDone: [],       // 已触发过的事件索引
   choiceBuffs: {},       // 一次性/永久 buff 追踪
+  // v0.12.0 图纸与专精
+  blueprints: [],        // 已持有图纸 [{ id, target, spec, type }]
+  bldSpec: {},           // 已激活建筑专精 { berryPatch: 'A', ... }
+  jobTalent: {},         // 已激活职业天赋 { gatherer: 'B', ... }
 };
 
 let lastRealTime = Date.now();
@@ -55,7 +59,24 @@ function bp(id, i) {
   const p = BD[id].p[i];
   var cost = Math.ceil(p.b * Math.pow(p.k, G.bld[id].c));
   if (G.harvestSeason === G.season) cost = Math.ceil(cost * 0.7);
+  cost = Math.ceil(cost * specCostMul(id, p.r));
   return cost;
+}
+
+// 专精/天赋造价乘数（乘法叠加）
+function specCostMul(bldId, resKey) {
+  var mul = 1;
+  // 莓果园沃土/野蔓 造价修正（对自身造价）
+  var spec = G.bldSpec[bldId];
+  if (spec && SPEC_BD[bldId] && SPEC_BD[bldId][spec] && SPEC_BD[bldId][spec].costMul)
+    mul *= SPEC_BD[bldId][spec].costMul;
+  // 锻造炉巧工：所有建筑矿铁造价 -15%
+  if (resKey === 'iron' && G.bldSpec.smithy === 'B')
+    mul *= SPEC_BD.smithy.B.costReduce.mul;
+  // 铁匠省料：锻造炉造价 -15%
+  if (bldId === 'smithy' && G.jobTalent.smith === 'B')
+    mul *= SPEC_JD.smith.B.bldCostReduce.mul;
+  return mul;
 }
 
 function canB(id) {
@@ -64,9 +85,15 @@ function canB(id) {
   return true;
 }
 
+function researchCostMul() {
+  if (G.jobTalent.scholar === 'B') return SPEC_JD.scholar.B.resCostMul;
+  return 1;
+}
+
 function canU(id) {
+  var mul = researchCostMul();
   for (const p of UD[id].p)
-    if (G.res[p.r].v < p.a) return false;
+    if (G.res[p.r].v < Math.ceil(p.a * mul)) return false;
   return true;
 }
 
@@ -91,6 +118,7 @@ function chk(q) {
 function foxEatRate() {
   var base = 0.7;
   if (G.upg.ancestorEye?.done) base *= 0.85;
+  if (G.bldSpec.tannery === 'A') base *= SPEC_BD.tannery.A.foxEatMul;
   return base;
 }
 
@@ -120,29 +148,82 @@ function calcR() {
   const r = {}, m = {};
   for (const k of Object.keys(RD)) { r[k] = 0; m[k] = 1; }
 
-  // 建筑被动产出
+  // 建筑被动产出（含专精加成）
   for (const [id, s] of Object.entries(G.bld)) {
     if (!s.c) continue;
     const e = BD[id].e; if (!e) continue;
-    for (const [k, v] of Object.entries(e))
-      if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c;
+    var specData = G.bldSpec[id] && SPEC_BD[id] ? SPEC_BD[id][G.bldSpec[id]] : null;
+    for (const [k, v] of Object.entries(e)) {
+      if (!k.endsWith('P')) continue;
+      var resKey = k.slice(0, -1);
+      var val = v;
+      // 建筑专精产量乘数
+      if (specData) {
+        if (specData.prodMul) val *= specData.prodMul;
+        // 藏书阁穷卷/秘阁 特殊乘数
+        if (resKey === 'lore' && specData.loreProdMul) val = v * specData.loreProdMul;
+        if (resKey === 'scroll' && specData.scrollProdMul) val = v * specData.scrollProdMul;
+        if (resKey === 'charm' && specData.charmProdMul) val = v * specData.charmProdMul;
+      }
+      r[resKey] = (r[resKey] || 0) + val * s.c;
+    }
+    // 建筑专精额外产出
+    if (specData && specData.extraP) {
+      for (var ek in specData.extraP)
+        r[ek] = (r[ek] || 0) + specData.extraP[ek] * s.c * TPD;
+    }
+    // 建筑专精消耗（drain）
+    if (specData && specData.drain) {
+      for (var dk in specData.drain)
+        r[dk] = (r[dk] || 0) - specData.drain[dk] * s.c * TPD;
+    }
   }
 
-  // 职业产出（含培训加成 × 满意度）
+  // 职业产出（含培训加成 × 满意度 × 天赋加成）
   for (const [id, s] of Object.entries(G.job)) {
     if (!s.c) continue;
     var trainBonus = 1 + (G.train[id] || 0) * 0.1;
-    for (const [k, v] of Object.entries(JD[id].e))
-      if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c * trainBonus * G.happy;
+    var talentData = G.jobTalent[id] && SPEC_JD[id] ? SPEC_JD[id][G.jobTalent[id]] : null;
+    for (const [k, v] of Object.entries(JD[id].e)) {
+      if (!k.endsWith('P')) continue;
+      var resKey = k.slice(0, -1);
+      var val = v;
+      if (talentData) {
+        if (talentData.prodMul) val *= talentData.prodMul;
+        if (resKey === 'lore' && talentData.loreProdMul) val = v * talentData.loreProdMul;
+        if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
+      }
+      r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy;
+    }
+    // 天赋额外产出
+    if (talentData && talentData.extraP) {
+      for (var ek in talentData.extraP)
+        r[ek] = (r[ek] || 0) + talentData.extraP[ek] * s.c * TPD * trainBonus * G.happy;
+    }
   }
 
-  // 祖灵加成（本季职业产出 +50%）
+  // 祖灵加成（本季职业产出 +50%，含天赋加成）
   if (G.spiritSeason === G.season) {
     for (const [id, s] of Object.entries(G.job)) {
       if (!s.c) continue;
       var trainBonus = 1 + (G.train[id] || 0) * 0.1;
-      for (const [k, v] of Object.entries(JD[id].e))
-        if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c * trainBonus * G.happy * 0.5;
+      var talentData = G.jobTalent[id] && SPEC_JD[id] ? SPEC_JD[id][G.jobTalent[id]] : null;
+      for (const [k, v] of Object.entries(JD[id].e)) {
+        if (!k.endsWith('P')) continue;
+        var resKey = k.slice(0, -1);
+        var val = v;
+        if (talentData) {
+          if (talentData.prodMul) val *= talentData.prodMul;
+          if (resKey === 'lore' && talentData.loreProdMul) val = v * talentData.loreProdMul;
+          if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
+        }
+        r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy * 0.5;
+      }
+      // 天赋额外产出也受祖灵加成
+      if (talentData && talentData.extraP) {
+        for (var ek in talentData.extraP)
+          r[ek] = (r[ek] || 0) + talentData.extraP[ek] * s.c * TPD * trainBonus * G.happy * 0.5;
+      }
     }
   }
 
@@ -166,9 +247,10 @@ function calcR() {
   // 应用乘数
   for (const k of Object.keys(r)) r[k] *= (m[k] || 1);
 
-  // 季节倍率（含灵狐庇护冬季加成）
+  // 季节倍率（含灵狐庇护冬季加成 + 霜藏专精）
   var berrySeasonMul = SM[G.season];
   if (G.season === 3 && G.upg.spiritShelter?.done) berrySeasonMul = 0.4;
+  if (G.season === 3 && G.bldSpec.warehouse === 'B') berrySeasonMul *= (1 + SPEC_BD.warehouse.B.winterBuff);
   r.berry *= berrySeasonMul;
 
   // 祈雨术加成
@@ -176,6 +258,17 @@ function calcR() {
 
   // 狐狸消耗野莓（外出狐狸不消耗）
   r.berry -= (G.foxes - (G.foxAway || 0)) * foxEatRate();
+
+  // 采集者勤爪额外消耗（独立加项，不受厚韧放大）
+  if (G.jobTalent.gatherer === 'A' && G.job.gatherer.c > 0)
+    r.berry -= SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * TPD;
+
+  // 鞣革坊薄削持续转化（兽皮→铜钱，不同速率）
+  if (G.bldSpec.tannery === 'B' && G.res.leather.v > 0 && G.res.coin.v < G.res.coin.mx) {
+    var cvt = SPEC_BD.tannery.B.convert;
+    r[cvt.from] = (r[cvt.from] || 0) - cvt.drainRate * TPD;
+    r[cvt.to] = (r[cvt.to] || 0) + cvt.gainRate * TPD;
+  }
 
   // 工坊自动制作（连续速率，受限于原料产量以保证显示准确）
   if (G.upg.craftMastery?.done) {
@@ -249,8 +342,17 @@ function calcMx() {
     for (const [id, s] of Object.entries(G.bld)) {
       if (!s.c) continue;
       const e = BD[id].e; if (!e) continue;
-      if (e[k + 'Mx']) mx += e[k + 'Mx'] * s.c;
+      if (e[k + 'Mx']) {
+        var contrib = e[k + 'Mx'] * s.c;
+        // 深窖：储藏窖上限翻倍（仅自身贡献）
+        if (id === 'warehouse' && G.bldSpec.warehouse === 'A') contrib *= SPEC_BD.warehouse.A.mxMul;
+        // 秘阁：藏书阁学识上限翻倍（仅自身贡献）
+        if (id === 'library' && k === 'lore' && G.bldSpec.library === 'B') contrib *= SPEC_BD.library.B.loreMxMul;
+        mx += contrib;
+      }
     }
+    // 霜藏：野莓上限 +50%（乘于总上限）
+    if (k === 'berry' && G.bldSpec.warehouse === 'B') mx = Math.floor(mx * SPEC_BD.warehouse.B.berryMxMul);
     G.res[k].mx = mx;
   }
   let mf = 0;
@@ -262,8 +364,12 @@ function calcMx() {
 function calcH() {
   let h = 1;
   if (G.foxes > 5) h -= (G.foxes - 5) * 0.02;
-  for (const [id, s] of Object.entries(G.bld))
-    if (s.c && BD[id].e?.hapB) h += BD[id].e.hapB * s.c;
+  for (const [id, s] of Object.entries(G.bld)) {
+    if (!s.c) continue;
+    if (BD[id].e?.hapB) h += BD[id].e.hapB * s.c;
+    // 福佑：灵狐祠额外满意度
+    if (id === 'shrine' && G.bldSpec.shrine === 'A') h += SPEC_BD.shrine.A.hapBonus * s.c;
+  }
   for (const [id, s] of Object.entries(G.upg))
     if (s.done && UD[id].e?.hapB) h += UD[id].e.hapB;
   // 山谷宴席 +15%
@@ -475,7 +581,8 @@ function tryEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  var hasRemnant = picked.e && picked.e.remnant;
+  log(msg, hasRemnant ? 'echo' : 'event');
 }
 
 function tryRewardEvent() {
@@ -502,7 +609,8 @@ function tryRewardEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  var hasRemnant = picked.e && picked.e.remnant;
+  log(msg, hasRemnant ? 'echo' : 'event');
 }
 
 function tryWorldEcho() {
@@ -522,12 +630,15 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  log(msg + '（遗光 +1）', 'echo');
 }
 
 // ===== 玩家操作 =====
 function gather(type) {
-  const amt = type === 'berry' ? 1 * G.happy : 1;
+  var amt = type === 'berry' ? 1 * G.happy : 1;
+  // 轻手天赋：手动采集量 +50%
+  if (type === 'berry' && G.jobTalent.gatherer === 'B')
+    amt *= SPEC_JD.gatherer.B.gatherMul;
   const s = G.res[type];
   s.v = Math.min(s.v + amt, s.mx);
   if (!s.on) s.on = true;
@@ -548,7 +659,8 @@ function build(id) {
 
 function research(id) {
   if (G.upg[id].done || !canU(id)) return;
-  for (const p of UD[id].p) G.res[p.r].v -= p.a;
+  var rMul = researchCostMul();
+  for (const p of UD[id].p) G.res[p.r].v -= Math.ceil(p.a * rMul);
   G.upg[id].done = 1;
   if (UD[id].e?.plankU) { G.res.plank.on = 1; G.res.plank.mx = 100; }
   if (UD[id].e?.brickU) { G.res.brick.on = 1; G.res.brick.mx = 100; }
@@ -606,10 +718,16 @@ function sell(id) {
 }
 
 // ===== 灵术 =====
+function spellCostMul() {
+  if (G.bldSpec.shrine === 'B') return SPEC_BD.shrine.B.spellCostMul;
+  return 1;
+}
+
 function canSpell(id) {
   if (!chk(SD[id].uq)) return false;
+  var mul = spellCostMul();
   for (const p of SD[id].cost)
-    if (G.res[p.r].v < p.a) return false;
+    if (G.res[p.r].v < Math.ceil(p.a * mul)) return false;
   return true;
 }
 
@@ -638,7 +756,7 @@ function castSpell(id) {
       }
     }
     if (!target) { log('没有可加速的远行队伍。', 'warn'); return; }
-    for (const p of SD[id].cost) G.res[p.r].v -= p.a;
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
     target.ticksLeft = Math.ceil(target.ticksLeft * 0.7);
     target.usedSpiritPath = true;
     log('灵路开启，前往' + EXD[target.dest].n + '的队伍加速了！', 'important');
@@ -648,7 +766,7 @@ function castSpell(id) {
   if (id === 'tradeWind') {
     if (G.tradeWindYear === G.year) { log('今年已经召唤过商风了。', 'warn'); return; }
     if (G.caravan) { log('已有商队在场。', 'warn'); return; }
-    for (const p of SD[id].cost) G.res[p.r].v -= p.a;
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
     G.tradeWindYear = G.year;
     trySpawnCaravan();
     log('商风吹起，远方的商队循风而来！', 'important');
@@ -657,14 +775,14 @@ function castSpell(id) {
   }
   if (id === 'feast') {
     if (G.feastSeason === G.season) { log('本季已经举办过宴席了。', 'warn'); return; }
-    for (const p of SD[id].cost) G.res[p.r].v -= p.a;
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
     G.feastSeason = G.season;
     log('山谷宴席开始了，狐狸们的满意度提升！', 'important');
     rAll();
     return;
   }
 
-  for (const p of SD[id].cost) G.res[p.r].v -= p.a;
+  for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
 
   if (id === 'rain') {
     G.rainSeason = G.season;
@@ -785,6 +903,9 @@ function resolveExpedition(idx, silent) {
   G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce(function(s, j) { return s + j.c; }, 0);
   // 计算奖励倍率
   var scoutBonus = 1 + (G.job.scout?.c || 0) * 0.2;
+  // 哨眼天赋：每位猎手额外 +10% 远行奖励（加法叠加）
+  if (G.jobTalent.hunter === 'B')
+    scoutBonus += (G.job.hunter?.c || 0) * SPEC_JD.hunter.B.expBonusPerHunter;
   var researchBonus = G.upg.longJourney?.done ? 1.5 : 1;
   var choiceRewardMul = 1;
   var cb = G.choiceBuffs || {};
@@ -969,10 +1090,15 @@ function trySpawnCaravan(silent) {
   }
   if (!pool.length) return;
   var picked = pool[Math.floor(Math.random() * pool.length)];
-  G.caravan = { id: picked, bought: {} };
+  G.caravan = { id: picked, bought: {}, blueprint: null };
   G.caravanTimer = 0;
+  // 图纸掉落判定
+  var bpChance = 0.5;
+  if (G.jobTalent.merchant === 'B') bpChance += SPEC_JD.merchant.B.bpChanceBonus;
+  if (Math.random() < bpChance) rollBlueprint(picked);
   if (!silent) {
     log(CVD[picked].arriveLog, 'event');
+    if (G.caravan.blueprint) log('商队带来了一张图纸。', 'important');
   }
 }
 
@@ -1041,6 +1167,108 @@ function sellToCaravan() {
   rAll();
 }
 
+// ===== 图纸与专精系统 =====
+function rollBlueprint(caravanId) {
+  var cv = CVD[caravanId];
+  if (!cv || !cv.blueprintPool) return;
+  // 检查图纸费用资源上限（玩家必须有对应资源上限才生成图纸）
+  for (var ci = 0; ci < cv.bpCost.length; ci++) {
+    var costRes = cv.bpCost[ci].r;
+    if (G.res[costRes] && G.res[costRes].mx === 0 && !G.res[costRes].on) return;
+  }
+  var pool = [];
+  for (var i = 0; i < cv.blueprintPool.length; i++) {
+    var bp = cv.blueprintPool[i];
+    var target = bp.target, type = bp.type;
+    // 每个 target 有 A/B 两张图纸
+    var specs = type === 'bld' ? SPEC_BD[target] : SPEC_JD[target];
+    if (!specs) continue;
+    for (var dir of ['A', 'B']) {
+      // 已激活该目标任意方向 → 排除
+      if (type === 'bld' && G.bldSpec[target]) continue;
+      if (type === 'job' && G.jobTalent[target]) continue;
+      // 已持有同目标同方向 → 排除
+      var held = false, heldOther = false;
+      for (var j = 0; j < G.blueprints.length; j++) {
+        if (G.blueprints[j].target === target && G.blueprints[j].spec === dir) held = true;
+        if (G.blueprints[j].target === target && G.blueprints[j].spec !== dir) heldOther = true;
+      }
+      if (held) continue;
+      // 同目标另一方向已持有 → 互斥排除
+      if (heldOther) continue;
+      pool.push({ id: target + '_' + dir, target: target, spec: dir, type: type });
+    }
+  }
+  if (!pool.length) return;
+  var picked = pool[Math.floor(Math.random() * pool.length)];
+  G.caravan.blueprint = {
+    id: picked.id, target: picked.target, spec: picked.spec, type: picked.type,
+    cost: cv.bpCost
+  };
+}
+
+function canBuyBlueprint() {
+  if (!G.caravan || !G.caravan.blueprint) return false;
+  if (G.caravan.bought['blueprint']) return false;
+  var bp = G.caravan.blueprint;
+  var mul = caravanCostMul();
+  for (var i = 0; i < bp.cost.length; i++)
+    if (G.res[bp.cost[i].r].v < Math.ceil(bp.cost[i].a * mul)) return false;
+  return true;
+}
+
+function buyBlueprint() {
+  if (!canBuyBlueprint()) return;
+  var bp = G.caravan.blueprint;
+  var mul = caravanCostMul();
+  for (var i = 0; i < bp.cost.length; i++)
+    G.res[bp.cost[i].r].v -= Math.ceil(bp.cost[i].a * mul);
+  G.blueprints.push({ id: bp.id, target: bp.target, spec: bp.spec, type: bp.type });
+  G.caravan.bought['blueprint'] = true;
+  // 消耗折扣 buff
+  if (G.choiceBuffs && G.choiceBuffs.ruinfolkDiscount && G.caravan.id === 'ruinfolk') {
+    G.choiceBuffs.ruinfolkDiscount = false;
+  }
+  var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
+  log('购入图纸：' + specData.n + '。', 'important');
+  rAll();
+}
+
+function activateSpec(bpIdx) {
+  if (bpIdx < 0 || bpIdx >= G.blueprints.length) return;
+  var bp = G.blueprints[bpIdx];
+  if (bp.type !== 'bld') return;
+  if (G.bldSpec[bp.target]) return; // 已激活
+  if ((G.bld[bp.target]?.c || 0) < 5) return; // 需要≥5座
+  G.bldSpec[bp.target] = bp.spec;
+  G.blueprints.splice(bpIdx, 1);
+  // 自动丢弃同目标另一方向的图纸
+  for (var i = G.blueprints.length - 1; i >= 0; i--) {
+    if (G.blueprints[i].target === bp.target) G.blueprints.splice(i, 1);
+  }
+  var specData = SPEC_BD[bp.target][bp.spec];
+  var bldName = BD[bp.target]?.n || bp.target;
+  log('激活专精：' + bldName + '「' + specData.n + '」。', 'important');
+  rAll();
+}
+
+function activateJobTalent(bpIdx) {
+  if (bpIdx < 0 || bpIdx >= G.blueprints.length) return;
+  var bp = G.blueprints[bpIdx];
+  if (bp.type !== 'job') return;
+  if (G.jobTalent[bp.target]) return; // 已激活
+  G.jobTalent[bp.target] = bp.spec;
+  G.blueprints.splice(bpIdx, 1);
+  // 自动丢弃同目标另一方向的图纸
+  for (var i = G.blueprints.length - 1; i >= 0; i--) {
+    if (G.blueprints[i].target === bp.target) G.blueprints.splice(i, 1);
+  }
+  var talentData = SPEC_JD[bp.target][bp.spec];
+  var jobName = JD[bp.target]?.n || bp.target;
+  log('激活天赋：' + jobName + '「' + talentData.n + '」。', 'important');
+  rAll();
+}
+
 // 重置 G 到初始骨架（保留引用，清除所有属性后填入默认值）
 function resetG() {
   for (var k in G) delete G[k];
@@ -1054,6 +1282,8 @@ function resetG() {
   G.feastSeason = -1; G.tradeWindYear = -1;
   G.caravan = null; G.caravanTimer = 0;
   G.pendingChoice = null; G.choicesDone = []; G.choiceBuffs = {};
+  // v0.12.0 图纸与专精
+  G.blueprints = []; G.bldSpec = {}; G.jobTalent = {};
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -1098,6 +1328,10 @@ function migrate() {
   G.pendingChoice = G.pendingChoice || null;
   G.choicesDone = G.choicesDone || [];
   G.choiceBuffs = G.choiceBuffs || {};
+  // v0.12.0 图纸与专精
+  G.blueprints = G.blueprints || [];
+  G.bldSpec = G.bldSpec || {};
+  G.jobTalent = G.jobTalent || {};
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };

@@ -9,6 +9,13 @@ const logs = [];
 const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
+const collapsed = { res: false, tc: false, log: false };
+
+function toggleCollapse(key) {
+  collapsed[key] = !collapsed[key];
+  try { localStorage.setItem('fhCollapsed', JSON.stringify(collapsed)); } catch(e) {}
+  rAll();
+}
 
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
@@ -157,7 +164,8 @@ function resBreakdown(k) {
   if (k === 'berry') {
     sMul = SM[G.season];
     if (G.season === 3 && G.upg.spiritShelter?.done) sMul = 0.4;
-    mulParts.push(SN[G.season] + ' ×' + sMul);
+    if (G.season === 3 && G.bldSpec.warehouse === 'B') sMul *= (1 + SPEC_BD.warehouse.B.winterBuff);
+    mulParts.push(SN[G.season] + ' ×' + sMul.toFixed(3).replace(/0+$/, '').replace(/\.$/, ''));
     if (G.rainSeason === G.season) { sMul *= 1.5; mulParts.push('祈雨 ×1.5'); }
   }
 
@@ -166,17 +174,47 @@ function resBreakdown(k) {
 
   var fullMul = mul * sMul;
 
-  // === 建筑产出 ===
+  // === 建筑产出（含专精）===
   var hasBldOutput = false;
   for (var bid in BD) {
     var bc = G.bld[bid].c; if (!bc) continue;
     var e = BD[bid].e; if (!e || !e[k + 'P']) continue;
     hasBldOutput = true;
-    var rate = e[k + 'P'] * bc * fullMul * 0.5;
-    lines.push(BD[bid].n + ' ×' + bc + '  ' + fmtR(rate));
+    var baseVal = e[k + 'P'];
+    var specData = G.bldSpec[bid] && SPEC_BD[bid] ? SPEC_BD[bid][G.bldSpec[bid]] : null;
+    if (specData) {
+      if (specData.prodMul) baseVal *= specData.prodMul;
+      if (k === 'lore' && specData.loreProdMul) baseVal = e[k + 'P'] * specData.loreProdMul;
+      if (k === 'scroll' && specData.scrollProdMul) baseVal = e[k + 'P'] * specData.scrollProdMul;
+      if (k === 'charm' && specData.charmProdMul) baseVal = e[k + 'P'] * specData.charmProdMul;
+    }
+    var rate = baseVal * bc * fullMul * 0.5;
+    var label = BD[bid].n + ' ×' + bc;
+    if (specData) label += '「' + specData.n + '」';
+    lines.push(label + '  ' + fmtR(rate));
   }
 
-  // === 职业产出（含训练、满意度、祖灵）===
+  // === 建筑专精额外产出 ===
+  for (var bid in BD) {
+    var bc = G.bld[bid].c; if (!bc) continue;
+    var specData = G.bldSpec[bid] && SPEC_BD[bid] ? SPEC_BD[bid][G.bldSpec[bid]] : null;
+    if (specData && specData.extraP && specData.extraP[k]) {
+      var rate = specData.extraP[k] * bc * fullMul * 0.5;
+      lines.push(BD[bid].n + '「' + specData.n + '」副产  ' + fmtR(rate));
+    }
+  }
+
+  // === 建筑专精消耗（drain）===
+  for (var bid in BD) {
+    var bc = G.bld[bid].c; if (!bc) continue;
+    var specData = G.bldSpec[bid] && SPEC_BD[bid] ? SPEC_BD[bid][G.bldSpec[bid]] : null;
+    if (specData && specData.drain && specData.drain[k]) {
+      var rate = -specData.drain[k] * bc * 0.5;
+      lines.push(BD[bid].n + '「' + specData.n + '」消耗  ' + fmtR(rate));
+    }
+  }
+
+  // === 职业产出（含训练、满意度、天赋、祖灵）===
   var hasJobOutput = false;
   for (var jid in JD) {
     var jc = G.job[jid].c; if (!jc) continue;
@@ -184,8 +222,29 @@ function resBreakdown(k) {
     hasJobOutput = true;
     var tb = 1 + (G.train[jid] || 0) * 0.1;
     var sp = spiritOn ? 1.5 : 1;
-    var rate = e[k + 'P'] * jc * tb * G.happy * sp * fullMul * 0.5;
-    lines.push(JD[jid].n + ' ×' + jc + '  ' + fmtR(rate));
+    var baseVal = e[k + 'P'];
+    var talentData = G.jobTalent[jid] && SPEC_JD[jid] ? SPEC_JD[jid][G.jobTalent[jid]] : null;
+    if (talentData) {
+      if (talentData.prodMul) baseVal *= talentData.prodMul;
+      if (k === 'lore' && talentData.loreProdMul) baseVal = e[k + 'P'] * talentData.loreProdMul;
+      if (k === 'scroll' && talentData.scrollProdMul) baseVal = e[k + 'P'] * talentData.scrollProdMul;
+    }
+    var rate = baseVal * jc * tb * G.happy * sp * fullMul * 0.5;
+    var label = JD[jid].n + ' ×' + jc;
+    if (talentData) label += '「' + talentData.n + '」';
+    lines.push(label + '  ' + fmtR(rate));
+  }
+
+  // === 职业天赋额外产出 ===
+  for (var jid in JD) {
+    var jc = G.job[jid].c; if (!jc) continue;
+    var talentData = G.jobTalent[jid] && SPEC_JD[jid] ? SPEC_JD[jid][G.jobTalent[jid]] : null;
+    if (talentData && talentData.extraP && talentData.extraP[k]) {
+      var tb = 1 + (G.train[jid] || 0) * 0.1;
+      var sp = spiritOn ? 1.5 : 1;
+      var rate = talentData.extraP[k] * jc * tb * G.happy * sp * fullMul * 0.5;
+      lines.push(JD[jid].n + '「' + talentData.n + '」副产  ' + fmtR(rate));
+    }
   }
 
   // === 加成汇总（仅当有建筑/职业被动产出时显示）===
@@ -195,10 +254,28 @@ function resBreakdown(k) {
     lines.push('加成: ' + mulParts.join('，'));
   }
 
-  // === 狐狸消耗 ===
-  if (k === 'berry' && G.foxes > 0) {
-    var fe = foxEatRate() * 0.5;
-    lines.push('狐狸 ×' + G.foxes + ' 消耗  ' + fmtR(-G.foxes * fe));
+  // === 狐狸消耗（扣除外出狐狸）===
+  if (k === 'berry') {
+    var villageFox = G.foxes - (G.foxAway || 0);
+    if (villageFox > 0) {
+      var fe = foxEatRate() * 0.5;
+      lines.push('狐狸 ×' + villageFox + ' 消耗  ' + fmtR(-villageFox * fe));
+    }
+  }
+
+  // === 采集者勤爪额外消耗 ===
+  if (k === 'berry' && G.jobTalent.gatherer === 'A' && G.job.gatherer.c > 0) {
+    var extraRate = -SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * 0.5;
+    lines.push('采集者「勤爪」消耗  ' + fmtR(extraRate));
+  }
+
+  // === 薄削持续转化 ===
+  if (G.bldSpec.tannery === 'B' && G.res.leather.v > 0 && G.res.coin.v < G.res.coin.mx) {
+    var cvt = SPEC_BD.tannery.B.convert;
+    if (k === cvt.from)
+      lines.push('鞣革坊「薄削」转化  ' + fmtR(-cvt.drainRate * 0.5));
+    if (k === cvt.to)
+      lines.push('鞣革坊「薄削」转化  ' + fmtR(cvt.gainRate * 0.5));
   }
 
   // === 自动制作 ===
@@ -271,6 +348,17 @@ function rExpStatus() {
 
 // ===== 渲染：资源面板 =====
 function rRes() {
+  document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res);
+  var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'res\')">'
+    + (collapsed.res ? '▶ 资源' : '▼ 资源') + '</div>';
+  if (collapsed.res) {
+    document.getElementById('res-list').innerHTML = toggle;
+    document.getElementById('fox-info').innerHTML =
+      '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
+      (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
+      (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
+    return;
+  }
   var panel = document.getElementById('res-list');
   var h = '', lc = '';
   for (var k in RD) {
@@ -294,7 +382,7 @@ function rRes() {
       '<span class="' + rvCls + '">' + fmt(s.v) +
       (s.mx > 0 ? '/' + fmt(s.mx) : '') + rr + '</span></div>';
   }
-  document.getElementById('res-list').innerHTML = h;
+  document.getElementById('res-list').innerHTML = toggle + h;
   document.getElementById('fox-info').innerHTML =
     '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
     (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
@@ -303,6 +391,15 @@ function rRes() {
 
 // ===== 渲染：Tab内容 =====
 function rTC() {
+  document.getElementById('center-panel').classList.toggle('collapsed', collapsed.tc);
+  var curTabName = '';
+  for (var ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === curTab) { curTabName = TABS[ti].n; break; } }
+  var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'tc\')">'
+    + (collapsed.tc ? '▶ ' + curTabName : '▼ ' + curTabName) + '</div>';
+  if (collapsed.tc) {
+    document.getElementById('tc').innerHTML = toggle;
+    return;
+  }
   var h = '';
 
   if (curTab === 'b') {
@@ -343,6 +440,17 @@ function rTC() {
         notes: bldUnlockNotes(d),
         tip: pickTip('bld_' + id, d.tip)
       };
+      // 添加专精信息到悬浮面板
+      if (SPEC_BD[id]) {
+        if (G.bldSpec[id]) {
+          var activeSpec = SPEC_BD[id][G.bldSpec[id]];
+          sec.notes = sec.notes || [];
+          sec.notes.push('专精「' + activeSpec.n + '」：' + activeSpec.d);
+        } else {
+          sec.notes = sec.notes || [];
+          sec.notes.push('可专精：' + SPEC_BD[id].A.n + ' / ' + SPEC_BD[id].B.n + '（需≥5座 + 图纸）');
+        }
+      }
       var nameHtml = hpWrap(
         '<span class="bld-name">' + d.n + '</span>',
         sec,
@@ -352,7 +460,13 @@ function rTC() {
       h += '<div class="bld-row">';
       h += '<div class="bld-top">';
       h += nameHtml;
-      h += '<span class="bld-cnt">(' + G.bld[id].c + ')</span>';
+      h += '<span class="bld-cnt">(' + G.bld[id].c + ')';
+      // 专精标记
+      if (G.bldSpec[id] && SPEC_BD[id]) {
+        var specN = SPEC_BD[id][G.bldSpec[id]].n;
+        h += '<span class="spec-tag">「' + specN + '」</span>';
+      }
+      h += '</span>';
       h += '<span class="bld-cost">' + costs + '</span>';
       h += '<button class="bld-btn" onclick="build(\'' + id + '\')" ' + (ok ? '' : 'disabled') + '>建造</button>';
       if (G.bld[id].c > 0) h += '<button class="bld-btn sell-btn" onclick="sell(\'' + id + '\')">出售</button>';
@@ -366,10 +480,12 @@ function rTC() {
       if (!chk(SD[sid].uq)) continue;
       if (!anySpell) { h += '<div class="res-cat" style="margin-top:10px;">灵术</div>'; anySpell = 1; }
       var ok = canSpell(sid);
+      var sMul = spellCostMul();
       var cost = SD[sid].cost.map(function(p) {
+        var need = Math.ceil(p.a * sMul);
         var have = G.res[p.r].v;
-        return (have < p.a ? '<span class="short">' : '') +
-          RD[p.r].n + ' ' + p.a + (have < p.a ? '</span>' : '');
+        return (have < need ? '<span class="short">' : '') +
+          RD[p.r].n + ' ' + need + (have < need ? '</span>' : '');
       }).join(', ');
       var extra = '';
       if (sid === 'rain' && G.rainSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
@@ -406,13 +522,22 @@ function rTC() {
     var hapNotes = ['基础：100%'];
     if (G.foxes > 5) hapNotes.push('人口惩罚（' + G.foxes + '-5）：-' + ((G.foxes - 5) * 2) + '%');
     for (var bid in G.bld) {
-      if (G.bld[bid].c && BD[bid].e?.hapB)
-        hapNotes.push(BD[bid].n + ' ×' + G.bld[bid].c + '：+' + (BD[bid].e.hapB * G.bld[bid].c * 100 | 0) + '%');
+      if (G.bld[bid].c && BD[bid].e?.hapB) {
+        var base = BD[bid].e.hapB * G.bld[bid].c * 100 | 0;
+        hapNotes.push(BD[bid].n + ' ×' + G.bld[bid].c + '：+' + base + '%');
+      }
+      // 福佑额外满意度
+      if (bid === 'shrine' && G.bld[bid].c && G.bldSpec.shrine === 'A') {
+        var bonus = SPEC_BD.shrine.A.hapBonus * G.bld[bid].c * 100 | 0;
+        hapNotes.push('灵狐祠「福佑」×' + G.bld[bid].c + '：+' + bonus + '%');
+      }
     }
     for (var uid in G.upg) {
       if (G.upg[uid].done && UD[uid].e?.hapB)
         hapNotes.push(UD[uid].n + '：+' + (UD[uid].e.hapB * 100 | 0) + '%');
     }
+    if (G.feastSeason === G.season) hapNotes.push('山谷宴席：+15%');
+    if (G.choiceBuffs && G.choiceBuffs.happySeason === G.season) hapNotes.push('掌印墙：+10%');
     var hapSec = { effects: hapNotes, notes: ['当前职业产出倍率：×' + (G.happy * 100 | 0) + '%'] };
     var hapHtml = hpWrap('<b>' + (G.happy * 100 | 0) + '%</b>', hapSec);
 
@@ -430,7 +555,21 @@ function rTC() {
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
-      var nameHtml = hpWrap('<span class="jn">' + d.n + '</span>', sec);
+      // 添加天赋信息到悬浮面板
+      if (SPEC_JD[id]) {
+        sec.notes = sec.notes || [];
+        if (G.jobTalent[id]) {
+          var activeTal = SPEC_JD[id][G.jobTalent[id]];
+          sec.notes.push('天赋「' + activeTal.n + '」：' + activeTal.d);
+        } else {
+          sec.notes.push('可天赋：' + SPEC_JD[id].A.n + ' / ' + SPEC_JD[id].B.n + '（需图纸）');
+        }
+      }
+      var jobLabel = d.n;
+      if (G.jobTalent[id] && SPEC_JD[id]) {
+        jobLabel += '<span class="talent-tag">「' + SPEC_JD[id][G.jobTalent[id]].n + '」</span>';
+      }
+      var nameHtml = hpWrap('<span class="jn">' + jobLabel + '</span>', sec);
       var tCost = trainCost(id);
       var tOk = canTrain(id);
       var trainSec = {
@@ -508,6 +647,43 @@ function rTC() {
         autoBtn + '</div></div>';
     }
     if (!any) h += '<div style="color:#aaa;font-size:13px;">继续研究来解锁配方。</div>';
+
+    // --- 图纸背包 ---
+    if (G.blueprints && G.blueprints.length > 0) {
+      h += '<div class="res-cat" style="margin-top:10px;">图纸</div>';
+      for (var bi = 0; bi < G.blueprints.length; bi++) {
+        var bp = G.blueprints[bi];
+        var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
+        var targetName = bp.type === 'bld' ? (BD[bp.target]?.n || bp.target) : (JD[bp.target]?.n || bp.target);
+        var canActivate = false;
+        var disableReason = '';
+        if (bp.type === 'bld') {
+          if (G.bldSpec[bp.target]) disableReason = '已激活';
+          else if ((G.bld[bp.target]?.c || 0) < 5) disableReason = '需要 ' + targetName + ' ≥5 座';
+          else canActivate = true;
+        } else {
+          if (G.jobTalent[bp.target]) disableReason = '已激活';
+          else canActivate = true;
+        }
+        var bpSec = {
+          desc: (bp.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
+          effects: [specData.d],
+          tip: pickTip('bp_' + bp.id, specData.tip)
+        };
+        var bpNameHtml = hpWrap('<span class="cr-name">' + specData.n + '</span>', bpSec);
+        h += '<div class="cr-row bp-inv-row"><div class="cr-top">';
+        h += bpNameHtml;
+        h += '<span class="bp-target-label">' + targetName + '</span>';
+        if (disableReason) {
+          h += '<span class="bp-disable-reason">' + disableReason + '</span>';
+          h += '<button class="cr-btn" disabled>激活</button>';
+        } else {
+          var activateFn = bp.type === 'bld' ? 'activateSpec' : 'activateJobTalent';
+          h += '<button class="cr-btn" onclick="' + activateFn + '(' + bi + ')">激活</button>';
+        }
+        h += '</div></div>';
+      }
+    }
   }
 
   else if (curTab === 'r') {
@@ -516,10 +692,12 @@ function rTC() {
       var d = UD[id];
       if (G.upg[id].done || !G.upg[id].on) continue; any = 1;
       var ok = canU(id);
+      var rMul = researchCostMul();
       var cost = d.p.map(function(p) {
+        var need = Math.ceil(p.a * rMul);
         var have = G.res[p.r].v;
-        return (have < p.a ? '<span class="short">' : '') +
-          RD[p.r].n + ' ' + p.a + (have < p.a ? '</span>' : '');
+        return (have < need ? '<span class="short">' : '') +
+          RD[p.r].n + ' ' + need + (have < need ? '</span>' : '');
       }).join(', ');
       var sec = { desc: d.d, effects: upgEffects(d.e), tip: pickTip('upg_' + id, d.tip) };
       var nameHtml = hpWrap('<span class="cr-name">' + d.n + '</span>', sec);
@@ -625,6 +803,37 @@ function rTC() {
         }
         h += '</div>';
       }
+      // --- 图纸商品行 ---
+      if (G.caravan.blueprint) {
+        var bp = G.caravan.blueprint;
+        var bpBought = G.caravan.bought['blueprint'];
+        var canBuyBp = canBuyBlueprint();
+        var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
+        var targetName = bp.type === 'bld' ? (BD[bp.target]?.n || bp.target) : (JD[bp.target]?.n || bp.target);
+        var bpCostStr = bp.cost.map(function(p) {
+          var mul = caravanCostMul();
+          var need = Math.ceil(p.a * mul);
+          var have = G.res[p.r].v;
+          return (have < need ? '<span class="short">' : '') +
+            RD[p.r].n + ' ' + need + (have < need ? '</span>' : '');
+        }).join(', ');
+        var bpSec = {
+          desc: (bp.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
+          effects: [specData.d],
+          tip: pickTip('bp_' + bp.id, specData.tip)
+        };
+        var bpNameHtml = hpWrap('<span class="cv-item-name bp-item-name">图纸：' + specData.n + '</span>', bpSec);
+        h += '<div class="cv-item bp-item">';
+        h += bpNameHtml;
+        h += '<span class="bp-target">' + targetName + '</span>';
+        h += '<span class="bld-cost">' + bpCostStr + '</span>';
+        if (bpBought) {
+          h += '<span class="cv-bought">已购</span>';
+        } else {
+          h += '<button class="bld-btn" onclick="buyBlueprint()" ' + (canBuyBp ? '' : 'disabled') + '>购买</button>';
+        }
+        h += '</div>';
+      }
       if (cv.buy) {
         var soldAlready = G.caravan.bought['sell'];
         var canSellNow = canSellToCaravan();
@@ -677,15 +886,21 @@ function rTC() {
     }
   }
 
-  document.getElementById('tc').innerHTML = h;
+  document.getElementById('tc').innerHTML = toggle + h;
 }
 
 // ===== 渲染：日志 =====
 function rLog() {
-  document.getElementById('log-list').innerHTML =
-    logs.slice(0, 30).map(function(e) {
+  document.getElementById('log-panel').classList.toggle('collapsed', collapsed.log);
+  var toggle = collapsed.log ? '▶' : '▼';
+  var h = '<h3 class="collapse-toggle" onclick="toggleCollapse(\'log\')">'
+    + toggle + ' 谷中见闻</h3>';
+  if (!collapsed.log) {
+    h += '<div id="log-list">' + logs.slice(0, 30).map(function(e) {
       return '<div class="log ' + (e.c || '') + '">' + e.m + '</div>';
-    }).join('');
+    }).join('') + '</div>';
+  }
+  document.getElementById('log-panel').innerHTML = h;
 }
 
 // ===== 渲染：季节 =====
@@ -694,7 +909,6 @@ function rSeason() {
     SN[G.season] + ' · 第' + G.year + '年 · 第' + (Math.floor(G.day) + 1) + '天';
 }
 
-// ===== 全量渲染 =====
 // ===== 全量渲染 =====
 var _blockTC = 0;
 function rAll() {
@@ -728,6 +942,11 @@ function showChoiceModal(idx) {
 
 // ===== 启动 =====
 function startGame() {
+  // 恢复折叠偏好
+  try {
+    var saved = JSON.parse(localStorage.getItem('fhCollapsed'));
+    if (saved) Object.assign(collapsed, saved);
+  } catch(e) {}
   initState();
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
