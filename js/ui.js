@@ -246,6 +246,29 @@ function rTabs() {
   }).join('');
 }
 
+// ===== 渲染：远行进度（常驻，不依赖当前Tab） =====
+function rExpStatus() {
+  var el = document.getElementById('exp-status');
+  if (!el) return;
+  if (!G.expeditions || !G.expeditions.length) { el.innerHTML = ''; return; }
+  var h = '';
+  for (var ei = 0; ei < G.expeditions.length; ei++) {
+    var exp = G.expeditions[ei];
+    var ed = EXD[exp.dest];
+    var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
+    var daysLeft = Math.ceil(exp.ticksLeft / TPD);
+    h += '<div class="exp-active">';
+    h += '<div class="exp-active-hdr">';
+    h += '<span class="exp-dest-name">' + ed.n + '</span>';
+    h += '<span class="exp-info">' + exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天</span>';
+    if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
+    h += '</div>';
+    h += '<div class="exp-bar-bg"><div class="exp-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
+    h += '</div>';
+  }
+  el.innerHTML = h;
+}
+
 // ===== 渲染：资源面板 =====
 function rRes() {
   var panel = document.getElementById('res-list');
@@ -523,25 +546,6 @@ function rTC() {
   else if (curTab === 'w') {
     // ===== 山外 Tab =====
 
-    // --- 进行中的远行 ---
-    if (G.expeditions && G.expeditions.length) {
-      h += '<div class="res-cat">进行中的远行</div>';
-      for (var ei = 0; ei < G.expeditions.length; ei++) {
-        var exp = G.expeditions[ei];
-        var ed = EXD[exp.dest];
-        var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
-        var daysLeft = Math.ceil(exp.ticksLeft / TPD);
-        h += '<div class="exp-active">';
-        h += '<div class="exp-active-hdr">';
-        h += '<span class="exp-dest-name">' + ed.n + '</span>';
-        h += '<span class="exp-info">' + exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天</span>';
-        if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
-        h += '</div>';
-        h += '<div class="exp-bar-bg"><div class="exp-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
-        h += '</div>';
-      }
-    }
-
     // --- 派遣远行 ---
     var maxExp = maxExpeditions();
     var curExp = G.expeditions ? G.expeditions.length : 0;
@@ -694,7 +698,7 @@ function rSeason() {
 // ===== 全量渲染 =====
 var _blockTC = 0;
 function rAll() {
-  rRes(); rTabs();
+  rRes(); rTabs(); rExpStatus();
   // select 交互期间跳过 rTC 重建
   if (_blockTC > 0) { _blockTC--; }
   else { rTC(); }
