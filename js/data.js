@@ -182,7 +182,7 @@ const JD = {
   scholar:    { n: '学者',   d: '积累学识',   e: { loreP: .08, scrollP: .005, charmP: .002 },    uq: { b: { library: 1 } }, tip: ['用爪子翻书不太方便，但慢有慢的好处——每一页都记得牢。', '尾巴尖蘸了墨，写出来的字比手写的还好看。'] },
   smith:      { n: '铁匠',   d: '锻造铁器',   e: { ironP: .02 },    uq: { b: { smithy: 1 } }, tip: ['锤子落下去是蛮力，提起来才是手艺。'] },
   merchant:   { n: '商贩',   d: '赚取铜钱',   e: { coinP: .01 },    uq: { b: { market: 1 } }, tip: ['三寸不烂之舌，换来三尺不烂之布。', '把东边的故事卖给西边，赚一点路费。'] },
-  scout:      { n: '斥候',   d: '远行奖励 +20%/人', desc: '远行奖励 +20%/人', e: {}, uq: { b: { trailroad: 1 } }, tip: ['比风先到，比影子更轻，回来的时候揣着一兜子情报。'] },
+  scout:      { n: '斥候',   d: '出征远行队伍来源；授业可提升远行奖励', desc: '出征远行队伍来源；授业可提升远行奖励', e: {}, uq: { b: { trailroad: 1 } }, tip: ['比风先到，比影子更轻，回来的时候揣着一兜子情报。'] },
 };
 
 // ===== 研究定义 =====
@@ -451,7 +451,7 @@ const EXD = {
   },
   oldRuin: {
     n: '旧墟', days: 30, narrative: true,
-    d: '山谷尽头一座沉默了很久的城。墙还在，住的人不在了。',
+    d: '山谷北端的废弃古城。',
     cost: [{ r: 'berry', a: 50 }, { r: 'coin', a: 2 }],
     uq: { b: { trailroad: 1 } },
     rewards: [
@@ -471,7 +471,7 @@ const EXD = {
   },
   cloudRidge: {
     n: '云岭', days: 60, narrative: true,
-    d: '高过云层的山脊，据说站在峰顶能同时看见旧墟和村子的炊烟。',
+    d: '西北方常年云雾的高山。',
     cost: [{ r: 'berry', a: 100 }, { r: 'coin', a: 5 }, { r: 'charm', a: 1 }],
     uq: { b: { trailroad: 1, watchtower: 1 }, u: { longJourney: 1 } },
     rewards: [
@@ -659,25 +659,25 @@ const SPEC_JD = {
   hunter: {
     A: { n: '憋着', d: '兽皮 +50%', prodMul: 1.5,
       tip: ['蹲了三天，腿麻了，猎物来了。'] },
-    B: { n: '顺嘴叼', d: '兽皮 +20%，远行奖励额外 +10%/猎手', prodMul: 1.2, expBonusPerHunter: 0.1,
+    B: { n: '顺嘴叼', d: '兽皮 +20%，额外产野莓 0.005/s', prodMul: 1.2, extraP: { berry: 0.005 },
       tip: ['路上看见什么都往嘴里叼，回来口袋比谁都满。'] },
   },
   scholar: {
-    A: { n: '沉思', d: '学识 +40%，卷轴 +30%', loreProdMul: 1.4, scrollProdMul: 1.3,
+    A: { n: '发呆冠军', d: '学识 +40%，卷轴 +30%', loreProdMul: 1.4, scrollProdMul: 1.3,
       tip: ['发呆是学者的工作，走神是学者的加班。'] },
-    B: { n: '通览', d: '学识 +20%，研究费用 -10%', loreProdMul: 1.2, resCostMul: 0.9,
+    B: { n: '划重点', d: '学识 +20%，研究费用 -10%', loreProdMul: 1.2, resCostMul: 0.9,
       tip: ['读得多了，什么都觉得见过——包括答案。'] },
   },
   smith: {
-    A: { n: '锤淬', d: '矿铁 +50%', prodMul: 1.5,
+    A: { n: '叮叮当当', d: '矿铁 +50%', prodMul: 1.5,
       tip: ['锤子敲一百下是练习，敲一万下是手艺。'] },
-    B: { n: '省料', d: '矿铁 +20%，锻造炉造价 -15%', prodMul: 1.2, bldCostReduce: { bld: 'smithy', mul: 0.85 },
+    B: { n: '边角料', d: '矿铁 +20%，锻造炉造价 -15%', prodMul: 1.2, bldCostReduce: { bld: 'smithy', mul: 0.85 },
       tip: ['好铁匠不是炼得多，是废得少。'] },
   },
   merchant: {
-    A: { n: '精算', d: '铜钱 +50%', prodMul: 1.5,
+    A: { n: '算盘精', d: '铜钱 +50%', prodMul: 1.5,
       tip: ['数钱的声音是世界上第二好听的声音。第一是进账。'] },
-    B: { n: '广路', d: '铜钱 +20%，商队图纸出现概率提升', prodMul: 1.2, bpChanceBonus: 0.10,
+    B: { n: '野路子', d: '铜钱 +20%，商队图纸出现概率提升', prodMul: 1.2, bpChanceBonus: 0.10,
       tip: ['认识的人多了，好东西就自己找上门了。'] },
   },
 };

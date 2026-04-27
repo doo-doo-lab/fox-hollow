@@ -847,7 +847,7 @@ function canSendExp(destId) {
   if (!d) return false;
   if (!chk(d.uq)) return false;
   if (G.expeditions.length >= maxExpeditions()) return false;
-  if (G.freeFox <= 0) return false;
+  if ((G.job.scout?.c || 0) <= 0) return false;
   for (var i = 0; i < d.cost.length; i++)
     if (G.res[d.cost[i].r].v < d.cost[i].a) return false;
   return true;
@@ -855,15 +855,15 @@ function canSendExp(destId) {
 
 function sendExpedition(destId, foxCount) {
   var d = EXD[destId];
-  foxCount = Math.min(foxCount || 1, Math.min(3, G.freeFox));
+  foxCount = Math.min(foxCount || 1, Math.min(3, G.job.scout?.c || 0));
   if (foxCount <= 0) return;
   if (!canSendExp(destId)) return;
   // 扣资源
   for (var i = 0; i < d.cost.length; i++)
     G.res[d.cost[i].r].v -= d.cost[i].a;
-  // 锁定狐狸
+  // 斥候出征
   G.foxAway = (G.foxAway || 0) + foxCount;
-  G.freeFox -= foxCount;
+  G.job.scout.c -= foxCount;
   // 计算实际路程 tick
   var cb = G.choiceBuffs || {};
   var timeMul = expTimeMul();
@@ -898,14 +898,13 @@ function tickExpeditions(silent) {
 function resolveExpedition(idx, silent) {
   var exp = G.expeditions[idx];
   var d = EXD[exp.dest];
-  // 归还狐狸
+  // 斥候归队
   G.foxAway = Math.max(0, (G.foxAway || 0) - exp.foxCount);
+  if (!G.job.scout) G.job.scout = { c: 0, on: 1 };
+  G.job.scout.c += exp.foxCount;
   G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce(function(s, j) { return s + j.c; }, 0);
-  // 计算奖励倍率
-  var scoutBonus = 1 + (G.job.scout?.c || 0) * 0.2;
-  // 哨眼天赋：每位猎手额外 +10% 远行奖励（加法叠加）
-  if (G.jobTalent.hunter === 'B')
-    scoutBonus += (G.job.hunter?.c || 0) * SPEC_JD.hunter.B.expBonusPerHunter;
+  // 计算奖励倍率：在岗斥候 +5%/人 + 授业次数 +10%/级
+  var scoutBonus = 1 + (G.job.scout?.c || 0) * 0.05 + (G.train.scout || 0) * 0.10;
   var researchBonus = G.upg.longJourney?.done ? 1.5 : 1;
   var choiceRewardMul = 1;
   var cb = G.choiceBuffs || {};

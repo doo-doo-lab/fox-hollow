@@ -337,7 +337,7 @@ function rExpStatus() {
     h += '<div class="exp-active">';
     h += '<div class="exp-active-hdr">';
     h += '<span class="exp-dest-name">' + ed.n + '</span>';
-    h += '<span class="exp-info">' + exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天</span>';
+    h += '<span class="exp-info">' + exp.foxCount + '只斥候 · 剩余' + daysLeft + '天</span>';
     if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
     h += '</div>';
     h += '<div class="exp-bar-bg"><div class="exp-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
@@ -573,7 +573,9 @@ function rTC() {
       var tCost = trainCost(id);
       var tOk = canTrain(id);
       var trainSec = {
-        desc: '消耗 ' + tCost + ' 卷轴，该职业所有从业者产出 +10%',
+        desc: id === 'scout'
+          ? '消耗 ' + tCost + ' 卷轴，所有远行奖励倍率 +10%'
+          : '消耗 ' + tCost + ' 卷轴，该职业所有从业者产出 +10%',
         tip: pickTip('train_' + id, ['师傅领进门，修行靠嚼草。', '学会了新本事的狐狸，尾巴翘得更高了。'])
       };
       var trainBtnHtml = hpWrap(
@@ -761,7 +763,7 @@ function rTC() {
         h += nameHtml;
         h += '<span class="exp-days">' + days + '天</span>';
         h += '<span class="bld-cost">' + costStr + '</span>';
-        var maxSend = Math.min(3, G.freeFox);
+        var maxSend = Math.min(3, G.job.scout?.c || 0);
         var selVal = _expFoxSel[did] || 1;
         h += '<span class="exp-fox-btns">';
         for (var fi = 1; fi <= 3; fi++) {
