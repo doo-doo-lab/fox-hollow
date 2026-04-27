@@ -652,23 +652,23 @@ function rTC() {
     if (G.blueprints && G.blueprints.length > 0) {
       h += '<div class="res-cat" style="margin-top:10px;">图纸</div>';
       for (var bi = 0; bi < G.blueprints.length; bi++) {
-        var bp = G.blueprints[bi];
-        var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
-        var targetName = bp.type === 'bld' ? (BD[bp.target]?.n || bp.target) : (JD[bp.target]?.n || bp.target);
+        var bpItem = G.blueprints[bi];
+        var specData = bpItem.type === 'bld' ? SPEC_BD[bpItem.target][bpItem.spec] : SPEC_JD[bpItem.target][bpItem.spec];
+        var targetName = bpItem.type === 'bld' ? (BD[bpItem.target]?.n || bpItem.target) : (JD[bpItem.target]?.n || bpItem.target);
         var canActivate = false;
         var disableReason = '';
-        if (bp.type === 'bld') {
-          if (G.bldSpec[bp.target]) disableReason = '已激活';
-          else if ((G.bld[bp.target]?.c || 0) < 5) disableReason = '需要 ' + targetName + ' ≥5 座';
+        if (bpItem.type === 'bld') {
+          if (G.bldSpec[bpItem.target]) disableReason = '已激活';
+          else if ((G.bld[bpItem.target]?.c || 0) < 5) disableReason = '需要 ' + targetName + ' ≥5 座';
           else canActivate = true;
         } else {
-          if (G.jobTalent[bp.target]) disableReason = '已激活';
+          if (G.jobTalent[bpItem.target]) disableReason = '已激活';
           else canActivate = true;
         }
         var bpSec = {
-          desc: (bp.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
+          desc: (bpItem.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
           effects: [specData.d],
-          tip: pickTip('bp_' + bp.id, specData.tip)
+          tip: pickTip('bp_' + bpItem.id, specData.tip)
         };
         var bpNameHtml = hpWrap('<span class="cr-name">' + specData.n + '</span>', bpSec);
         h += '<div class="cr-row bp-inv-row"><div class="cr-top">';
@@ -678,7 +678,7 @@ function rTC() {
           h += '<span class="bp-disable-reason">' + disableReason + '</span>';
           h += '<button class="cr-btn" disabled>激活</button>';
         } else {
-          var activateFn = bp.type === 'bld' ? 'activateSpec' : 'activateJobTalent';
+          var activateFn = bpItem.type === 'bld' ? 'activateSpec' : 'activateJobTalent';
           h += '<button class="cr-btn" onclick="' + activateFn + '(' + bi + ')">激活</button>';
         }
         h += '</div></div>';
@@ -805,12 +805,12 @@ function rTC() {
       }
       // --- 图纸商品行 ---
       if (G.caravan.blueprint) {
-        var bp = G.caravan.blueprint;
+        var bpItem = G.caravan.blueprint;
         var bpBought = G.caravan.bought['blueprint'];
         var canBuyBp = canBuyBlueprint();
-        var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
-        var targetName = bp.type === 'bld' ? (BD[bp.target]?.n || bp.target) : (JD[bp.target]?.n || bp.target);
-        var bpCostStr = bp.cost.map(function(p) {
+        var specData = bpItem.type === 'bld' ? SPEC_BD[bpItem.target][bpItem.spec] : SPEC_JD[bpItem.target][bpItem.spec];
+        var targetName = bpItem.type === 'bld' ? (BD[bpItem.target]?.n || bpItem.target) : (JD[bpItem.target]?.n || bpItem.target);
+        var bpCostStr = bpItem.cost.map(function(p) {
           var mul = caravanCostMul();
           var need = Math.ceil(p.a * mul);
           var have = G.res[p.r].v;
@@ -818,9 +818,9 @@ function rTC() {
             RD[p.r].n + ' ' + need + (have < need ? '</span>' : '');
         }).join(', ');
         var bpSec = {
-          desc: (bp.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
+          desc: (bpItem.type === 'bld' ? '建筑专精' : '职业天赋') + '：' + targetName,
           effects: [specData.d],
-          tip: pickTip('bp_' + bp.id, specData.tip)
+          tip: pickTip('bp_' + bpItem.id, specData.tip)
         };
         var bpNameHtml = hpWrap('<span class="cv-item-name bp-item-name">图纸：' + specData.n + '</span>', bpSec);
         h += '<div class="cv-item bp-item">';
