@@ -569,10 +569,10 @@ function rTC() {
           return RD[rw.r].n + ' ' + rw.min + '-' + rw.max + probStr;
         }).join('，');
         var sec = {
-          desc: '路程：' + days + ' 天',
+          desc: (dd.d ? dd.d + '<br>' : '') + '路程：' + days + ' 天',
           effects: ['可能获得：' + rwPrev],
           notes: dd.narrative ? ['每次必定获得一段叙事碎片'] : [],
-          tip: ''
+          tip: pickTip('exp_' + did, dd.tip)
         };
         var nameHtml = hpWrap('<span class="bld-name">' + dd.n + '</span>', sec);
         h += '<div class="exp-row"><div class="exp-row-top">';
