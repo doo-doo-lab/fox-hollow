@@ -712,7 +712,7 @@ function sell(id) {
   }
   // 重算容量，超出的狐狸保留为闲置
   calcMx();
-  G.freeFox = G.foxes - Object.values(G.job).reduce((s, j) => s + j.c, 0);
+  G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce((s, j) => s + j.c, 0);
   log('出售了' + BD[id].n + '（剩余' + G.bld[id].c + '座）');
   rAll();
 }

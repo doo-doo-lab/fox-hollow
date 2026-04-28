@@ -350,7 +350,7 @@ function rExpStatus() {
 function rRes() {
   document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res);
   var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'res\')">'
-    + (collapsed.res ? '▶ 资源' : '▼ 资源') + '</div>';
+    + (collapsed.res ? '▶︎ 资源' : '▼︎ 资源') + '</div>';
   if (collapsed.res) {
     document.getElementById('res-list').innerHTML = toggle;
     document.getElementById('fox-info').innerHTML =
@@ -395,7 +395,7 @@ function rTC() {
   var curTabName = '';
   for (var ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === curTab) { curTabName = TABS[ti].n; break; } }
   var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'tc\')">'
-    + (collapsed.tc ? '▶ ' + curTabName : '▼ ' + curTabName) + '</div>';
+    + (collapsed.tc ? '▶︎ ' + curTabName : '▼︎ ' + curTabName) + '</div>';
   if (collapsed.tc) {
     document.getElementById('tc').innerHTML = toggle;
     return;
@@ -894,7 +894,7 @@ function rTC() {
 // ===== 渲染：日志 =====
 function rLog() {
   document.getElementById('log-panel').classList.toggle('collapsed', collapsed.log);
-  var toggle = collapsed.log ? '▶' : '▼';
+  var toggle = collapsed.log ? '▶︎' : '▼︎';
   var h = '<h3 class="collapse-toggle" onclick="toggleCollapse(\'log\')">'
     + toggle + ' 谷中见闻</h3>';
   if (!collapsed.log) {
