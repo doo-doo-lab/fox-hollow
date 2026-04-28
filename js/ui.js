@@ -199,7 +199,7 @@ function resBreakdown(k) {
     var bc = G.bld[bid].c; if (!bc) continue;
     var specData = G.bldSpec[bid] && SPEC_BD[bid] ? SPEC_BD[bid][G.bldSpec[bid]] : null;
     if (specData && specData.extraP && specData.extraP[k]) {
-      var rate = specData.extraP[k] * bc * fullMul * 0.5;
+      var rate = specData.extraP[k] * bc * fullMul * TPD * 0.5;
       lines.push(BD[bid].n + '「' + specData.n + '」副产  ' + fmtR(rate));
     }
   }
@@ -242,7 +242,7 @@ function resBreakdown(k) {
     if (talentData && talentData.extraP && talentData.extraP[k]) {
       var tb = 1 + (G.train[jid] || 0) * 0.1;
       var sp = spiritOn ? 1.5 : 1;
-      var rate = talentData.extraP[k] * jc * tb * G.happy * sp * fullMul * 0.5;
+      var rate = talentData.extraP[k] * jc * tb * G.happy * sp * fullMul * TPD * 0.5;
       lines.push(JD[jid].n + '「' + talentData.n + '」副产  ' + fmtR(rate));
     }
   }
