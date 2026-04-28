@@ -133,26 +133,12 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志：按远行次数顺序选取；最后一条仅在叙事碎片全部收集后才显示
-  var doneCount = G.expDone[exp.dest];
-  var logLen = d.logs.length;
-  var narrTotal = (d.narrative && NARR[exp.dest]) ? NARR[exp.dest].length : 0;
-  var narrDone = (G.narratives && G.narratives[exp.dest]) ? G.narratives[exp.dest].length : 0;
-  var narrComplete = narrTotal > 0 && narrDone >= narrTotal;
-  var lastIsFinale = logLen > 1;
-  var normalLen = lastIsFinale ? logLen - 1 : logLen;
-  var logIdx;
-  if (narrComplete && doneCount > normalLen) {
-    logIdx = logLen - 1; // 叙事全部收集后，使用终章日志
-  } else {
-    logIdx = ((doneCount - 1) % normalLen);
-  }
-  var returnLog = d.logs[logIdx];
+  // 返回日志：仅显示带回的奖励。叙事氛围由 NARR 叙事碎片承担（v0.13.x 移除 d.logs 池）
   if (!silent) {
-    log(returnLog, 'event');
+    log('远行队伍从' + d.n + '返回了。', 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
-    // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
-    if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
+    // 抉择事件触发：至少有 1 名在岗斥候 + 30% 概率 + 无待处理抉择
+    if ((G.job.scout?.c || 0) >= 1 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();
     }
   } else {
