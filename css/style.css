@@ -126,7 +126,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .cv-name{font-weight:bold;color:#333;margin-bottom:4px;}
 .cv-item{display:flex;align-items:baseline;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:13px;flex-wrap:wrap;}
 .cv-item-name{color:#555;}
-.cv-bought{font-size:11px;color:#aaa;margin-left:auto;}
+.cv-bought{font-size:11px;color:#aaa;}
 
 /* NARRATIVE FRAGMENTS */
 .narr-section{margin-bottom:10px;}

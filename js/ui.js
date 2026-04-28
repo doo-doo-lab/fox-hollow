@@ -824,10 +824,11 @@ function rTC() {
           effects: [specData.d],
           tip: pickTip('bp_' + bpItem.id, specData.tip)
         };
-        var bpNameHtml = hpWrap('<span class="cv-item-name bp-item-name">图纸：' + specData.n + '</span>', bpSec);
+        // 把 target 内联进名字 span，让图纸行结构跟普通商品行一致（cost 列对齐）
+        var bpLabelHtml = '图纸：' + specData.n + ' <span class="bp-target">' + targetName + '</span>';
+        var bpNameHtml = hpWrap('<span class="cv-item-name bp-item-name">' + bpLabelHtml + '</span>', bpSec);
         h += '<div class="cv-item bp-item">';
         h += bpNameHtml;
-        h += '<span class="bp-target">' + targetName + '</span>';
         h += '<span class="bld-cost">' + bpCostStr + '</span>';
         if (bpBought) {
           h += '<span class="cv-bought">已购</span>';
