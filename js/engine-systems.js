@@ -398,6 +398,11 @@ function buyBlueprint() {
   }
   var specData = bp.type === 'bld' ? SPEC_BD[bp.target][bp.spec] : SPEC_JD[bp.target][bp.spec];
   log('购入图纸：' + specData.n + '。', 'important');
+  // 考拉·小曼 彩蛋：20% 概率出现"来晚了"小段子
+  if (typeof KOALA_LATE_LOGS !== 'undefined' && Math.random() < 0.2) {
+    var line = KOALA_LATE_LOGS[Math.floor(Math.random() * KOALA_LATE_LOGS.length)];
+    log(line, 'echo');
+  }
   rAll();
 }
 
