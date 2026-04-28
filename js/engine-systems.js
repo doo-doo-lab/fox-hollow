@@ -154,7 +154,18 @@ function tryTriggerChoice() {
   if (!G.choicesDone) G.choicesDone = [];
   var pool = [];
   for (var i = 0; i < CHOICE_EVENTS.length; i++) {
-    if (G.choicesDone.indexOf(i) === -1) pool.push(i);
+    if (G.choicesDone.indexOf(i) !== -1) continue;
+    // 叙事前置检查：避免在玩家还没看到对应碎片前触发剧透抉择
+    var req = CHOICE_EVENTS[i].requires;
+    if (req) {
+      var meets = true;
+      for (var dest in req) {
+        var have = (G.narratives && G.narratives[dest]) ? G.narratives[dest].length : 0;
+        if (have < req[dest]) { meets = false; break; }
+      }
+      if (!meets) continue;
+    }
+    pool.push(i);
   }
   if (!pool.length) return;
   var picked = pool[Math.floor(Math.random() * pool.length)];

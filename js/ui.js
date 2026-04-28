@@ -9,7 +9,7 @@ const logs = [];
 const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
-const collapsed = { res: false, tc: false, log: false };
+const collapsed = { res: false, tc: false, log: false, narr: false };
 
 function toggleCollapse(key) {
   collapsed[key] = !collapsed[key];
@@ -763,19 +763,26 @@ function rTC() {
         h += nameHtml;
         h += '<span class="exp-days">' + days + '天</span>';
         h += '<span class="bld-cost">' + costStr + '</span>';
-        var maxSend = Math.min(3, G.job.scout?.c || 0);
-        var selVal = _expFoxSel[did] || 1;
-        h += '<span class="exp-fox-btns">';
-        for (var fi = 1; fi <= 3; fi++) {
-          var isSel = fi === selVal;
-          var dis = fi > maxSend;
-          h += '<button class="exp-fox-btn' + (isSel ? ' sel' : '') + '"' +
-            (dis ? ' disabled' : ' onclick="_expFoxSel[\'' + did + '\']=' + fi + ';rTC()"') +
-            '>' + fi + '只</button>';
+        var scoutAvail = G.job.scout?.c || 0;
+        if (scoutAvail <= 0) {
+          // 没有在岗斥候时，给出明确占位（避免 .sel 绿框 disabled 按钮的"看着可点"歧义）
+          h += '<span class="exp-fox-btns" style="color:#aaa;font-size:11px;">尚未训练斥候</span>';
+          h += '<button class="bld-btn" disabled>派遣</button>';
+        } else {
+          var maxSend = Math.min(3, scoutAvail);
+          var selVal = _expFoxSel[did] || 1;
+          h += '<span class="exp-fox-btns">';
+          for (var fi = 1; fi <= 3; fi++) {
+            var isSel = fi === selVal;
+            var dis = fi > maxSend;
+            h += '<button class="exp-fox-btn' + (isSel ? ' sel' : '') + '"' +
+              (dis ? ' disabled' : ' onclick="_expFoxSel[\'' + did + '\']=' + fi + ';rTC()"') +
+              '>' + fi + '只</button>';
+          }
+          h += '</span>';
+          h += '<button class="bld-btn" onclick="sendExpedition(\'' + did + '\', _expFoxSel[\'' + did + '\'] || 1)" ' +
+            (canSend ? '' : 'disabled') + '>派遣</button>';
         }
-        h += '</span>';
-        h += '<button class="bld-btn" onclick="sendExpedition(\'' + did + '\', _expFoxSel[\'' + did + '\'] || 1)" ' +
-          (canSend ? '' : 'disabled') + '>派遣</button>';
         h += '</div></div>';
       }
     }
@@ -865,26 +872,29 @@ function rTC() {
       if (NARR[nk].length) { hasNarr = true; break; }
     }
     if (hasNarr) {
-      h += '<div class="res-cat" style="margin-top:10px;">山外拾遗</div>';
-      var narrSections = [
-        { key: 'oldRuin', label: '旧墟手记' },
-        { key: 'cloudRidge', label: '云岭石刻' },
-      ];
-      for (var ni = 0; ni < narrSections.length; ni++) {
-        var ns = narrSections[ni];
-        var narrData = NARR[ns.key];
-        if (!narrData || !narrData.length) continue;
-        var collected = (G.narratives && G.narratives[ns.key]) ? G.narratives[ns.key].length : 0;
-        h += '<div class="narr-section">';
-        h += '<div class="narr-title">' + ns.label + ' <span style="color:#888;font-size:11px;">（' + collected + '/' + narrData.length + '）</span></div>';
-        for (var nj = 0; nj < narrData.length; nj++) {
-          if (nj < collected) {
-            h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
-          } else {
-            h += '<div class="narr-item narr-locked">???</div>';
+      h += '<div class="collapse-toggle" style="margin-top:10px;" onclick="toggleCollapse(\'narr\')">'
+        + (collapsed.narr ? '▶︎ ' : '▼︎ ') + '山外拾遗</div>';
+      if (!collapsed.narr) {
+        var narrSections = [
+          { key: 'oldRuin', label: '旧墟手记' },
+          { key: 'cloudRidge', label: '云岭石刻' },
+        ];
+        for (var ni = 0; ni < narrSections.length; ni++) {
+          var ns = narrSections[ni];
+          var narrData = NARR[ns.key];
+          if (!narrData || !narrData.length) continue;
+          var collected = (G.narratives && G.narratives[ns.key]) ? G.narratives[ns.key].length : 0;
+          h += '<div class="narr-section">';
+          h += '<div class="narr-title">' + ns.label + ' <span style="color:#888;font-size:11px;">（' + collected + '/' + narrData.length + '）</span></div>';
+          for (var nj = 0; nj < narrData.length; nj++) {
+            if (nj < collected) {
+              h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
+            } else {
+              h += '<div class="narr-item narr-locked">???</div>';
+            }
           }
+          h += '</div>';
         }
-        h += '</div>';
       }
     }
   }
