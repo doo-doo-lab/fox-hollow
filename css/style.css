@@ -146,6 +146,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 /* BLUEPRINT ITEMS (caravan) */
 .bp-item{background:#faf8f2;border-bottom-color:#e8e0cc !important;}
 .bp-item-name{font-weight:bold;color:#9a7b4f !important;}
+.bp-item-name-s{color:#b8860b !important;}
 .bp-target{font-size:11px;color:#888;margin-left:4px;}
 
 /* BLUEPRINT INVENTORY (craft tab) */
