@@ -551,7 +551,7 @@ function rTC() {
       var eff = jobEffects(id, d.e);
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
       var sec = {
-        desc: d.d,
+        desc: (d.desc && d.desc === d.d) ? '' : d.d,
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
