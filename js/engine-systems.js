@@ -133,8 +133,21 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：按远行次数顺序选取；最后一条仅在叙事碎片全部收集后才显示
+  var doneCount = G.expDone[exp.dest];
+  var logLen = d.logs.length;
+  var narrTotal = (d.narrative && NARR[exp.dest]) ? NARR[exp.dest].length : 0;
+  var narrDone = (G.narratives && G.narratives[exp.dest]) ? G.narratives[exp.dest].length : 0;
+  var narrComplete = narrTotal > 0 && narrDone >= narrTotal;
+  var lastIsFinale = logLen > 1;
+  var normalLen = lastIsFinale ? logLen - 1 : logLen;
+  var logIdx;
+  if (narrComplete && doneCount > normalLen) {
+    logIdx = logLen - 1; // 叙事全部收集后，使用终章日志
+  } else {
+    logIdx = ((doneCount - 1) % normalLen);
+  }
+  var returnLog = d.logs[logIdx];
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
