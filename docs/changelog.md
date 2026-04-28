@@ -2,6 +2,18 @@
 
 ## 2026-04-28
 
+### v0.13.1 - hotfix 合集
+- **iOS 折叠按钮 emoji 修复**：`▶` / `▼` 后追加 U+FE0E 变体选择符（`▶︎` / `▼︎`），iOS Safari 不再渲染成蓝色播放按钮
+- **三个折叠按钮样式统一**：把谷中见闻原本的 bold + uppercase + letter-spacing + #999 提到 `.collapse-toggle` base，资源/Tab/谷中见闻三处看齐
+- **`sell()` freeFox 公式修复**：远行进行中卖建筑时 freeFox 重算漏减 foxAway，导致在外斥候被错算成"闲置"。现在与 tick / resolveExpedition 一致
+- **extraP talent 描述与产出对齐**：所有用 `extraP` 的 talent（5 个）描述数值翻 5 倍写实际值；UI 副产悬浮面板公式补 `* TPD`，让 描述 / 悬浮 / 资源面板 三处数值一致（平衡未变，只对齐口径）
+  - 伐木场 B `0.002/s → 0.01/s`
+  - 采石坑 B `0.001/s → 0.005/s`
+  - 伐木工 B `0.01/s → 0.05/s`
+  - 矿工 B `0.002/s → 0.01/s`
+  - 猎手 B `0.005/s → 0.025/s`
+- **缓存版本号**：data.js → `?v=6`，engine.js → `?v=6`，ui.js → `?v=7`，css → `?v=2`
+
 ### v0.13.0 - 斥候系统重构 + 文案/命名整理
 - **斥候改为出征角色**：远行队伍现在从斥候中派出（消耗 `G.job.scout.c`），不再从闲置狐狸（freeFox）派出
   - canSendExp / sendExpedition / resolveExpedition 全部改用 scout.c 跟踪
