@@ -10,9 +10,11 @@ fox-hollow/
 ├── css/
 │   └── style.css       # 样式
 ├── js/
-│   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件）
-│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发）
-│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板）
+│   ├── data.js              # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件/天赋）
+│   ├── engine.js            # 引擎核心（状态 G、工具函数、calcR/calcMx/calcH、tick、离线模拟、山谷见闻、resetG/migrate、存档/存档码）
+│   ├── engine-actions.js    # 玩家直接触发的操作（gather/build/research/craft/aJob/trainJob/sell/灵术/autoCraft 开关）
+│   ├── engine-systems.js    # 子系统（远行 / 抉择事件 / 商队 / 图纸专精）
+│   └── ui.js                # 界面渲染（日志/面板/Tab/悬浮面板/modal）
 ├── docs/
 │   ├── RULES.md        # 本文件
 │   ├── design.md       # 策划文档

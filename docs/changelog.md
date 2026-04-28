@@ -2,6 +2,15 @@
 
 ## 2026-04-28
 
+### v0.13.2 - auto-craft 修复 + engine.js 拆分
+- **修复 auto-craft 双计数 bug**：`runAutoCraft()` 离散批次与 `calcR()` 连续速率同时改资源，导致所有 auto-craft 配方实际产出 = 显示速率的 2 倍。删除 `runAutoCraft()` 函数及 `tick()` / `simulateOffline()` 内的两处调用，连续速率作为唯一来源。修复后实测 1 个 plank 配方在 fullAcRate 下每 50 tick 产 1 个（修复前是 2 个）。
+- **engine.js 按职责拆分为 3 个文件**（1438 行 → 799/179/438），避免后续屎山化：
+  - `engine.js`（核心，799 行）：state、工具函数、calcR/calcMx/calcH、tick、离线模拟、山谷见闻、resetG/migrate、存档/存档码
+  - `engine-actions.js`（玩家操作，179 行）：gather / build / research / craft / aJob / trainJob / sell / 灵术 / autoCraft 开关
+  - `engine-systems.js`（子系统，438 行）：远行 / 抉择事件 / 商队 / 图纸专精
+- **RULES.md 仓库结构** 同步更新到新文件布局。
+- **缓存版本号**：engine.js → `?v=8`，新增 engine-actions.js / engine-systems.js → `?v=1`。
+
 ### v0.13.1 - hotfix 合集
 - **iOS 折叠按钮 emoji 修复**：`▶` / `▼` 后追加 U+FE0E 变体选择符（`▶︎` / `▼︎`），iOS Safari 不再渲染成蓝色播放按钮
 - **三个折叠按钮样式统一**：把谷中见闻原本的 bold + uppercase + letter-spacing + #999 提到 `.collapse-toggle` base，资源/Tab/谷中见闻三处看齐
