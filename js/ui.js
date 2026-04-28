@@ -832,7 +832,9 @@ function rTC() {
           tip: pickTip('bp_' + bpItem.id, specData.tip)
         };
         // 把 target 内联进名字 span，让图纸行结构跟普通商品行一致（cost 列对齐）
-        var bpLabelHtml = '图纸：' + specData.n + ' <span class="bp-target">' + targetName + '</span>';
+        // S 档图纸（强力）加金色「强」标记
+        var tierBadge = bpItem.tier === 'S' ? '<span style="color:#b8860b;font-weight:bold;font-size:11px;margin-right:3px;">强</span>' : '';
+        var bpLabelHtml = tierBadge + '图纸：' + specData.n + ' <span class="bp-target">' + targetName + '</span>';
         var bpNameHtml = hpWrap('<span class="cv-item-name bp-item-name">' + bpLabelHtml + '</span>', bpSec);
         h += '<div class="cv-item bp-item">';
         h += bpNameHtml;

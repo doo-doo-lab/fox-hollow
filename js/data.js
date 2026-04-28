@@ -498,7 +498,8 @@ const CVD = {
       { target: 'berryPatch', type: 'bld' }, { target: 'lumberYard', type: 'bld' },
       { target: 'quarry', type: 'bld' }, { target: 'gatherer', type: 'job' },
     ],
-    bpCost: [{ r: 'coin', a: 12 }, { r: 'spice', a: 1 }],
+    bpCostS: [{ r: 'coin', a: 180 }, { r: 'spice', a: 1 }],
+    bpCostA: [{ r: 'coin', a: 100 }, { r: 'spice', a: 1 }],
     arriveLog: '一只背着大包的山猫出现在村口，朝最近的狐狸点了点头。',
     leaveLog: '山猫行商收拾好包袱走了，临走在地上留了一撮香料当茶钱。',
   },
@@ -515,7 +516,8 @@ const CVD = {
       { target: 'warehouse', type: 'bld' }, { target: 'woodcutter', type: 'job' },
       { target: 'miner', type: 'job' },
     ],
-    bpCost: [{ r: 'coin', a: 15 }, { r: 'silk', a: 1 }],
+    bpCostS: [{ r: 'coin', a: 225 }, { r: 'silk', a: 1 }],
+    bpCostA: [{ r: 'coin', a: 125 }, { r: 'silk', a: 1 }],
     arriveLog: '几只河獭沿着溪流摸上来了，推着满载丝帛的小木筏。',
     leaveLog: '河獭商队顺水滑走了，尾巴在水面拍了两下算是告别。',
   },
@@ -531,7 +533,8 @@ const CVD = {
       { target: 'library', type: 'bld' }, { target: 'shrine', type: 'bld' },
       { target: 'scholar', type: 'job' }, { target: 'smith', type: 'job' },
     ],
-    bpCost: [{ r: 'coin', a: 18 }, { r: 'ancCoin', a: 1 }],
+    bpCostS: [{ r: 'coin', a: 270 }, { r: 'ancCoin', a: 1 }],
+    bpCostA: [{ r: 'coin', a: 150 }, { r: 'ancCoin', a: 1 }],
     arriveLog: '一只白鹤落在灵狐祠的檐角上，脚上绑着一个小布包。',
     leaveLog: '白鹤信使展翅飞走了，盘旋了一圈像是在记路。',
   },
@@ -546,7 +549,8 @@ const CVD = {
     blueprintPool: [
       { target: 'hunter', type: 'job' }, { target: 'merchant', type: 'job' },
     ],
-    bpCost: [{ r: 'coin', a: 20 }, { r: 'ancCoin', a: 2 }],
+    bpCostS: [{ r: 'coin', a: 300 }, { r: 'ancCoin', a: 2 }],
+    bpCostA: [{ r: 'coin', a: 175 }, { r: 'ancCoin', a: 2 }],
     arriveLog: '几只灰毛狐狸从驿道尽头走来，披着旧墟式样的斗篷。',
     leaveLog: '旧墟遗民沿来路返回了，走之前朝山谷的方向鞠了一躬。',
   },
@@ -683,6 +687,25 @@ const CHOICE_EVENTS = [
       { label: '带上他，慢慢走', desc: '下次旧墟远行时间×1.5，返回古币+8、卷轴+1' },
       { label: '让他在这里住下', desc: '人口+1，下次旧墟遗民商队价格减半' },
   ]},
+];
+
+// ===== 图纸强度分档 =====
+// S 档（10 张）：纯强力、无副作用，定价更高
+// A 档（其他 20 张）：有副作用 / 中等增益 / 条件性，定价略低（默认 A）
+// 用于 rollBlueprint 时按 target+spec 查表选 S 或 A 价格
+const STRONG_SPECS = [
+  // 建筑专精 S
+  'warehouse_A',  // 松鼠病 - 上限翻倍
+  'library_A',    // 四眼田狐 - 学识 +50% + 卷轴 +30%
+  'library_B',    // 生狐勿近 - 学识上限翻倍
+  'smithy_B',     // 一颗矿掰两颗用 - 全建筑铁造价 -15%
+  // 职业天赋 S
+  'woodcutter_A', // 跟树杠上了 - +40% 木
+  'miner_A',      // 只挖一个坑 - +40% 石
+  'hunter_A',     // 憋着 - +50% 兽皮
+  'scholar_A',    // 发呆冠军 - +40% 学识 +30% 卷轴
+  'smith_A',      // 叮叮当当 - +50% 铁
+  'merchant_A',   // 算盘精 - +50% 铜钱
 ];
 
 // ===== 考拉·小曼 彩蛋（玩家直购图纸时 20% 概率出现）=====

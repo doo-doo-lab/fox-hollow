@@ -349,9 +349,11 @@ function sellToCaravan() {
 function rollBlueprint(caravanId) {
   var cv = CVD[caravanId];
   if (!cv || !cv.blueprintPool) return;
-  // 检查图纸费用资源上限（玩家必须有对应资源上限才生成图纸）
-  for (var ci = 0; ci < cv.bpCost.length; ci++) {
-    var costRes = cv.bpCost[ci].r;
+  // 用 bpCostA 检查资源上限（A/S 两档使用相同的资源类型，只差铜钱数额）
+  var costRefA = cv.bpCostA || cv.bpCost;
+  if (!costRefA) return;
+  for (var ci = 0; ci < costRefA.length; ci++) {
+    var costRes = costRefA[ci].r;
     if (G.res[costRes] && G.res[costRes].mx === 0 && !G.res[costRes].on) return;
   }
   var pool = [];
@@ -379,9 +381,14 @@ function rollBlueprint(caravanId) {
   }
   if (!pool.length) return;
   var picked = pool[Math.floor(Math.random() * pool.length)];
+  // 按强度档查价：S 档（强力图纸）走 bpCostS，其他走 bpCostA
+  var isStrong = (typeof STRONG_SPECS !== 'undefined') && STRONG_SPECS.indexOf(picked.id) !== -1;
+  var bpCost = isStrong ? cv.bpCostS : cv.bpCostA;
+  if (!bpCost) bpCost = cv.bpCost; // 老数据兜底
   G.caravan.blueprint = {
     id: picked.id, target: picked.target, spec: picked.spec, type: picked.type,
-    cost: cv.bpCost
+    cost: bpCost,
+    tier: isStrong ? 'S' : 'A',
   };
 }
 
