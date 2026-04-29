@@ -928,6 +928,11 @@ function rTC() {
 
   // ===== v0.14 风俗页签 =====
   else if (curTab === 'k') {
+    // ===== v0.15 节令面板（顶部） =====
+    if (G.upg.artistryLore?.done) {
+      h += renderRitePanel();
+    }
+
     var actCount = 0;
     for (var ck in (G.customs || {})) if (G.customs[ck]) actCount++;
     h += '<div style="margin-bottom:10px;font-weight:bold;color:#555;">已激活习俗：' + actCount + ' / ' + CUSTD.length + '</div>';
@@ -998,6 +1003,110 @@ function rTC() {
   }
 
   document.getElementById('tc').innerHTML = toggle + h;
+}
+
+// ===== v0.15 节令面板渲染 =====
+// 三种状态：
+// 1. 首次解锁（!riteIntroSeen）→ intro card，引导玩家
+// 2. 待决策（pendingSeasonRites.open）→ 决策面板（manual mode 或新季首次）
+// 3. 已应用 → 状态 banner（含模式切换 + 修改下季 default）
+function renderRitePanel() {
+  var h = '';
+  // 状态 1：首次引导
+  if (!G.riteIntroSeen) {
+    h += '<div class="rite-intro">';
+    h += '<div class="rite-intro-title">节令系统已解锁</div>';
+    h += '<div class="rite-intro-body">';
+    h += '<p>百艺通觉参透之后，每季可借染丝、果酒、墨锭三件文化品换得季节加成：</p>';
+    h += '<ul class="rite-intro-list">';
+    h += '<li><b>染丝</b> ×1 → 全职业产出 +5%</li>';
+    h += '<li><b>果酒</b> ×1 → 野莓产量 +8%</li>';
+    h += '<li><b>墨锭</b> ×1 → 学识产出 +10%</li>';
+    h += '<li>三选 → <b>三全礼</b>：满意度 +5% + 全产出 +3%</li>';
+    h += '</ul>';
+    h += '<p class="rite-intro-note">资源够才生效，不够自动跳过。模式可在面板内切换：</p>';
+    h += '<ul class="rite-intro-list">';
+    h += '<li><b>自动</b>（默认）：每季按上次选择静默应用</li>';
+    h += '<li><b>手动</b>：每季弹出选择面板</li>';
+    h += '</ul>';
+    h += '<button class="rite-intro-btn" onclick="markRiteIntroSeen()">明白了 →</button>';
+    h += '</div></div>';
+    return h;
+  }
+
+  // 状态 2：待决策面板（manual mode 触发或 auto 模式手动展开）
+  var pending = G.pendingSeasonRites && G.pendingSeasonRites.open;
+  var expanded = !!collapsed.riteEdit;  // 玩家点击"修改下季"展开
+  var defaults = pending ? (G.pendingSeasonRites.defaults || G.lastSeasonRites) : G.lastSeasonRites;
+
+  // 状态 banner（已应用区）
+  h += '<div class="rite-banner">';
+  h += '<div class="rite-banner-row">';
+  h += '<span class="rite-banner-title">本季节令</span>';
+  // 当前已应用状态
+  var applied = [];
+  for (var k of Object.keys(SEASON_RITES)) {
+    if (G.seasonRites[k]) applied.push(SEASON_RITES[k].name);
+  }
+  if (applied.length) {
+    var statusText = applied.join('+');
+    if (G.seasonRites.all) statusText += '（三全礼）';
+    h += '<span class="rite-status-applied">已应用：' + statusText + '</span>';
+  } else if (!pending) {
+    h += '<span class="rite-status-skip">本季已跳过</span>';
+  }
+  // 模式切换
+  h += '<span class="rite-mode">模式：';
+  h += '<button class="rite-mode-btn ' + (G.riteMode === 'auto' ? 'rite-mode-active' : '') + '" onclick="setRiteMode(\'auto\')">自动</button>';
+  h += '<button class="rite-mode-btn ' + (G.riteMode === 'manual' ? 'rite-mode-active' : '') + '" onclick="setRiteMode(\'manual\')">手动</button>';
+  h += '</span>';
+  h += '</div>';
+
+  // 决策/修改面板
+  if (pending) {
+    h += '<div class="rite-decide">';
+    h += '<div class="rite-decide-title">请为本季选择：</div>';
+    h += renderRiteCheckboxes(defaults, true);
+    h += '<div class="rite-decide-actions">';
+    h += '<button class="bld-btn" onclick="confirmRites()">本季应用</button>';
+    h += '<button class="bld-btn" onclick="skipRites()">跳过本季</button>';
+    h += '</div></div>';
+  } else {
+    // 折叠的"修改下季 default"
+    h += '<div class="rite-edit-toggle collapse-toggle" onclick="toggleCollapse(\'riteEdit\')">'
+      + (expanded ? '▼︎' : '▶︎') + ' 调整下季默认</div>';
+    if (expanded) {
+      h += '<div class="rite-edit">';
+      h += renderRiteCheckboxes(G.lastSeasonRites, false);
+      h += '<button class="bld-btn" onclick="saveRiteDefault()">保存为默认</button>';
+      h += '</div>';
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderRiteCheckboxes(selected, includeShortageHint) {
+  var h = '<div class="rite-checks">';
+  for (var k of Object.keys(SEASON_RITES)) {
+    var cfg = SEASON_RITES[k];
+    var checked = selected && selected[k] ? 'checked' : '';
+    var have = (G.res[k] && G.res[k].v) || 0;
+    var shortage = (have < cfg.consume) ? ' <span class="rite-short">资源不足</span>' : '';
+    var effect = '';
+    if (k === 'dye') effect = '全职业 +5%';
+    else if (k === 'wine') effect = '野莓 +8%';
+    else if (k === 'ink') effect = '学识 +10%';
+    h += '<label class="rite-check-row">';
+    h += '<input type="checkbox" id="rite-cb-' + k + '" ' + checked + '>';
+    h += ' <b>' + cfg.name + '</b> ×' + cfg.consume + '（有 ' + Math.floor(have) + '）';
+    h += ' → ' + effect;
+    h += includeShortageHint ? shortage : '';
+    h += '</label>';
+  }
+  h += '<div class="rite-trinity-hint">三选齐 → 三全礼：满意度 +5% + 全产出 +3%</div>';
+  h += '</div>';
+  return h;
 }
 
 // ===== 渲染：日志 =====

@@ -179,3 +179,38 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 @media(max-width:860px){
   .customs-list{grid-template-columns:1fr;}
 }
+
+/* v0.15 节令面板 */
+.rite-intro{padding:12px;margin-bottom:10px;background:#fdf6e3;border:1px solid #dab86a;}
+.rite-intro-title{font-weight:bold;color:#9a7b4f;font-size:14px;margin-bottom:6px;}
+.rite-intro-body p{margin:6px 0;font-size:12px;color:#555;line-height:1.6;}
+.rite-intro-list{margin:4px 0 6px 18px;font-size:12px;color:#444;}
+.rite-intro-list li{margin:2px 0;}
+.rite-intro-note{color:#777;font-style:italic;}
+.rite-intro-btn{margin-top:8px;padding:5px 12px;background:#9a7b4f;color:#fff;border:none;cursor:pointer;font-size:12px;}
+.rite-intro-btn:hover{background:#7d6440;}
+
+.rite-banner{padding:8px 10px;margin-bottom:10px;background:#f4f8fa;border:1px solid #bcd;font-size:12px;}
+.rite-banner-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rite-banner-title{font-weight:bold;color:#46739a;}
+.rite-status-applied{color:#3a7a3a;}
+.rite-status-skip{color:#888;}
+.rite-mode{margin-left:auto;color:#666;font-size:11px;}
+.rite-mode-btn{padding:2px 8px;margin-left:3px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:11px;color:#555;}
+.rite-mode-btn.rite-mode-active{background:#46739a;color:#fff;border-color:#46739a;}
+.rite-mode-btn:hover{background:#e0e8ee;}
+.rite-mode-btn.rite-mode-active:hover{background:#3a607f;}
+
+.rite-decide{margin-top:8px;padding-top:8px;border-top:1px dashed #bcd;}
+.rite-decide-title{font-weight:bold;color:#46739a;margin-bottom:6px;}
+.rite-decide-actions{margin-top:8px;display:flex;gap:6px;}
+
+.rite-edit-toggle{margin-top:6px;color:#46739a;font-size:11px;cursor:pointer;}
+.rite-edit{margin-top:6px;padding-top:6px;border-top:1px dashed #bcd;}
+
+.rite-checks{display:flex;flex-direction:column;gap:4px;}
+.rite-check-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#444;cursor:pointer;}
+.rite-check-row input{cursor:pointer;}
+.rite-short{color:#b00;font-size:11px;font-style:italic;}
+.rite-trinity-hint{margin-top:4px;font-size:11px;color:#9a7b4f;font-style:italic;}
+

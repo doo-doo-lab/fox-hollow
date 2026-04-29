@@ -325,3 +325,48 @@ function activateCustom(id) {
   log('习俗激活：' + c.n, 'important');
   rAll();
 }
+
+// ===== v0.15 节令面板交互（UI onclick 调用） =====
+function markRiteIntroSeen() {
+  G.riteIntroSeen = true;
+  rAll();
+}
+
+function setRiteMode(mode) {
+  if (mode !== 'auto' && mode !== 'manual') return;
+  G.riteMode = mode;
+  log('节令模式切换为：' + (mode === 'auto' ? '自动应用' : '手动确认'), 'echo');
+  rAll();
+}
+
+// 从 DOM checkbox 收集玩家选择
+function _readRiteCheckboxes() {
+  var sel = { dye: false, wine: false, ink: false };
+  for (var k of Object.keys(SEASON_RITES)) {
+    var el = document.getElementById('rite-cb-' + k);
+    if (el) sel[k] = !!el.checked;
+  }
+  return sel;
+}
+
+function confirmRites() {
+  var sel = _readRiteCheckboxes();
+  applySeasonRites(sel, false);
+  // applySeasonRites 内已 rAll
+}
+
+function skipRites() {
+  // 不消耗、不加成；只清 pending 标记并记忆"全空"为下季 default
+  G.seasonRites = { dye: false, wine: false, ink: false, all: false };
+  G.lastSeasonRites = { dye: false, wine: false, ink: false };
+  G.pendingSeasonRites = { open: false };
+  log('本季节令已跳过。', 'event');
+  rAll();
+}
+
+function saveRiteDefault() {
+  var sel = _readRiteCheckboxes();
+  G.lastSeasonRites = sel;
+  log('节令默认已保存：将在下季按此应用。', 'echo');
+  rAll();
+}
