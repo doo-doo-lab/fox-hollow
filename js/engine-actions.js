@@ -36,6 +36,10 @@ function research(id) {
   G.upg[id].done = 1;
   if (UD[id].e?.plankU) { G.res.plank.on = 1; G.res.plank.mx = 100; }
   if (UD[id].e?.brickU) { G.res.brick.on = 1; G.res.brick.mx = 100; }
+  // v0.14 文化研究解锁中间品资源
+  if (id === 'folkLore' && G.res.dye) G.res.dye.on = 1;
+  if (id === 'calendar' && G.res.wine) G.res.wine.on = 1;
+  if (id === 'engraving' && G.res.ink) G.res.ink.on = 1;
   log('研究完成：' + UD[id].n, 'important');
   rAll();
 }
@@ -176,4 +180,63 @@ function castSpell(id) {
 function toggleAutoCraft(id) {
   G.autoCraft[id] = !G.autoCraft[id];
   rTC();
+}
+
+// ===== v0.14 习俗激活 =====
+function customById(id) {
+  for (var i = 0; i < CUSTD.length; i++) if (CUSTD[i].id === id) return CUSTD[i];
+  return null;
+}
+
+function customUnlocked(id) {
+  var c = customById(id);
+  if (!c) return false;
+  var req = c.unlock || {};
+  if (req.u) for (var i = 0; i < req.u.length; i++) if (!G.upg[req.u[i]]?.done) return false;
+  if (req.b) for (var k in req.b) if ((G.bld[k]?.c || 0) < req.b[k]) return false;
+  if (req.j) for (var k in req.j) if ((G.job[k]?.c || 0) < req.j[k]) return false;
+  if (req.r) for (var k in req.r) if ((G.res[k]?.v || 0) < req.r[k]) return false;
+  if (req.custom) for (var i = 0; i < req.custom.length; i++) if (!G.customs[req.custom[i]]) return false;
+  if (req.choice) for (var i = 0; i < req.choice.length; i++) if ((G.choicesDone || []).indexOf(req.choice[i]) < 0) return false;
+  if (req.spring && (G.springExpDone || 0) < req.spring) return false;
+  return true;
+}
+
+function canActivateCustom(id) {
+  if (G.customs && G.customs[id]) return false; // 已激活
+  if (!customUnlocked(id)) return false;
+  var c = customById(id);
+  for (var i = 0; i < c.cost.length; i++)
+    if (G.res[c.cost[i].r].v < c.cost[i].a) return false;
+  return true;
+}
+
+function activateCustom(id) {
+  if (!canActivateCustom(id)) return;
+  var c = customById(id);
+  // 扣资源
+  for (var i = 0; i < c.cost.length; i++)
+    G.res[c.cost[i].r].v -= c.cost[i].a;
+  // 标记激活（值为激活时 tick，便于将来扩展）
+  if (!G.customs) G.customs = {};
+  G.customs[id] = G.tick || 1;
+  // onActivate 一次性效果
+  if (c.onActivate) {
+    if (c.onActivate.trainScholar) {
+      G.train = G.train || {};
+      G.train.scholar = (G.train.scholar || 0) + c.onActivate.trainScholar;
+    }
+    if (c.onActivate.ruinNarrAdvance) {
+      // 旧墟叙事推进 +1（如果未到末尾）
+      if (G.narratives && G.narratives.oldRuin && G.narratives.oldRuin.length < NARR.oldRuin.length) {
+        var nextIdx = G.narratives.oldRuin.length;
+        G.narratives.oldRuin.push(nextIdx);
+        log(NARR.oldRuin[nextIdx], 'echo');
+      }
+    }
+  }
+  // 静默纪日：触发本季 -3% 满意度
+  if (id === 'silentDay') G.silentSeason = G.season;
+  log('习俗激活：' + c.n, 'important');
+  rAll();
 }

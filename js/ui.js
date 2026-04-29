@@ -71,6 +71,9 @@ function bldEffects(e) {
     else if (k.endsWith('Mx')) r.push((RD[k.slice(0, -2)]?.n || k) + ' 上限 +' + v);
     else if (k === 'hapB') r.push('满意度 +' + (v * 100 | 0) + '%');
     else if (k === 'allM') r.push('全资源产量 +' + (v * 100 | 0) + '%');
+    // v0.14 文化建筑专属字段
+    else if (k === 'customAllM') r.push('全村产出 +' + (v * 100).toFixed(1) + '%/座 ×已激活习俗数');
+    else if (k === 'craftCultureMul') r.push('染丝/果酒/墨锭产能 +' + (v * 100 | 0) + '%/座');
   }
   return r;
 }
@@ -880,6 +883,7 @@ function rTC() {
         var narrSections = [
           { key: 'oldRuin', label: '旧墟手记' },
           { key: 'cloudRidge', label: '云岭石刻' },
+          { key: 'windRidge', label: '苍风岭札记' },
         ];
         for (var ni = 0; ni < narrSections.length; ni++) {
           var ns = narrSections[ni];
@@ -899,6 +903,73 @@ function rTC() {
         }
       }
     }
+  }
+
+  // ===== v0.14 风俗页签 =====
+  else if (curTab === 'k') {
+    var actCount = 0;
+    for (var ck in (G.customs || {})) if (G.customs[ck]) actCount++;
+    h += '<div style="margin-bottom:10px;font-weight:bold;color:#555;">已激活习俗：' + actCount + ' / ' + CUSTD.length + '</div>';
+
+    h += '<div class="customs-list">';
+    for (var ci = 0; ci < CUSTD.length; ci++) {
+      var c = CUSTD[ci];
+      var isActive = !!(G.customs && G.customs[c.id]);
+      var unlocked = customUnlocked(c.id);
+      var hasResources = unlocked && !isActive && canActivateCustom(c.id);
+      var statusCls = isActive ? 'custom-active' : (unlocked ? 'custom-ready' : 'custom-locked');
+
+      h += '<div class="custom-card ' + statusCls + '">';
+      h += '<div class="custom-name">' + c.n + '</div>';
+      h += '<div class="custom-desc">' + c.desc + '</div>';
+
+      if (isActive) {
+        h += '<div class="custom-status">已激活</div>';
+      } else if (unlocked) {
+        var costStr = c.cost.map(function(p) {
+          var have = G.res[p.r] ? G.res[p.r].v : 0;
+          var col = have >= p.a ? '#333' : '#b00';
+          return '<span style="color:' + col + '">' + ((RD[p.r] && RD[p.r].n) || p.r) + ' ' + p.a + '</span>';
+        }).join('，');
+        h += '<div class="custom-cost">成本：' + costStr + '</div>';
+        h += '<button onclick="activateCustom(\'' + c.id + '\')" class="bld-btn"' + (hasResources ? '' : ' disabled') + '>激活</button>';
+      } else {
+        var req = c.unlock || {};
+        var reqStrs = [];
+        if (req.u) for (var rui = 0; rui < req.u.length; rui++) {
+          var udId = req.u[rui];
+          var done = G.upg[udId] && G.upg[udId].done;
+          reqStrs.push((done ? '✓ ' : '✗ ') + '研究：' + ((UD[udId] && UD[udId].n) || udId));
+        }
+        if (req.b) for (var bk in req.b) {
+          var hb = G.bld[bk] ? G.bld[bk].c : 0, nb = req.b[bk];
+          reqStrs.push((hb >= nb ? '✓ ' : '✗ ') + ((BD[bk] && BD[bk].n) || bk) + ' ≥ ' + nb);
+        }
+        if (req.j) for (var jk in req.j) {
+          var hj = G.job[jk] ? G.job[jk].c : 0, nj = req.j[jk];
+          reqStrs.push((hj >= nj ? '✓ ' : '✗ ') + ((JD[jk] && JD[jk].n) || jk) + ' ≥ ' + nj);
+        }
+        if (req.r) for (var rk in req.r) {
+          var hr = G.res[rk] ? G.res[rk].v : 0, nr = req.r[rk];
+          reqStrs.push((hr >= nr ? '✓ ' : '✗ ') + ((RD[rk] && RD[rk].n) || rk) + ' ≥ ' + nr);
+        }
+        if (req.choice) for (var chi = 0; chi < req.choice.length; chi++) {
+          var done = (G.choicesDone || []).indexOf(req.choice[chi]) >= 0;
+          reqStrs.push((done ? '✓ ' : '✗ ') + '抉择事件 #' + req.choice[chi] + ' 完成');
+        }
+        if (req.spring) {
+          var done = (G.springExpDone || 0) >= req.spring;
+          reqStrs.push((done ? '✓ ' : '✗ ') + '春季远行完成 ≥ ' + req.spring);
+        }
+        h += '<div class="custom-req">' + reqStrs.join('<br>') + '</div>';
+      }
+
+      if (c.tip && c.tip.length) {
+        h += '<div class="custom-tip">' + pickTip('cust_' + c.id, c.tip) + '</div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
   }
 
   document.getElementById('tc').innerHTML = toggle + h;

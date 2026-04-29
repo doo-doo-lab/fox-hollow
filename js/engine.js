@@ -31,6 +31,11 @@ const G = {
   blueprints: [],        // 已持有图纸 [{ id, target, spec, type }]
   bldSpec: {},           // 已激活建筑专精 { berryPatch: 'A', ... }
   jobTalent: {},         // 已激活职业天赋 { gatherer: 'B', ... }
+  // v0.14 风俗与习俗
+  customs: {},           // { id: tick } 已激活习俗（值为激活时 tick）
+  bonfireSeason: -1,     // 篝火夜歌触发的本季满意度 buff
+  silentSeason: -1,      // 静默纪日触发的本季满意度 -3%
+  springExpDone: 0,      // 春季完成的远行次数（用于春迁俗解锁）
 };
 
 let lastRealTime = Date.now();
@@ -111,6 +116,8 @@ function chk(q) {
     if (!G.upg[k]?.done) return false;
   if (q.exp) for (const [k, n] of Object.entries(q.exp))
     if ((G.expDone[k] || 0) < n) return false;
+  // v0.14 已激活习俗数门槛
+  if (q.custom !== undefined && activeCustomCount() < q.custom) return false;
   return true;
 }
 
@@ -120,6 +127,14 @@ function foxEatRate() {
   if (G.upg.ancestorEye?.done) base *= 0.85;
   if (G.bldSpec.tannery === 'A') base *= SPEC_BD.tannery.A.foxEatMul;
   return base;
+}
+
+// v0.14 已激活习俗数
+function activeCustomCount() {
+  if (!G.customs) return 0;
+  var n = 0;
+  for (var k in G.customs) if (G.customs[k]) n++;
+  return n;
 }
 
 // 有效瞭望塔数（符咒耗尽时失效）
@@ -165,6 +180,16 @@ function calcR() {
         if (resKey === 'scroll' && specData.scrollProdMul) val = v * specData.scrollProdMul;
         if (resKey === 'charm' && specData.charmProdMul) val = v * specData.charmProdMul;
       }
+      // v0.14 习俗对灵狐祠 charm 的加成（加法叠加，与引灵专精合并：×(1 + 0.4 + 0.2 + 0.05)）
+      if (id === 'shrine' && resKey === 'charm') {
+        var bonus = 0;
+        if (specData && specData.charmProdMul) bonus += (specData.charmProdMul - 1);
+        if (G.customs && G.customs.watchNight) bonus += 0.2;
+        if (G.customs && G.customs.ancestorRite) bonus += 0.05;
+        val = v * (1 + bonus);
+      }
+      // v0.14 习俗：老火传承 - 锻造炉矿铁产出 +10%（乘法叠加）
+      if (id === 'smithy' && resKey === 'iron' && G.customs && G.customs.oldFire) val *= 1.1;
       r[resKey] = (r[resKey] || 0) + val * s.c;
     }
     // 建筑专精额外产出
@@ -193,6 +218,8 @@ function calcR() {
         if (resKey === 'lore' && talentData.loreProdMul) val = v * talentData.loreProdMul;
         if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
       }
+      // v0.14 习俗：共狩日 - 猎手兽皮 +15%
+      if (id === 'hunter' && resKey === 'leather' && G.customs.shareHunt) val *= 1.15;
       r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy;
     }
     // 天赋额外产出
@@ -217,6 +244,8 @@ function calcR() {
           if (resKey === 'lore' && talentData.loreProdMul) val = v * talentData.loreProdMul;
           if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
         }
+        // v0.14 习俗：共狩日 - 猎手兽皮 +15%（祖灵段同步）
+        if (id === 'hunter' && resKey === 'leather' && G.customs.shareHunt) val *= 1.15;
         r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy * 0.5;
       }
       // 天赋额外产出也受祖灵加成
@@ -244,6 +273,16 @@ function calcR() {
       m[k] = (m[k] || 1) + e.allM * s.c;
   }
 
+  // v0.14 刻名碑加成（每座 ×已激活习俗 ×0.2%，加法叠加 allM）
+  if (G.bld.memorial?.c && BD.memorial?.e?.customAllM) {
+    var customCnt = activeCustomCount();
+    var memorialMul = BD.memorial.e.customAllM * G.bld.memorial.c * customCnt;
+    if (memorialMul > 0) {
+      for (const k of Object.keys(r))
+        m[k] = (m[k] || 1) + memorialMul;
+    }
+  }
+
   // 应用乘数
   for (const k of Object.keys(r)) r[k] *= (m[k] || 1);
 
@@ -262,6 +301,10 @@ function calcR() {
   // 采集者勤爪额外消耗（独立加项，不受厚韧放大）
   if (G.jobTalent.gatherer === 'A' && G.job.gatherer.c > 0)
     r.berry -= SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * TPD;
+
+  // v0.14 习俗：守夜传统 每狐 -0.02 野莓/s（r-unit = 2× /s，故乘 0.04）
+  if (G.customs && G.customs.watchNight)
+    r.berry -= (G.foxes - (G.foxAway || 0)) * 0.04;
 
   // 鞣革坊薄削持续转化（兽皮→铜钱，不同速率）
   if (G.bldSpec.tannery === 'B' && G.res.leather.v > 0 && G.res.coin.v < G.res.coin.mx) {
@@ -320,15 +363,22 @@ function calcR() {
         acRate = canReserve ? Math.min(acRate, fullAcRate * 0.25) : 0;
       }
 
-      G._acRates[id] = acRate;
+      // v0.14 艺工坊 + 百艺通觉对染丝/果酒/墨锭的加成（craft 速率乘数）
+      var craftMul = 1;
+      if (id === 'dye' || id === 'wine' || id === 'ink') {
+        if (G.bld.artistry?.c && BD.artistry?.e?.craftCultureMul)
+          craftMul += BD.artistry.e.craftCultureMul * G.bld.artistry.c;
+        if (G.upg.artistryLore?.done) craftMul += 0.2;
+      }
+      G._acRates[id] = acRate * craftMul;
 
       for (var i = 0; i < CD[id].inp.length; i++) {
         var p = CD[id].inp[i];
-        r[p.r] = (r[p.r] || 0) - p.a * acRate;
+        r[p.r] = (r[p.r] || 0) - p.a * acRate * craftMul;
       }
       for (var i = 0; i < CD[id].out.length; i++) {
         var p = CD[id].out[i];
-        r[p.r] = (r[p.r] || 0) + p.a * acRate;
+        r[p.r] = (r[p.r] || 0) + p.a * acRate * craftMul;
       }
     }
   }
@@ -353,6 +403,10 @@ function calcMx() {
     }
     // 霜藏：野莓上限 +50%（乘于总上限）
     if (k === 'berry' && G.bldSpec.warehouse === 'B') mx = Math.floor(mx * SPEC_BD.warehouse.B.berryMxMul);
+    // v0.14 习俗：铭石礼 学识上限 +50（一次性，永久）
+    if (k === 'lore' && G.customs && G.customs.nameStone) mx += 50;
+    // v0.14 习俗：谷雨宴 寒冬野莓上限 +30%
+    if (k === 'berry' && G.season === 3 && G.customs && G.customs.rainFeast) mx = Math.floor(mx * 1.3);
     G.res[k].mx = mx;
   }
   let mf = 0;
@@ -376,7 +430,36 @@ function calcH() {
   if (G.feastSeason === G.season) h += 0.15;
   // 抉择事件掌印墙 +10%
   if (G.choiceBuffs && G.choiceBuffs.happySeason === G.season) h += 0.1;
+  // v0.14 习俗满意度加成
+  if (G.customs && G.customs.newClothes) h += 0.05;
+  if (G.bonfireSeason === G.season) h += 0.03;
+  if (G.silentSeason === G.season) h -= 0.03;
   G.happy = Math.max(0.1, Math.min(2, h));
+}
+
+// v0.14 习俗：季节切换钩子（被 tick 和 simulateOffline 调用）
+function customSeasonHook(silent) {
+  if (!G.customs) return;
+  // 篝火夜歌：每次季节切换瞬时本季 +3% 满意度
+  if (G.customs.bonfire) G.bonfireSeason = G.season;
+  // 年度结算（新一年开始 = season 0）
+  if (G.season === 0) {
+    if (G.customs.newClothes && G.res.dye) {
+      if (G.res.dye.v >= 5) G.res.dye.v -= 5;
+      else {
+        G.res.dye.v = 0;
+        if (!silent) log('染丝不足，新衣节缩减了规模。', 'warn');
+      }
+    }
+    if (G.customs.shareHunt && G.res.leather) {
+      if (G.res.leather.v >= 30) G.res.leather.v -= 30;
+      else G.res.leather.v = 0;
+    }
+    if (G.customs.nameStone && G.res.stone) {
+      if (G.res.stone.v >= 20) G.res.stone.v -= 20;
+      else G.res.stone.v = 0;
+    }
+  }
 }
 
 // ===== 解锁检查 =====
@@ -421,6 +504,8 @@ function simulateOffline(seconds) {
         G.caravanTimer = (G.caravanTimer || 0) + 1;
         if (G.caravanTimer >= 2 && Math.random() < 0.5) trySpawnCaravan(true);
       }
+      // v0.14 习俗季节切换钩子（静默）
+      customSeasonHook(true);
     }
     updateUnlocks();
     calcMx();
@@ -499,6 +584,8 @@ function tick() {
         trySpawnCaravan();
       }
     }
+    // v0.14 习俗季节切换钩子
+    customSeasonHook(false);
   }
 
   updateUnlocks();
@@ -645,6 +732,8 @@ function resetG() {
   G.pendingChoice = null; G.choicesDone = []; G.choiceBuffs = {};
   // v0.12.0 图纸与专精
   G.blueprints = []; G.bldSpec = {}; G.jobTalent = {};
+  // v0.14 风俗与习俗
+  G.customs = {}; G.bonfireSeason = -1; G.silentSeason = -1; G.springExpDone = 0;
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -693,6 +782,11 @@ function migrate() {
   G.blueprints = G.blueprints || [];
   G.bldSpec = G.bldSpec || {};
   G.jobTalent = G.jobTalent || {};
+  // v0.14 风俗与习俗
+  G.customs = G.customs || {};
+  if (G.bonfireSeason === undefined) G.bonfireSeason = -1;
+  if (G.silentSeason === undefined) G.silentSeason = -1;
+  if (G.springExpDone === undefined) G.springExpDone = 0;
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };

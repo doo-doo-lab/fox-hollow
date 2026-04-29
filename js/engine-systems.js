@@ -41,6 +41,10 @@ function sendExpedition(destId, foxCount) {
     timeMul *= cb.nextSendTimeMul[destId];
     delete cb.nextSendTimeMul[destId];
   }
+  // v0.14 习俗：春迁俗 - 春季出发的远行时间 -15%
+  if (G.season === 0 && G.customs && G.customs.springMigrate) timeMul *= 0.85;
+  // v0.14 春季远行计数（用于春迁俗解锁条件）
+  if (G.season === 0) G.springExpDone = (G.springExpDone || 0) + 1;
   var days = d.days * timeMul;
   var ticks = Math.ceil(days * TPD);
   G.expeditions.push({
