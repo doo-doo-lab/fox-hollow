@@ -231,7 +231,7 @@ const JD = {
   scholar:    { n: '学者',   d: '积累学识',   e: { loreP: .08, scrollP: .005, charmP: .002 },    uq: { b: { library: 1 } }, tip: ['用爪子翻书不太方便，但慢有慢的好处——每一页都记得牢。', '尾巴尖蘸了墨，写出来的字比手写的还好看。'] },
   smith:      { n: '铁匠',   d: '锻造铁器',   e: { ironP: .02 },    uq: { b: { smithy: 1 } }, tip: ['锤子落下去是蛮力，提起来才是手艺。'] },
   merchant:   { n: '商贩',   d: '赚取铜钱',   e: { coinP: .01 },    uq: { b: { market: 1 } }, tip: ['三寸不烂之舌，换来三尺不烂之布。', '把东边的故事卖给西边，赚一点路费。'] },
-  scout:      { n: '斥候',   d: '出征远行队伍来源；授业可提升远行奖励', desc: '出征远行队伍来源；授业可提升远行奖励', e: {}, uq: { b: { trailroad: 1 } }, tip: ['比风先到，比影子更轻，回来的时候揣着一兜子情报。'] },
+  scout:      { n: '斥候',   d: '远行探路',   desc: '出征远行队伍来源；授业可提升远行奖励', e: {}, uq: { b: { trailroad: 1 } }, tip: ['比风先到，比影子更轻，回来的时候揣着一兜子情报。'] },
 };
 
 // ===== 研究定义 =====
@@ -1043,72 +1043,65 @@ const CUSTD = [
     unlock: { u: ['folkLore'] },
     cost: [{ r: 'wood', a: 30 }, { r: 'ancCoin', a: 5 }],
     desc: '激活后，每次季节切换时本季全村满意度 +3%。',
-    tip: ['火生起来，故事就有了座位。']
+    tip: ['跑调的那只唱得最大声。']
   },
   { id: 'newClothes', n: '新衣节',
     unlock: { u: ['folkLore'], r: { dye: 5 } },
     cost: [{ r: 'dye', a: 5 }],
     ongoing: { kind: 'spring', r: 'dye', a: 5 },
     desc: '全年满意度 +5%；春季每年消耗 5 染丝。',
-    tip: ['新衣穿上身的瞬间，今年就开始了。']
+    tip: ['旧衣服又没破——但新的好看。']
   },
   { id: 'shareHunt', n: '共狩日',
     unlock: { u: ['folkLore'], j: { hunter: 5 } },
     cost: [{ r: 'leather', a: 30 }],
     ongoing: { kind: 'year', r: 'leather', a: 30 },
     desc: '猎手兽皮产出 +15%；每年消耗 30 兽皮。',
-    tip: ['一起出猎，谁先看见，谁先叫。']
+    tip: ['分工是假的，抢功才是传统。']
   },
   { id: 'springMigrate', n: '春迁俗',
     unlock: { u: ['calendar'], spring: 1 },
     cost: [{ r: 'leather', a: 10 }, { r: 'wood', a: 20 }],
     desc: '春季远行时间 -15%。',
-    tip: ['春天来了，腿就痒。']
+    tip: ['雪还没化完，行李已经收好了。']
   },
   { id: 'rainFeast', n: '谷雨宴',
     unlock: { u: ['calendar'], r: { wine: 5 } },
     cost: [{ r: 'wine', a: 5 }],
     desc: '寒冬野莓上限 +30%。',
-    tip: ['谷雨那天的酒最甜。']
+    tip: ['喝完这顿，冬天的事就不许再提了。']
   },
   { id: 'nameStone', n: '铭石礼',
     unlock: { u: ['engraving'], b: { memorial: 1 } },
     cost: [{ r: 'stone', a: 50 }],
     ongoing: { kind: 'year', r: 'stone', a: 20 },
     desc: '学识上限 +50（一次性，与现有上限相加）；每年消耗 20 碎石。',
-    tip: ['名字刻进去，以后还在的就不是石头，是声音。']
+    tip: ['石头：我也没同意。狐狸：现在你同意了。']
   },
   { id: 'moonClass', n: '月话课',
     unlock: { u: ['engraving'], b: { moonStage: 1 } },
     cost: [{ r: 'scroll', a: 5 }, { r: 'ancCoin', a: 10 }],
     onActivate: { trainScholar: 1 },
     desc: '激活时学者授业等级 +1（一次性）。',
-    tip: ['月光下讲的故事，记得最牢。']
+    tip: ['打呼的都给我坐后排。']
   },
   { id: 'watchNight', n: '守夜传统',
     unlock: { u: ['engraving'], b: { shrine: 3 } },
     cost: [{ r: 'spice', a: 5 }, { r: 'scroll', a: 3 }],
     ongoing: { kind: 'perFox', r: 'berry', a: 0.02 },
     desc: '灵狐祠符咒 +20%；每只狐狸每秒额外消耗 0.02 野莓。',
-    tip: ['夜里点着的灯，是给迷路的狐狸看的。']
+    tip: ['野莓吃完了，夜还没过半。']
   },
   { id: 'oldFire', n: '老火传承',
     unlock: { u: ['engraving'], b: { smithy: 3 } },
     cost: [{ r: 'iron', a: 20 }, { r: 'wood', a: 50 }],
     desc: '锻造炉产出 +10%。',
-    tip: ['炉子里的火不能灭，灭了就要重新认它。']
-  },
-  { id: 'silentDay', n: '静默纪日',
-    unlock: { u: ['engraving'], choice: [3] },
-    cost: [{ r: 'ancCoin', a: 30 }],
-    onActivate: { ruinNarrAdvance: 1, silentSeason: 1 },
-    desc: '激活后旧墟叙事推进 +1，本季全村满意度 -3%。',
-    tip: ['一天不说话，是为了听见更多。']
+    tip: ['这团火比所有活着的狐狸年纪都大。']
   },
   { id: 'ancestorRite', n: '祖荫祭',
     unlock: { u: ['ancestry'], b: { ancestor: 1 } },
     cost: [{ r: 'ink', a: 2 }, { r: 'ancCoin', a: 30 }],
     desc: '灵狐祠符咒额外 +5%（与守夜传统叠加）。',
-    tip: ['祖先的名字念出来，灯火就替我们多亮一会儿。']
+    tip: ['先祖未必在听，但念名字的时候最好假装他们在。']
   },
 ];
