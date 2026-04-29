@@ -26,6 +26,10 @@ function build(id) {
   G.bld[id].c++;
   if (BD[id].ur) for (const r of BD[id].ur) G.res[r].on = true;
   log('建造了' + BD[id].n + '（共' + G.bld[id].c + '座）');
+  if (id === 'smithy' && G.bld.smithy.c === 1) {
+    G.res.iron.v = Math.min(G.res.iron.v + 3, G.res.iron.mx);
+    log('锻造炉第一炉出铁了，获得 3 矿铁。', 'important');
+  }
   rAll();
 }
 

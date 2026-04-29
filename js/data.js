@@ -195,7 +195,7 @@ const BD = {
     n: '刻名碑', t: 'b', d: '刻满前狐名字的纪念碑，习俗激活越多越生光。',
     p: [{ r: 'stone', b: 50, k: 1.12 }, { r: 'iron', b: 5, k: 1.12 }],
     e: { customAllM: .002, scrollP: .001 },
-    uq: { b: { storyTree: 2 }, u: { engraving: 1 } },
+    uq: { b: { storyTree: 1 }, u: { engraving: 1 } },
     tip: ['名字刻进去，就和山一样长寿了。']
   },
   artistry: {
@@ -268,7 +268,7 @@ const UD = {
   },
   ironWorking: {
     n: '铁器冶炼', d: '提高矿铁产出。',
-    p: [{ r: 'lore', a: 40 }, { r: 'iron', a: 10 }],
+    p: [{ r: 'lore', a: 40 }, { r: 'iron', a: 5 }],
     e: { ironM: .5 },
     uq: { b: { smithy: 1 } },
     tip: ['火候差一分，铁就只是块有脾气的石头。']
@@ -310,7 +310,7 @@ const UD = {
   },
   longJourney: {
     n: '远途跋涉', d: '远行奖励 +50%，解锁云岭目的地。',
-    p: [{ r: 'lore', a: 45 }, { r: 'silk', a: 2 }, { r: 'ancCoin', a: 1 }],
+    p: [{ r: 'lore', a: 45 }, { r: 'silk', a: 1 }, { r: 'ancCoin', a: 1 }],
     e: { expReward: .5 },
     uq: { b: { trailroad: 2 }, exp: { oldRuin: 1 } },
     tip: ['走远路的第一课，是学会不回头。']
@@ -335,7 +335,7 @@ const UD = {
     n: '岁时有常', d: '解锁刻名碑、墨锭与五个后期习俗。',
     p: [{ r: 'lore', a: 120 }, { r: 'scroll', a: 10 }],
     e: { loreM: .1 },
-    uq: { u: { calendar: 1 }, b: { moonStage: 1 } },
+    uq: { u: { folkLore: 1 }, b: { storyTree: 1 } },
     tip: ['大火流兮草虫鸣，繁霜降兮草木零。']
   },
   artistryLore: {
@@ -346,21 +346,21 @@ const UD = {
     tip: ['手上活太多，终于串味了。']
   },
   customsDeep: {
-    n: '俗成共庆', d: '解锁共聚堂；v0.15 节庆效果倍率提升（待启用）。',
+    n: '俗成共庆', d: '解锁共聚堂——让狐狸们更会聚在一起。',
     p: [{ r: 'lore', a: 200 }],
     e: { hapB: .05 },
-    uq: { u: { engraving: 1 }, custom: 7 },
+    uq: { u: { engraving: 1 }, custom: 5 },
     tip: ['快乐太重了，得全村一起，才抛得起来。']
   },
   ancestry: {
     n: '连枝溯本', d: '解锁祖龛与祖荫祭习俗。',
     p: [{ r: 'lore', a: 130 }, { r: 'ink', a: 3 }],
     e: { charmM: .1 },
-    uq: { u: { engraving: 1 }, b: { shrine: 3 } },
+    uq: { u: { calendar: 1 }, b: { shrine: 3 } },
     tip: ['发现自己是无数个"过去"终于长出的"现在"。']
   },
   valleyVoice: {
-    n: '同声相应', d: '为村庄议事制度做准备（v0.16 政体系统的前置）。',
+    n: '同声相应', d: '谷中的声音越传越远，共识渐渐成形。',
     p: [{ r: 'lore', a: 250 }, { r: 'scroll', a: 30 }],
     e: { hapB: .1 },
     uq: { u: { engraving: 1 }, custom: 5 },
@@ -565,6 +565,7 @@ const EXD = {
     rewards: [
       { r: 'iron', min: 3, max: 6, prob: 1 },
       { r: 'ancCoin', min: 1, max: 2, prob: 1 },
+      { r: 'spice', min: 1, max: 1, prob: .25 },
       { r: 'remnant', min: 1, max: 1, prob: .1 },
     ],
     tip: ['有的门还开着，像在等谁回来吃饭。'],
