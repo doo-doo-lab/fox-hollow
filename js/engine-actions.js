@@ -221,8 +221,9 @@ function toggleAutoCraft(id) {
 
 // ===== v0.15 节令系统：应用本季选择 =====
 // selection: { dye: bool, wine: bool, ink: bool }
+// silent=true：离线补算时调用，不输出 per-season 日志（汇总在 simulateOffline 末尾）
 // 资源不够的项自动跳过。
-function applySeasonRites(selection) {
+function applySeasonRites(selection, silent) {
   G.seasonRites = { dye: false, wine: false, ink: false, all: false };
   var applied = [];
   var skipped = [];
@@ -241,6 +242,7 @@ function applySeasonRites(selection) {
   G.lastSeasonRites = { dye: !!selection.dye, wine: !!selection.wine, ink: !!selection.ink };
   G.pendingSeasonRites = { open: false };
   G.lastRiteToast = G.season;
+  if (silent) return;  // 离线模式：跳过 per-season 日志和 rAll，由调用者处理
   if (applied.length) {
     var msg = '本季节令已应用：' + applied.join('、');
     if (G.seasonRites.all) msg += '（三全礼生效）';

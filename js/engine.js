@@ -621,6 +621,31 @@ function simulateOffline(seconds) {
       log(G.pendingNarr[i], 'echo');
     G.pendingNarr = [];
   }
+  // v0.15 节令离线总结
+  if (G.offlineRiteLog && G.offlineRiteLog.length) {
+    var consumed = { dye: 0, wine: 0, ink: 0 };
+    var trinityCount = 0;
+    var seasonsCount = G.offlineRiteLog.length;
+    for (var i = 0; i < G.offlineRiteLog.length; i++) {
+      var rec = G.offlineRiteLog[i];
+      if (rec.applied?.dye) consumed.dye++;
+      if (rec.applied?.wine) consumed.wine++;
+      if (rec.applied?.ink) consumed.ink++;
+      if (rec.applied?.all) trinityCount++;
+    }
+    var parts = [];
+    if (consumed.dye > 0) parts.push('染丝 -' + consumed.dye);
+    if (consumed.wine > 0) parts.push('果酒 -' + consumed.wine);
+    if (consumed.ink > 0) parts.push('墨锭 -' + consumed.ink);
+    if (parts.length) {
+      var rmsg = '离开期间 ' + seasonsCount + ' 季节令均按上次设置应用（' + parts.join('，') + '）';
+      if (trinityCount > 0) rmsg += '；其中 ' + trinityCount + ' 季三全礼生效';
+      log(rmsg, 'event');
+    } else {
+      log('离开期间 ' + seasonsCount + ' 季节令均因资源不足跳过。', 'warn');
+    }
+    G.offlineRiteLog = [];
+  }
 }
 
 // ===== 主循环 =====
