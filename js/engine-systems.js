@@ -275,6 +275,7 @@ function trySpawnCaravan(silent) {
   var picked = pool[Math.floor(Math.random() * pool.length)];
   G.caravan = { id: picked, bought: {}, blueprint: null };
   G.caravanTimer = 0;
+  G.caravanEverVisited = true;  // §14.5 修复 5：玩家见过商队后才显示商队 UI 区域
   // 图纸掉落判定
   var bpChance = 0.5;
   if (G.jobTalent.merchant === 'B') bpChance += SPEC_JD.merchant.B.bpChanceBonus;

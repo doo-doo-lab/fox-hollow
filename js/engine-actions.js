@@ -274,6 +274,20 @@ function customUnlocked(id) {
   return true;
 }
 
+// §14.5 修复 3：习俗"是否对玩家可见"——习俗依赖的研究至少需出现在研究面板上
+// （研究尚未 on 也尚未 done → 整张习俗卡隐藏，避免暴露玩家不认识的研究名）
+function isCustomVisible(cst) {
+  if (!cst) return false;
+  var req = cst.unlock || {};
+  if (req.u) {
+    for (var i = 0; i < req.u.length; i++) {
+      var udId = req.u[i];
+      if (!G.upg[udId] || !(G.upg[udId].on || G.upg[udId].done)) return false;
+    }
+  }
+  return true;
+}
+
 function canActivateCustom(id) {
   if (G.customs && G.customs[id]) return false; // 已激活
   if (!customUnlocked(id)) return false;

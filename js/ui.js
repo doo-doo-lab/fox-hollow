@@ -443,15 +443,18 @@ function rTC() {
         notes: bldUnlockNotes(d),
         tip: pickTip('bld_' + id, d.tip)
       };
-      // 添加专精信息到悬浮面板
+      // 添加专精信息到悬浮面板（§14.5 修复 1：仅持有该建筑图纸时才暴露"可专精"）
       if (SPEC_BD[id]) {
         if (G.bldSpec[id]) {
           var activeSpec = SPEC_BD[id][G.bldSpec[id]];
           sec.notes = sec.notes || [];
           sec.notes.push('专精「' + activeSpec.n + '」：' + activeSpec.d);
         } else {
-          sec.notes = sec.notes || [];
-          sec.notes.push('可专精：' + SPEC_BD[id].A.n + ' / ' + SPEC_BD[id].B.n + '（需≥5座 + 图纸）');
+          var hasBp = (G.blueprints || []).some(function(bp) { return bp.target === id; });
+          if (hasBp) {
+            sec.notes = sec.notes || [];
+            sec.notes.push('可专精：' + SPEC_BD[id].A.n + ' / ' + SPEC_BD[id].B.n + '（需≥5座 + 图纸）');
+          }
         }
       }
       var nameHtml = hpWrap(
@@ -497,6 +500,9 @@ function rTC() {
       if (sid === 'feast' && G.feastSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
       if (sid === 'tradeWind' && G.tradeWindYear === G.year) extra = ' <span style="color:#888;font-size:11px;">（今年已施）</span>';
       if (sid === 'tradeWind' && G.caravan) extra = ' <span style="color:#888;font-size:11px;">（商队在场）</span>';
+      if (sid === 'overflow' && G.overflowSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'doubleCraft' && G.doubleCraftSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'inkPact' && G.inkPact === G.season) extra = ' <span style="color:#888;font-size:11px;">（已写就，等下次研究）</span>';
       if (sid === 'spiritPath') {
         var hasTarget = false;
         for (var ei = 0; ei < (G.expeditions||[]).length; ei++)
@@ -558,14 +564,20 @@ function rTC() {
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
-      // 添加天赋信息到悬浮面板
+      // 添加天赋信息到悬浮面板（§14.5 修复 2：玩家接触过图纸系统后才暴露"可天赋"）
       if (SPEC_JD[id]) {
-        sec.notes = sec.notes || [];
         if (G.jobTalent[id]) {
+          sec.notes = sec.notes || [];
           var activeTal = SPEC_JD[id][G.jobTalent[id]];
           sec.notes.push('天赋「' + activeTal.n + '」：' + activeTal.d);
         } else {
-          sec.notes.push('可天赋：' + SPEC_JD[id].A.n + ' / ' + SPEC_JD[id].B.n + '（需图纸）');
+          var seenBlueprint = (G.blueprints || []).length > 0
+            || Object.keys(G.bldSpec || {}).length > 0
+            || Object.keys(G.jobTalent || {}).length > 0;
+          if (seenBlueprint) {
+            sec.notes = sec.notes || [];
+            sec.notes.push('可天赋：' + SPEC_JD[id].A.n + ' / ' + SPEC_JD[id].B.n + '（需图纸）');
+          }
         }
       }
       var jobLabel = d.n;
@@ -753,7 +765,9 @@ function rTC() {
         }).join(', ');
         var rwPrev = dd.rewards.map(function(rw) {
           var probStr = rw.prob < 1 ? ' (' + Math.round(rw.prob * 100) + '%)' : '';
-          return RD[rw.r].n + ' ' + rw.min + '-' + rw.max + probStr;
+          // §14.5 修复 6：未解锁的资源显示为 ???
+          var rName = (G.res[rw.r] && G.res[rw.r].on) ? RD[rw.r].n : '???';
+          return rName + ' ' + rw.min + '-' + rw.max + probStr;
         }).join('，');
         var sec = {
           desc: (dd.d ? dd.d + '<br>' : '') + '路程：' + days + ' 天',
@@ -790,7 +804,8 @@ function rTC() {
       }
     }
 
-    // --- 商队面板 ---
+    // --- 商队面板 ---（§14.5 修复 5：玩家见过商队后才显示）
+    if (G.caravan || G.caravanEverVisited) {
     h += '<div class="res-cat" style="margin-top:10px;">商队</div>';
     if (G.caravan) {
       var cv = CVD[G.caravan.id];
@@ -870,38 +885,39 @@ function rTC() {
     } else {
       h += '<div style="color:#aaa;font-size:13px;">暂无商队到访。</div>';
     }
+    }  // end §14.5 修复 5 商队区域包裹
 
-    // --- 叙事碎片 ---
-    var hasNarr = false;
-    for (var nk in NARR) {
-      if (NARR[nk].length) { hasNarr = true; break; }
+    // --- 叙事碎片 ---（§14.5 修复 7 配套：玩家未收集过任何叙事则整块隐藏）
+    var hasCollectedNarr = false;
+    if (G.narratives) {
+      for (var nk in G.narratives) {
+        if (G.narratives[nk] && G.narratives[nk].length > 0) { hasCollectedNarr = true; break; }
+      }
     }
-    if (hasNarr) {
+    if (hasCollectedNarr) {
       h += '<div class="collapse-toggle" style="margin-top:10px;" onclick="toggleCollapse(\'narr\')">'
         + (collapsed.narr ? '▶︎ ' : '▼︎ ') + '山外拾遗</div>';
       if (!collapsed.narr) {
-        var narrSections = [
-          { key: 'oldRuin', label: '旧墟手记' },
-          { key: 'cloudRidge', label: '云岭石刻' },
-        ];
-        for (var ni = 0; ni < narrSections.length; ni++) {
-          var ns = narrSections[ni];
-          var narrData = NARR[ns.key];
+        // §14.5 修复 7：动态从 NARR keys 读取，且只显示 collected > 0 的目的地
+        var narrLabels = { oldRuin: '旧墟手记', cloudRidge: '云岭石刻', windRidge: '枯风口札记' };
+        var narrKeys = Object.keys(NARR);
+        for (var ni = 0; ni < narrKeys.length; ni++) {
+          var nsKey = narrKeys[ni];
+          var narrData = NARR[nsKey];
           if (!narrData || !narrData.length) continue;
-          var collected = (G.narratives && G.narratives[ns.key]) ? G.narratives[ns.key].length : 0;
-          var cKey = 'narr_' + ns.key;
+          var collected = (G.narratives && G.narratives[nsKey]) ? G.narratives[nsKey].length : 0;
+          if (collected === 0) continue;  // 未收集过则不显示该目的地
+          var nsLabel = narrLabels[nsKey] || (EXD[nsKey] && EXD[nsKey].n) || nsKey;
+          var cKey = 'narr_' + nsKey;
           var isColl = !!collapsed[cKey];
           h += '<div class="narr-section">';
+          // 隐藏总数，只显示已收集数（避免剧透"还有几篇没拿"）
           h += '<div class="narr-title collapse-toggle" onclick="toggleCollapse(\'' + cKey + '\')">'
-            + (isColl ? '▶︎ ' : '▼︎ ') + ns.label
-            + ' <span style="color:#888;font-size:11px;">（' + collected + '/' + narrData.length + '）</span></div>';
+            + (isColl ? '▶︎ ' : '▼︎ ') + nsLabel
+            + ' <span style="color:#888;font-size:11px;">（已收集 ' + collected + ' 篇）</span></div>';
           if (!isColl) {
-            for (var nj = 0; nj < narrData.length; nj++) {
-              if (nj < collected) {
-                h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
-              } else {
-                h += '<div class="narr-item narr-locked">???</div>';
-              }
+            for (var nj = 0; nj < collected; nj++) {
+              h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
             }
           }
           h += '</div>';
@@ -919,6 +935,8 @@ function rTC() {
     h += '<div class="customs-list">';
     for (var ci = 0; ci < CUSTD.length; ci++) {
       var c = CUSTD[ci];
+      // §14.5 修复 3：习俗依赖的研究未在研究面板出现 → 该习俗整张卡片隐藏
+      if (!isCustomVisible(c)) continue;
       var isActive = !!(G.customs && G.customs[c.id]);
       var unlocked = customUnlocked(c.id);
       var hasResources = unlocked && !isActive && canActivateCustom(c.id);
