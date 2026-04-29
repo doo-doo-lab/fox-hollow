@@ -43,8 +43,6 @@ function sendExpedition(destId, foxCount) {
   }
   // v0.14 习俗：春迁俗 - 春季出发的远行时间 -15%
   if (G.season === 0 && G.customs && G.customs.springMigrate) timeMul *= 0.85;
-  // v0.14 春季远行计数（用于春迁俗解锁条件）
-  if (G.season === 0) G.springExpDone = (G.springExpDone || 0) + 1;
   var days = d.days * timeMul;
   var ticks = Math.ceil(days * TPD);
   G.expeditions.push({
@@ -52,7 +50,8 @@ function sendExpedition(destId, foxCount) {
     foxCount: foxCount,
     ticksLeft: ticks,
     totalTicks: ticks,
-    usedSpiritPath: false
+    usedSpiritPath: false,
+    startSeason: G.season,  // v0.14 用于春迁俗"完成时计数"
   });
   log('派出 ' + foxCount + ' 只狐狸前往' + d.n + '。', 'important');
   rAll();
@@ -137,6 +136,8 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
+  // v0.14 春季远行完成计数（出发是春才计入，用于春迁俗解锁）
+  if (exp.startSeason === 0) G.springExpDone = (G.springExpDone || 0) + 1;
   // 返回日志：仅显示带回的奖励。叙事氛围由 NARR 叙事碎片承担（v0.13.x 移除 d.logs 池）
   if (!silent) {
     log('远行队伍从' + d.n + '返回了。', 'event');

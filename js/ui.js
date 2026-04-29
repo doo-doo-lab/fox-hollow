@@ -955,7 +955,9 @@ function rTC() {
         }
         if (req.choice) for (var chi = 0; chi < req.choice.length; chi++) {
           var done = (G.choicesDone || []).indexOf(req.choice[chi]) >= 0;
-          reqStrs.push((done ? '✓ ' : '✗ ') + '抉择事件 #' + req.choice[chi] + ' 完成');
+          var ce = (typeof CHOICE_EVENTS !== 'undefined') ? CHOICE_EVENTS[req.choice[chi]] : null;
+          var ceName = (ce && ce.n) || ('#' + req.choice[chi]);
+          reqStrs.push((done ? '✓ ' : '✗ ') + '抉择：' + ceName + ' 完成');
         }
         if (req.spring) {
           var done = (G.springExpDone || 0) >= req.spring;

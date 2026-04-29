@@ -188,6 +188,8 @@ function customById(id) {
   return null;
 }
 
+// 注：req.customsHave = 数组，要求已激活特定的习俗 id（CUSTD unlock 用）；
+//     与 chk(q.custom) 不同，后者是数字（已激活习俗总数门槛，BD/UD uq 用）。
 function customUnlocked(id) {
   var c = customById(id);
   if (!c) return false;
@@ -196,7 +198,7 @@ function customUnlocked(id) {
   if (req.b) for (var k in req.b) if ((G.bld[k]?.c || 0) < req.b[k]) return false;
   if (req.j) for (var k in req.j) if ((G.job[k]?.c || 0) < req.j[k]) return false;
   if (req.r) for (var k in req.r) if ((G.res[k]?.v || 0) < req.r[k]) return false;
-  if (req.custom) for (var i = 0; i < req.custom.length; i++) if (!G.customs[req.custom[i]]) return false;
+  if (req.customsHave) for (var i = 0; i < req.customsHave.length; i++) if (!G.customs[req.customsHave[i]]) return false;
   if (req.choice) for (var i = 0; i < req.choice.length; i++) if ((G.choicesDone || []).indexOf(req.choice[i]) < 0) return false;
   if (req.spring && (G.springExpDone || 0) < req.spring) return false;
   return true;
@@ -234,9 +236,8 @@ function activateCustom(id) {
         log(NARR.oldRuin[nextIdx], 'echo');
       }
     }
+    if (c.onActivate.silentSeason) G.silentSeason = G.season;
   }
-  // 静默纪日：触发本季 -3% 满意度
-  if (id === 'silentDay') G.silentSeason = G.season;
   log('习俗激活：' + c.n, 'important');
   rAll();
 }

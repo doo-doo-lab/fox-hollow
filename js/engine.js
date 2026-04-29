@@ -219,7 +219,7 @@ function calcR() {
         if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
       }
       // v0.14 习俗：共狩日 - 猎手兽皮 +15%
-      if (id === 'hunter' && resKey === 'leather' && G.customs.shareHunt) val *= 1.15;
+      if (id === 'hunter' && resKey === 'leather' && G.customs && G.customs.shareHunt) val *= 1.15;
       r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy;
     }
     // 天赋额外产出
@@ -245,7 +245,7 @@ function calcR() {
           if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
         }
         // v0.14 习俗：共狩日 - 猎手兽皮 +15%（祖灵段同步）
-        if (id === 'hunter' && resKey === 'leather' && G.customs.shareHunt) val *= 1.15;
+        if (id === 'hunter' && resKey === 'leather' && G.customs && G.customs.shareHunt) val *= 1.15;
         r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy * 0.5;
       }
       // 天赋额外产出也受祖灵加成
@@ -453,11 +453,17 @@ function customSeasonHook(silent) {
     }
     if (G.customs.shareHunt && G.res.leather) {
       if (G.res.leather.v >= 30) G.res.leather.v -= 30;
-      else G.res.leather.v = 0;
+      else {
+        G.res.leather.v = 0;
+        if (!silent) log('兽皮不足，共狩日草草收场。', 'warn');
+      }
     }
     if (G.customs.nameStone && G.res.stone) {
       if (G.res.stone.v >= 20) G.res.stone.v -= 20;
-      else G.res.stone.v = 0;
+      else {
+        G.res.stone.v = 0;
+        if (!silent) log('碎石不足，铭石礼今年没刻几个名字。', 'warn');
+      }
     }
   }
 }
