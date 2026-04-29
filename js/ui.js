@@ -883,20 +883,25 @@ function rTC() {
         var narrSections = [
           { key: 'oldRuin', label: '旧墟手记' },
           { key: 'cloudRidge', label: '云岭石刻' },
-          { key: 'windRidge', label: '苍风岭札记' },
         ];
         for (var ni = 0; ni < narrSections.length; ni++) {
           var ns = narrSections[ni];
           var narrData = NARR[ns.key];
           if (!narrData || !narrData.length) continue;
           var collected = (G.narratives && G.narratives[ns.key]) ? G.narratives[ns.key].length : 0;
+          var cKey = 'narr_' + ns.key;
+          var isColl = !!collapsed[cKey];
           h += '<div class="narr-section">';
-          h += '<div class="narr-title">' + ns.label + ' <span style="color:#888;font-size:11px;">（' + collected + '/' + narrData.length + '）</span></div>';
-          for (var nj = 0; nj < narrData.length; nj++) {
-            if (nj < collected) {
-              h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
-            } else {
-              h += '<div class="narr-item narr-locked">???</div>';
+          h += '<div class="narr-title collapse-toggle" onclick="toggleCollapse(\'' + cKey + '\')">'
+            + (isColl ? '▶︎ ' : '▼︎ ') + ns.label
+            + ' <span style="color:#888;font-size:11px;">（' + collected + '/' + narrData.length + '）</span></div>';
+          if (!isColl) {
+            for (var nj = 0; nj < narrData.length; nj++) {
+              if (nj < collected) {
+                h += '<div class="narr-item narr-unlocked">' + narrData[nj] + '</div>';
+              } else {
+                h += '<div class="narr-item narr-locked">???</div>';
+              }
             }
           }
           h += '</div>';
