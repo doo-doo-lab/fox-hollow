@@ -91,8 +91,11 @@ function canB(id) {
 }
 
 function researchCostMul() {
-  if (G.jobTalent.scholar === 'B') return SPEC_JD.scholar.B.resCostMul;
-  return 1;
+  var mul = 1;
+  if (G.jobTalent.scholar === 'B') mul *= SPEC_JD.scholar.B.resCostMul;
+  // v0.15 墨契：本季内下次研究费用 ×0.6
+  if (G.inkPact === G.season) mul *= 0.6;
+  return mul;
 }
 
 function canU(id) {
@@ -229,6 +232,31 @@ function calcR() {
     }
   }
 
+  // v0.15 染丝节令：本季全职业产出 +5%（仿祖灵段，独立加项）
+  if (G.seasonRites.dye) {
+    for (const [id, s] of Object.entries(G.job)) {
+      if (!s.c) continue;
+      var trainBonus = 1 + (G.train[id] || 0) * 0.1;
+      var talentData = G.jobTalent[id] && SPEC_JD[id] ? SPEC_JD[id][G.jobTalent[id]] : null;
+      for (const [k, v] of Object.entries(JD[id].e)) {
+        if (!k.endsWith('P')) continue;
+        var resKey = k.slice(0, -1);
+        var val = v;
+        if (talentData) {
+          if (talentData.prodMul) val *= talentData.prodMul;
+          if (resKey === 'lore' && talentData.loreProdMul) val = v * talentData.loreProdMul;
+          if (resKey === 'scroll' && talentData.scrollProdMul) val = v * talentData.scrollProdMul;
+        }
+        if (id === 'hunter' && resKey === 'leather' && G.customs && G.customs.shareHunt) val *= 1.15;
+        r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy * 0.05;
+      }
+      if (talentData && talentData.extraP) {
+        for (var ek in talentData.extraP)
+          r[ek] = (r[ek] || 0) + talentData.extraP[ek] * s.c * TPD * trainBonus * G.happy * 0.05;
+      }
+    }
+  }
+
   // 祖灵加成（本季职业产出 +50%，含天赋加成）
   if (G.spiritSeason === G.season) {
     for (const [id, s] of Object.entries(G.job)) {
@@ -283,6 +311,11 @@ function calcR() {
     }
   }
 
+  // v0.15 三全礼：全产出 +3%（加法叠加 allM）
+  if (G.seasonRites.all) {
+    for (const k of Object.keys(r)) m[k] = (m[k] || 1) + 0.03;
+  }
+
   // 应用乘数
   for (const k of Object.keys(r)) r[k] *= (m[k] || 1);
 
@@ -294,6 +327,10 @@ function calcR() {
 
   // 祈雨术加成
   if (G.rainSeason === G.season) r.berry *= 1.5;
+
+  // v0.15 节令单资源加成
+  if (G.seasonRites.wine) r.berry *= 1.08;
+  if (G.seasonRites.ink) r.lore *= 1.10;
 
   // 狐狸消耗野莓（外出狐狸不消耗）
   r.berry -= (G.foxes - (G.foxAway || 0)) * foxEatRate();
@@ -365,6 +402,8 @@ function calcR() {
 
       // v0.14 艺工坊 + 百艺通觉对染丝/果酒/墨锭的加成（craft 速率乘数）
       var craftMul = 1;
+      // v0.15 双工：本季所有工坊产出 +50%（加法叠加在 craftMul 上）
+      if (G.doubleCraftSeason === G.season) craftMul += 0.5;
       if (id === 'dye' || id === 'wine' || id === 'ink') {
         if (G.bld.artistry?.c && BD.artistry?.e?.craftCultureMul)
           craftMul += BD.artistry.e.craftCultureMul * G.bld.artistry.c;
@@ -407,6 +446,8 @@ function calcMx() {
     if (k === 'lore' && G.customs && G.customs.nameStone) mx += 50;
     // v0.14 习俗：谷雨宴 寒冬野莓上限 +30%
     if (k === 'berry' && G.season === 3 && G.customs && G.customs.rainFeast) mx = Math.floor(mx * 1.3);
+    // v0.15 盈库灵术：本季所有资源上限 +30%
+    if (G.overflowSeason === G.season && mx > 0) mx = Math.floor(mx * 1.3);
     G.res[k].mx = mx;
   }
   let mf = 0;
@@ -438,6 +479,33 @@ function calcH() {
 }
 
 // v0.14 习俗：季节切换钩子（被 tick 和 simulateOffline 调用）
+// ===== v0.15 节令系统季节钩子 =====
+// 在每次季节切换时调用：清墨契、清当前季加成、按 riteMode 应用或弹面板
+function seasonRiteHook(silent) {
+  // 墨契季末清零（A3：inkPact 与 inkPactBp 同时清）
+  if (G.inkPact !== -1) {
+    G.inkPact = -1;
+    G.inkPactBp = false;
+  }
+  // 清当前季节令加成（旧 season 的不带过来）
+  G.seasonRites = { dye: false, wine: false, ink: false, all: false };
+  // 节令系统：仅 artistryLore 完成后启用
+  if (!G.upg.artistryLore?.done) return;
+  if (silent || G.riteMode === 'auto') {
+    applySeasonRites(G.lastSeasonRites, silent);
+    if (silent) {
+      G.offlineRiteLog.push({
+        season: G.season, year: G.year,
+        applied: { dye: G.seasonRites.dye, wine: G.seasonRites.wine, ink: G.seasonRites.ink, all: G.seasonRites.all },
+      });
+      if (G.offlineRiteLog.length > 16) G.offlineRiteLog.shift();
+    }
+  } else {
+    // manual mode: 触发面板
+    G.pendingSeasonRites = { open: true, defaults: { ...G.lastSeasonRites } };
+  }
+}
+
 function customSeasonHook(silent) {
   if (!G.customs) return;
   // 篝火夜歌：每次季节切换瞬时本季 +3% 满意度
@@ -512,6 +580,8 @@ function simulateOffline(seconds) {
       }
       // v0.14 习俗季节切换钩子（静默）
       customSeasonHook(true);
+      // v0.15 节令季节切换钩子（静默，离线时强制 auto 应用）
+      seasonRiteHook(true);
     }
     updateUnlocks();
     calcMx();
@@ -592,6 +662,8 @@ function tick() {
     }
     // v0.14 习俗季节切换钩子
     customSeasonHook(false);
+    // v0.15 节令季节切换钩子
+    seasonRiteHook(false);
   }
 
   updateUnlocks();
@@ -793,6 +865,27 @@ function migrate() {
   if (G.bonfireSeason === undefined) G.bonfireSeason = -1;
   if (G.silentSeason === undefined) G.silentSeason = -1;
   if (G.springExpDone === undefined) G.springExpDone = 0;
+
+  // v0.15 文化经济循环
+  // 节令系统（A1：双模式 auto / manual）
+  G.riteMode = G.riteMode || 'auto';
+  G.seasonRites = G.seasonRites || { dye: false, wine: false, ink: false, all: false };
+  G.lastSeasonRites = G.lastSeasonRites || { dye: true, wine: true, ink: true };
+  G.pendingSeasonRites = G.pendingSeasonRites || { open: false };
+  G.riteIntroSeen = G.riteIntroSeen ?? false;
+  G.offlineRiteLog = G.offlineRiteLog || [];
+  G.lastRiteToast = G.lastRiteToast ?? -1;
+  // 文化灵术
+  G.inkPact = G.inkPact ?? -1;             // 存施放时季节，-1 = 未生效
+  G.inkPactBp = G.inkPactBp || false;      // 商队图纸概率额外加成（A3：季末与 inkPact 一同清零）
+  G.overflowSeason = G.overflowSeason ?? -1;
+  G.doubleCraftSeason = G.doubleCraftSeason ?? -1;
+  // 商队首次记录（§14.5 修复 5）
+  G.caravanEverVisited = G.caravanEverVisited ?? false;
+  // v0.15.1 预留字段（提前存好让存档结构稳定）
+  G.merchantSpiceAcc = G.merchantSpiceAcc || 0;
+  G.moonStageActive = G.moonStageActive ?? true;
+  G.artistryActive = G.artistryActive ?? true;
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };

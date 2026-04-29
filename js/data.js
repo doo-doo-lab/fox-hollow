@@ -414,6 +414,22 @@ const CD = {
     uq: { u: { engraving: 1 } },
     tip: ['推一下，拉一下。再推一下，再拉一下。悟了没？没。']
   },
+
+  // ===== v0.15 丝帛供应链配方 =====
+  weave: {
+    n: '纺丝帛', d: '兽皮+圆木 → 丝帛',
+    inp: [{ r: 'leather', a: 5 }, { r: 'wood', a: 5 }],
+    out: [{ r: 'silk', a: 1 }],
+    uq: { b: { artistry: 1 } },
+    tip: ['不是正经蚕丝，但搓出来一样滑溜。']
+  },
+  spiceToSilk: {
+    n: '换丝帛', d: '香料+铜钱 → 丝帛',
+    inp: [{ r: 'spice', a: 3 }, { r: 'coin', a: 5 }],
+    out: [{ r: 'silk', a: 1 }],
+    uq: { b: { tradePost: 1 } },
+    tip: ['三袋香料加五枚钱，过路的河獭掏出一匹丝，双方满意。']
+  },
 };
 
 // ===== 灵术定义 =====
@@ -454,7 +470,35 @@ const SD = {
     uq: { b: { trailroad: 1 } },
     tip: ['香料往锅里一撒，连最不爱说话的狐狸都开了口。']
   },
+
+  // ===== v0.15 文化灵术 =====
+  overflow: {
+    n: '盈库', d: '本季资源上限 +30%；满仓时溢出按 50% 效率继续累积',
+    cost: [{ r: 'dye', a: 2 }],
+    uq: { u: { artistryLore: 1 } },
+    tip: ['本来放不下了——但换个方式叠，居然又挤进去了。']
+  },
+  doubleCraft: {
+    n: '双工', d: '本季所有工坊制作产出 +50%',
+    cost: [{ r: 'wine', a: 2 }],
+    uq: { u: { artistryLore: 1 } },
+    tip: ['一锤下去多崩出半个，狐狸自己都吓了一跳。']
+  },
+  inkPact: {
+    n: '墨契', d: '下次研究花费 -40%；本季内未用则消失',
+    cost: [{ r: 'ink', a: 2 }],
+    uq: { u: { artistryLore: 1 } },
+    tip: ['写一份契约跟学识讲价，居然成了。']
+  },
 };
+
+// ===== v0.15 节令系统：消耗的文化资源 → 加成 =====
+const SEASON_RITES = {
+  dye:  { consume: 1, mul: { jobMul: .05 }, name: '染丝', desc: '穿新衣干活有精神' },
+  wine: { consume: 1, mul: { berryMul: .08 }, name: '果酒', desc: '微醺的狐狸摘得更多' },
+  ink:  { consume: 1, mul: { loreMul: .10 }, name: '墨锭', desc: '研墨读书效率高' },
+};
+// 三全礼 = 三者全选生效 → 满意度 +5% + 全产出 +3%（allM 加法）
 
 // ===== TAB定义 =====
 const TABS = [

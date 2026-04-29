@@ -36,6 +36,7 @@ function build(id) {
 function research(id) {
   if (G.upg[id].done || !canU(id)) return;
   var rMul = researchCostMul();
+  var inkPactUsed = (G.inkPact === G.season);
   for (const p of UD[id].p) G.res[p.r].v -= Math.ceil(p.a * rMul);
   G.upg[id].done = 1;
   if (UD[id].e?.plankU) { G.res.plank.on = 1; G.res.plank.mx = 100; }
@@ -44,6 +45,12 @@ function research(id) {
   if (id === 'folkLore' && G.res.dye) G.res.dye.on = 1;
   if (id === 'calendar' && G.res.wine) G.res.wine.on = 1;
   if (id === 'engraving' && G.res.ink) G.res.ink.on = 1;
+  // v0.15 墨契：本次研究消耗墨契标记（A3：inkPactBp 一并清，避免遗留商队加成）
+  if (inkPactUsed) {
+    G.inkPact = -1;
+    G.inkPactBp = false;
+    log('墨契生效，本次研究花费 -40%。', 'echo');
+  }
   log('研究完成：' + UD[id].n, 'important');
   rAll();
 }
@@ -161,6 +168,32 @@ function castSpell(id) {
     rAll();
     return;
   }
+  // v0.15 文化灵术
+  if (id === 'overflow') {
+    if (G.overflowSeason === G.season) { log('本季已经施过盈库了。', 'warn'); return; }
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
+    G.overflowSeason = G.season;
+    log('盈库灵术施展，本季资源上限扩展，满仓不再浪费！', 'important');
+    rAll();
+    return;
+  }
+  if (id === 'doubleCraft') {
+    if (G.doubleCraftSeason === G.season) { log('本季已经施过双工了。', 'warn'); return; }
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
+    G.doubleCraftSeason = G.season;
+    log('双工灵术施展，工坊产出提升 50%！', 'important');
+    rAll();
+    return;
+  }
+  if (id === 'inkPact') {
+    if (G.inkPact === G.season) { log('墨契尚未用完，请先完成一次研究。', 'warn'); return; }
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
+    G.inkPact = G.season;
+    G.inkPactBp = true;
+    log('墨契写就，下次研究花费降低，下支商队或更易携带图纸。', 'important');
+    rAll();
+    return;
+  }
 
   for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
 
@@ -184,6 +217,39 @@ function castSpell(id) {
 function toggleAutoCraft(id) {
   G.autoCraft[id] = !G.autoCraft[id];
   rTC();
+}
+
+// ===== v0.15 节令系统：应用本季选择 =====
+// selection: { dye: bool, wine: bool, ink: bool }
+// 资源不够的项自动跳过。
+function applySeasonRites(selection) {
+  G.seasonRites = { dye: false, wine: false, ink: false, all: false };
+  var applied = [];
+  var skipped = [];
+  for (const k of Object.keys(SEASON_RITES)) {
+    var cfg = SEASON_RITES[k];
+    if (!selection[k]) continue;
+    if (G.res[k] && G.res[k].v >= cfg.consume) {
+      G.res[k].v -= cfg.consume;
+      G.seasonRites[k] = true;
+      applied.push(cfg.name);
+    } else {
+      skipped.push(cfg.name);
+    }
+  }
+  G.seasonRites.all = G.seasonRites.dye && G.seasonRites.wine && G.seasonRites.ink;
+  G.lastSeasonRites = { dye: !!selection.dye, wine: !!selection.wine, ink: !!selection.ink };
+  G.pendingSeasonRites = { open: false };
+  G.lastRiteToast = G.season;
+  if (applied.length) {
+    var msg = '本季节令已应用：' + applied.join('、');
+    if (G.seasonRites.all) msg += '（三全礼生效）';
+    log(msg, 'event');
+  }
+  if (skipped.length) {
+    log('资源不足，跳过：' + skipped.join('、'), 'warn');
+  }
+  rAll();
 }
 
 // ===== v0.14 习俗激活 =====
