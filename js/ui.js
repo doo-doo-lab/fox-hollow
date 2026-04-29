@@ -1029,7 +1029,7 @@ function renderRitePanel() {
     h += '<li><b>自动</b>（默认）：每季按上次选择静默应用</li>';
     h += '<li><b>手动</b>：每季弹出选择面板</li>';
     h += '</ul>';
-    h += '<button class="rite-intro-btn" onclick="markRiteIntroSeen()">明白了 →</button>';
+    h += '<button class="rite-intro-btn" onclick="markRiteIntroSeen()">明白了</button>';
     h += '</div></div>';
     return h;
   }
