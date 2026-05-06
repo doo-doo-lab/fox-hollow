@@ -1943,6 +1943,98 @@ function rTC() {
         h += '<div style="color:#c0a;font-size:12px;">所有门已通过。</div>';
       }
     }
+
+    // v0.19 §七 4.5 六神系统面板
+    if ((G.upg.edictLore?.done || G.upg.mysteryInit?.done) && typeof DEITY_DATA !== 'undefined') {
+      h += '<div class="section-label">神祇</div>';
+      if (!G.deity) {
+        // 首次选神
+        h += '<div style="font-size:12px;color:#888;margin-bottom:6px;">选择一位主神，获得永久被动加成与专属仪式。</div>';
+        for (var did in DEITY_DATA) {
+          var dd = DEITY_DATA[did];
+          var descParts = [];
+          for (var pk in dd.passive) {
+            var v = dd.passive[pk];
+            descParts.push(pk.replace(/^_/,'') + (v > 0 ? ' +' : ' ') + (Math.abs(v) < 1 ? (v*100).toFixed(0)+'%' : v));
+          }
+          if (dd.passiveByLine) {
+            var lp = dd.passiveByLine[G.mainLine] || {};
+            for (var lpk in lp) descParts.push(lpk.replace(/^_/,'') + ' +' + (Math.abs(lp[lpk]) < 1 ? (lp[lpk]*100).toFixed(0)+'%' : lp[lpk]));
+          }
+          var dSec = { desc: dd.theme + ' — ' + descParts.join('，') };
+          h += hpWrap(
+            '<button class="btn" onclick="chooseDeity(\'' + did + '\')">'
+            + dd.n + '</button>',
+            dSec
+          );
+        }
+      } else {
+        // 已选神：显示当前主神信息
+        var curD = DEITY_DATA[G.deity];
+        h += '<div style="font-size:13px;margin-bottom:4px;">当前主神：<strong>' + curD.n + '</strong>（' + curD.theme + '）</div>';
+        // 教派选择
+        if (curD.sects && curD.sects.length > 0) {
+          h += '<div style="font-size:12px;color:#888;margin-bottom:4px;">教派'
+            + (G.sect ? '：<strong>' + SECT_DATA[G.sect].n + '</strong>' : '（未选择）')
+            + '</div>';
+          for (var si = 0; si < curD.sects.length; si++) {
+            var sid = curD.sects[si];
+            var sdef = SECT_DATA[sid];
+            var isCur = (G.sect === sid);
+            var sectDesc = [];
+            for (var spk in sdef.passive) {
+              var sv = sdef.passive[spk];
+              sectDesc.push(spk.replace(/^_/,'') + (sv > 0 ? ' +' : ' ') + (Math.abs(sv) < 1 ? (sv*100).toFixed(0)+'%' : sv));
+            }
+            var sSec = { desc: sectDesc.join('，') + (isCur ? '' : G.sect ? '（改换代价：虔诚 ×30）' : '') };
+            h += hpWrap(
+              '<button class="btn' + (isCur ? ' dis' : '') + '" onclick="chooseSect(\'' + sid + '\')">'
+              + sdef.n + (isCur ? ' ✓' : '') + '</button>',
+              sSec
+            );
+          }
+        }
+        // 专属仪式
+        h += '<div style="font-size:12px;color:#888;margin:6px 0 4px;">专属仪式</div>';
+        for (var dri = 0; dri < curD.rituals.length; dri++) {
+          var drid = curD.rituals[dri];
+          var drt = DEITY_RITUAL_DATA[drid];
+          if (!drt) continue;
+          var drCD = (G._deityRitualCD && G._deityRitualCD[drid] > 0);
+          var drBusy = (drt.dur !== 0 && G._deityRitualBuff);
+          var drCan = !drCD && !drBusy;
+          var drCostStr = drt.cost.map(function(p) {
+            var have = G.res[p.r] ? G.res[p.r].v : 0;
+            var ok = have >= p.a;
+            if (!ok) drCan = false;
+            return (ok ? '' : '<span class="short">') + (RD[p.r] ? RD[p.r].n : p.r) + ' ' + fmt(p.a) + (ok ? '' : '</span>');
+          }).join(', ');
+          var drSec = { desc: drt.d + (drCD ? ' (冷却: ' + G._deityRitualCD[drid] + '季)' : '') + (drt.dur > 0 ? ' [持续' + drt.dur + '季]' : '') };
+          h += hpWrap(
+            '<button class="btn' + (drCan ? '' : ' dis') + '" onclick="castDeityRitual(\'' + drid + '\')">'
+            + drt.n + (drCD ? ' ⏳' : '') + '</button><span class="cost">' + drCostStr + '</span>',
+            drSec
+          );
+        }
+        // 大仪式进行中提示
+        if (G._deityRitualBuff) {
+          var buffDef = DEITY_RITUAL_DATA[G._deityRitualBuff.id];
+          h += '<div style="color:#c0a;font-size:12px;margin-top:4px;">'
+            + (buffDef ? buffDef.n : '仪式') + ' 生效中'
+            + (G._deityRitualBuff.remain < 900 ? '（剩余 ' + G._deityRitualBuff.remain + ' 季）' : '')
+            + '</div>';
+        }
+        // 改宗按钮
+        h += '<div style="margin-top:8px;">';
+        if (G.deityCD > 0) {
+          h += '<button class="btn dis">改宗（冷却 ' + G.deityCD + ' 季）</button>';
+        } else {
+          h += '<button class="btn" onclick="showConvertDeityModal()">改宗</button>';
+          h += '<span class="cost" style="margin-left:6px;">卷轴 80 + 古币 30 + 虔诚归零</span>';
+        }
+        h += '</div>';
+      }
+    }
   }
 
   document.getElementById('tc').innerHTML = toggle + h;
@@ -2433,6 +2525,32 @@ function showDivinationModal() {
   // 隐藏关闭按钮（必须做出选择）
   var closeBtn = document.querySelector('#modal-box > div:last-child');
   if (closeBtn) closeBtn.style.display = 'none';
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+// ===== v0.19 §七 4.5 改宗确认弹窗 =====
+function showConvertDeityModal() {
+  if (G.deityCD > 0) return;
+  if (!G.deity) return;
+  var curD = DEITY_DATA[G.deity];
+  document.getElementById('modal-title').textContent = '改宗 — 选择新主神';
+  var h = '<div style="line-height:1.7;margin-bottom:10px;color:#555;">当前主神：<strong>' + curD.n + '</strong>。改宗代价：卷轴 ×80 + 古币 ×30 + 虔诚归零 + 5 季冷却。</div>';
+  var scrollOk = (G.res.scroll?.v || 0) >= 80;
+  var coinOk = (G.res.ancientCoin?.v || 0) >= 30;
+  h += '<div style="font-size:12px;margin-bottom:8px;">'
+    + '<span' + (scrollOk ? '' : ' class="short"') + '>卷轴: ' + fmt(G.res.scroll?.v || 0) + '/80</span>'
+    + ' · <span' + (coinOk ? '' : ' class="short"') + '>古币: ' + fmt(G.res.ancientCoin?.v || 0) + '/30</span>'
+    + ' · 虔诚: ' + fmt(G.res.piety?.v || 0) + ' → 0'
+    + '</div>';
+  for (var did in DEITY_DATA) {
+    if (did === G.deity) continue;
+    var dd = DEITY_DATA[did];
+    var canConvert = scrollOk && coinOk;
+    h += '<button class="btn' + (canConvert ? '' : ' dis') + '" style="margin:2px 4px;" '
+      + 'onclick="if(confirm(\'确定改宗为「' + dd.n + '」？虔诚将归零，教派重置，5 季冷却。\')){convertDeity(\'' + did + '\');closeModal();}">'
+      + dd.n + '（' + dd.theme + '）</button>';
+  }
+  document.getElementById('modal-body').innerHTML = h;
   document.getElementById('modal-overlay').style.display = 'flex';
 }
 

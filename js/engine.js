@@ -151,6 +151,11 @@ function bp(id, i) {
     if (G.upgd[_gb].done && UPGD[_gb]?.e?._bldCostM) _globalBldCostM += UPGD[_gb].e._bldCostM;
   }
   if (_globalBldCostM !== 0) cost = Math.ceil(cost * Math.max(0, 1 + _globalBldCostM));
+  // v0.19 §七 4.5 六神被动：建筑造价减免
+  if (G.deity && DEITY_DATA[G.deity]?.passive?._bldCostM)
+    cost = Math.ceil(cost * Math.max(0, 1 + DEITY_DATA[G.deity].passive._bldCostM));
+  // 六神小仪式：本季额外造价减免
+  if (G._deityBldCostBuff) cost = Math.ceil(cost * Math.max(0, 1 + G._deityBldCostBuff));
   return cost;
 }
 
@@ -1259,6 +1264,65 @@ function calcR() {
     G._graceBonus = graceBonus;
   }
 
+  // ===== v0.19 §七 4.5 六神被动/教派/仪式 buff 应用 =====
+  if (G.deity && typeof DEITY_DATA !== 'undefined') {
+    var dDef = DEITY_DATA[G.deity];
+    if (dDef) {
+      // 被动加成（产出乘数类）
+      var dp = dDef.passive;
+      if (dp._stoneM && r.stone) r.stone *= (1 + dp._stoneM);
+      if (dp._brickM && r.brick) r.brick *= (1 + dp._brickM);
+      if (dp._charmM && r.charm) r.charm *= (1 + dp._charmM);
+      if (dp._loreM && r.lore)   r.lore *= (1 + dp._loreM);
+      if (dp._scrollCraftM) G._deityScrollCraftM = dp._scrollCraftM;
+      if (dp._coinM && r.coin)   r.coin *= (1 + dp._coinM);
+      if (dp._gatherM) {
+        if (r.berry) r.berry *= (1 + dp._gatherM);
+      }
+      // 月狐按主线适配
+      if (dDef.passiveByLine) {
+        var lineP = dDef.passiveByLine[G.mainLine] || {};
+        if (lineP._hapFlat) G._deityHapFlat = (G._deityHapFlat || 0) + lineP._hapFlat;
+      }
+      // 被动幸福固定值（篝火神等）
+      if (dp._hapFlat) G._deityHapFlat = (G._deityHapFlat || 0) + dp._hapFlat;
+    }
+    // 教派被动加成
+    if (G.sect && typeof SECT_DATA !== 'undefined') {
+      var sDef = SECT_DATA[G.sect];
+      if (sDef) {
+        var sp = sDef.passive;
+        if (sp._baseProdM) { for (var bk of ['wood','stone','mineral']) if (r[bk]) r[bk] *= (1 + sp._baseProdM); }
+        if (sp._charmM && r.charm) r.charm *= (1 + sp._charmM);
+        if (sp._scrollM && r.scroll) r.scroll *= (1 + sp._scrollM);
+        if (sp._coinM && r.coin) r.coin *= (1 + sp._coinM);
+        if (sp._foodM && r.berry) r.berry *= (1 + sp._foodM);
+        if (sp._pietyM && r.piety) r.piety *= (1 + sp._pietyM);
+        if (sp._maxFoxFlat) G._deityMaxFoxFlat = (G._deityMaxFoxFlat || 0) + sp._maxFoxFlat;
+      }
+    }
+    // 大仪式持续 buff
+    if (G._deityRitualBuff) {
+      var drb = G._deityRitualBuff;
+      if (drb.effects._allProdM) { for (var pk of Object.keys(r)) if (r[pk] > 0) r[pk] *= (1 + drb.effects._allProdM); }
+      if (drb.effects._jobEffM) G._deityJobEffBuff = drb.effects._jobEffM;
+      if (drb.effects._caravanProb) G._deityCaravanBuff = drb.effects._caravanProb;
+      if (drb.effects._expRewardM) G._deityExpRewardBuff = drb.effects._expRewardM;
+      if (drb.effects._pollProdM) G._deityPollBuff = drb.effects._pollProdM;
+    }
+    // 小仪式本季 buff（存于 G._deitySmallBuff）
+    if (G._deitySmallBuff && G._deitySmallBuff.season === G.season) {
+      var dsb = G._deitySmallBuff.effects;
+      if (dsb._bldCostM) G._deityBldCostBuff = dsb._bldCostM;
+      if (dsb._charmM && r.charm) r.charm *= (1 + dsb._charmM);
+      if (dsb._hapFlat) G._deityHapFlat = (G._deityHapFlat || 0) + dsb._hapFlat;
+      if (dsb._loreM && r.lore) r.lore *= (1 + dsb._loreM);
+      if (dsb._coinM && r.coin) r.coin *= (1 + dsb._coinM);
+      if (dsb._unrestReduce) G.unrest = Math.max(0, (G.unrest || 0) - dsb._unrestReduce * dt);
+      if (dsb._pollReduce) G.pollution = Math.max(0, (G.pollution || 0) - dsb._pollReduce * dt);
+    }
+  }
+
   // ===== v0.18 §六 3.6 声望系统：通达副线产出加成 =====
   if (G.upg.reputeLore?.done && G.res.renown) {
     var rn = G.res.renown.v;
@@ -1938,6 +2002,12 @@ function calcMx() {
   if (uTier.maxFox) G.maxFox = Math.max(0, G.maxFox + uTier.maxFox);
   // v0.19 §七 4.3 飞升代价：狐狸上限减少
   if (G._gateEffects?._maxPopReduce) G.maxFox = Math.max(0, G.maxFox - G._gateEffects._maxPopReduce);
+  // v0.19 §七 4.5 六神被动 + 教派：狐狸上限
+  if (G.deity) {
+    var dDef = DEITY_DATA[G.deity];
+    if (dDef?.passive?._maxFoxFlat) G.maxFox += dDef.passive._maxFoxFlat;
+    if (G._deityMaxFoxFlat) { G.maxFox += G._deityMaxFoxFlat; G._deityMaxFoxFlat = 0; }
+  }
 }
 
 function calcH() {
@@ -2021,6 +2091,8 @@ function calcH() {
     var koalaD = G._alliance.koala;
     h += Math.min(koalaD, 2) * 0.02;
   }
+  // v0.19 §七 4.5 六神幸福加成
+  if (G._deityHapFlat) { h += G._deityHapFlat; G._deityHapFlat = 0; }
   G.happy = Math.max(0.1, Math.min(2, h));
 }
 
@@ -2542,6 +2614,21 @@ function tick() {
     if (G._gateEcstasyRemain > 0) G._gateEcstasyRemain--;
     // v0.19 §七 4.4 结邦喜悦 buff 递减
     if (G._allianceJoyRemain > 0) G._allianceJoyRemain--;
+    // v0.19 §七 4.5 六神系统：改宗冷却 + 仪式冷却 + 大仪式 buff 递减
+    if (G.deityCD > 0) G.deityCD--;
+    if (G._deityRitualCD) {
+      for (var drk in G._deityRitualCD) {
+        if (G._deityRitualCD[drk] > 0) G._deityRitualCD[drk]--;
+      }
+    }
+    if (G._deityRitualBuff && G._deityRitualBuff.remain > 0) {
+      G._deityRitualBuff.remain--;
+      if (G._deityRitualBuff.remain <= 0) {
+        var expName = DEITY_RITUAL_DATA[G._deityRitualBuff.id]?.n || '仪式';
+        log(expName + '效果已消退。', 'event');
+        G._deityRitualBuff = null;
+      }
+    }
     // v0.19 §七 4.2 灵修 C 升级：_autoChart（每季初自动施放一次基础编灵图）
     for (var _ac in G.upgd) {
       if (G.upgd[_ac].done && UPGD[_ac]?.e?._autoChart) {
@@ -2839,6 +2926,9 @@ function resetG() {
   G._allianceFavor = { otter: 0, crane: 0, ruinfolk: 0, lynx: 0, owl: 0, ratter: 0, koala: 0 };
   G._allianceFrozen = {};
   G._allianceJoyRemain = 0;  // 结邦喜悦剩余季数
+  // v0.19 §七 4.5 六神系统
+  G.deity = null; G.sect = null; G.deityCD = 0;
+  G._deityRitualCD = {}; G._deityRitualBuff = null; G._deitySmallBuff = null;
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -3108,6 +3198,14 @@ function migrate() {
   if (G.upg.coreCraft?.done && G.res.spiritCore) G.res.spiritCore.on = 1;
   if (G.upg.formStudy?.done && G.res.formSoul) G.res.formSoul.on = 1;
   if (G.upg.chartDraw?.done && G.res.spiritChart) G.res.spiritChart.on = 1;
+
+  // v0.19 §七 4.5 六神系统
+  if (G.deity === undefined) G.deity = null;
+  if (G.sect === undefined) G.sect = null;
+  if (G.deityCD === undefined) G.deityCD = 0;
+  if (!G._deityRitualCD) G._deityRitualCD = {};
+  if (!G._deityRitualBuff) G._deityRitualBuff = null;
+  if (G._deitySmallBuff === undefined) G._deitySmallBuff = null;
 
   // §五 2.9 成就
   if (!G.achievements) G.achievements = {};

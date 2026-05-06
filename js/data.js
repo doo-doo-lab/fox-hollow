@@ -3301,6 +3301,81 @@ const RITUALS = {
   },
 };
 
+// ===== v0.19 §七 4.5 六神系统（branch-divine.md §十三） =====
+const DEITY_DATA = {
+  mountainGod: {
+    n: '山神', theme: '大地/建筑',
+    passive: { _bldCostM: -0.08, _stoneM: 0.10, _brickM: 0.10 },
+    sects: ['rockSect', 'soilSect'],
+    rituals: ['earthPulse', 'petrifyShield'],
+  },
+  moonFox: {
+    n: '月狐', theme: '灵性/符咒',
+    passive: { _charmM: 0.12 },
+    passiveByLine: { M: { _spellBoost: 0.08 }, I: { _hapFlat: 0.03 } },
+    sects: ['crescentSect', 'fullMoonSect', 'eclipseSect'],
+    rituals: ['moonBath', 'lunarWeave'],
+  },
+  bonfireGod: {
+    n: '篝火神', theme: '温暖/幸福',
+    passive: { _hapFlat: 0.08, _gatherM: 0.10 },
+    sects: ['flameSect', 'warmSect'],
+    rituals: ['bonfireFeast', 'warmthSpread'],
+  },
+  namelessFog: {
+    n: '雾中无名', theme: '神秘/学识',
+    passive: { _loreM: 0.15, _scrollCraftM: 0.10 },
+    sects: ['peekSect', 'voidSect'],
+    rituals: ['fogReveal', 'knowledgeSteal'],
+  },
+  ancestorSpirit: {
+    n: '祖灵集合', theme: '传承/人口',
+    passive: { _maxFoxFlat: 5, _jobEffM: 0.08 },
+    sects: ['watchSect', 'teachSect'],
+    rituals: ['ancestorShield', 'bloodLegacy'],
+  },
+  goldTailMerchant: {
+    n: '金尾商君', theme: '商贸/外交',
+    passive: { _caravanProb: 0.12, _coinM: 0.15 },
+    sects: ['purseSect', 'importSect', 'pawnSect'],
+    rituals: ['fortuneBless', 'tradeBlessing'],
+  },
+};
+
+const DEITY_RITUAL_DATA = {
+  // 小仪式（虔诚消耗，本季即时效果）
+  earthPulse:     { n: '地脉强化', d: '本季建筑造价额外 -15%。', deity: 'mountainGod', cost: [{ r: 'piety', a: 25 }], dur: 0, e: { _bldCostM: -0.15 }, cd: 2 },
+  moonBath:       { n: '月光沐浴', d: '本季符咒产出 +25%。',     deity: 'moonFox',     cost: [{ r: 'piety', a: 20 }], dur: 0, e: { _charmM: 0.25 },    cd: 2 },
+  bonfireFeast:   { n: '篝火盛宴', d: '本季幸福 +0.15。',        deity: 'bonfireGod',  cost: [{ r: 'piety', a: 20 }], dur: 0, e: { _hapFlat: 0.15 },   cd: 2 },
+  fogReveal:      { n: '迷雾启示', d: '本季学识 +25%，下研究费用 -10%。', deity: 'namelessFog',  cost: [{ r: 'piety', a: 30 }], dur: 0, e: { _loreM: 0.25, _researchDiscount: 0.10 }, cd: 3 },
+  ancestorShield: { n: '祖灵庇佑', d: '本季不安 -20，污染 -10。', deity: 'ancestorSpirit', cost: [{ r: 'piety', a: 25 }], dur: 0, e: { _unrestReduce: 20, _pollReduce: 10 }, cd: 2 },
+  fortuneBless:   { n: '财神祝福', d: '本季铜钱产出 +30%。',      deity: 'goldTailMerchant', cost: [{ r: 'piety', a: 20 }], dur: 0, e: { _coinM: 0.30 }, cd: 2 },
+  // 大仪式（圣油+资源消耗，持续多季）
+  petrifyShield:  { n: '石化护盾', d: '3 季内污染产出 -50%。',    deity: 'mountainGod', cost: [{ r: 'holyOil', a: 5 }, { r: 'stone', a: 200 }], dur: 3, e: { _pollProdM: -0.50 }, cd: 5 },
+  lunarWeave:     { n: '命丝编织', d: '下次占卜可从 4 签中选。',   deity: 'moonFox',     cost: [{ r: 'holyOil', a: 4 }, { r: 'charm', a: 30 }],  dur: -1, e: { _divDrawCount: 4 }, cd: 5 },
+  warmthSpread:   { n: '暖意传递', d: '3 季内全资源产出 +8%。',    deity: 'bonfireGod',  cost: [{ r: 'holyOil', a: 4 }, { r: 'berry', a: 300 }], dur: 3, e: { _allProdM: 0.08 }, cd: 5 },
+  knowledgeSteal: { n: '知识窃取', d: '立即获得最贵未完成研究 15% 进度。', deity: 'namelessFog', cost: [{ r: 'holyOil', a: 6 }, { r: 'scroll', a: 15 }], dur: 0, e: { _researchProgress: 0.15 }, cd: 6 },
+  bloodLegacy:    { n: '血脉传承', d: '3 季内职业效率 +20%。',     deity: 'ancestorSpirit', cost: [{ r: 'holyOil', a: 5 }, { r: 'ancientCoin', a: 20 }], dur: 3, e: { _jobEffM: 0.20 }, cd: 5 },
+  tradeBlessing:  { n: '通商护佑', d: '3 季内商队概率 +25%，远行奖励 +15%。', deity: 'goldTailMerchant', cost: [{ r: 'holyOil', a: 4 }, { r: 'coin', a: 100 }], dur: 3, e: { _caravanProb: 0.25, _expRewardM: 0.15 }, cd: 5 },
+};
+
+const SECT_DATA = {
+  rockSect:      { n: '磐石派', deity: 'mountainGod', passive: { _bldHpM: 0.10 } },
+  soilSect:      { n: '沃土派', deity: 'mountainGod', passive: { _baseProdM: 0.05 } },
+  crescentSect:  { n: '弦月派', deity: 'moonFox',     passive: { _charmM: 0.05 } },
+  fullMoonSect:  { n: '满月派', deity: 'moonFox',     passive: { _spellBoost: 0.05 } },
+  eclipseSect:   { n: '蚀月派', deity: 'moonFox',     passive: { _pietyM: 0.08 } },
+  flameSect:     { n: '焰心派', deity: 'bonfireGod',  passive: { _hapDecayReduce: 0.15 } },
+  warmSect:      { n: '暖风派', deity: 'bonfireGod',  passive: { _foodM: 0.08 } },
+  peekSect:      { n: '窥秘派', deity: 'namelessFog',  passive: { _researchDiscount: 0.05 } },
+  voidSect:      { n: '忘我派', deity: 'namelessFog',  passive: { _scrollM: 0.10 } },
+  watchSect:     { n: '守望派', deity: 'ancestorSpirit', passive: { _maxFoxFlat: 2 } },
+  teachSect:     { n: '师承派', deity: 'ancestorSpirit', passive: { _expGainM: 0.10 } },
+  purseSect:     { n: '锦囊派', deity: 'goldTailMerchant', passive: { _coinM: 0.08 } },
+  importSect:    { n: '舶来派', deity: 'goldTailMerchant', passive: { _caravanReward: 0.10 } },
+  pawnSect:      { n: '质库派', deity: 'goldTailMerchant', passive: { _tradeDiscount: 0.08 } },
+};
+
 // ===== 占卜系统：年签（Phase 3, §六 3.4） =====
 const DIVINATION_POOL = [
   {

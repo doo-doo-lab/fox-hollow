@@ -953,6 +953,115 @@ function castRitual(id) {
   rAll();
 }
 
+// ===== v0.19 §七 4.5 六神系统 =====
+function chooseDeity(deityId) {
+  if (!DEITY_DATA[deityId]) return;
+  // 首次选神（非改宗）
+  if (G.deity !== null) { log('已有主神，如需改宗请使用改宗功能。', 'warn'); return; }
+  // 门控：需教团或秘仪 Phase B 研究
+  if (!(G.upg.edictLore?.done || G.upg.mysteryInit?.done)) {
+    log('尚未达到选神条件。', 'warn'); return;
+  }
+  G.deity = deityId;
+  G.sect = null;
+  G.deityCD = 0;
+  G._deityRitualCD = {};
+  log('你选定了「' + DEITY_DATA[deityId].n + '」为主神。', 'important');
+  rAll();
+}
+
+function chooseSect(sectId) {
+  if (!SECT_DATA[sectId]) return;
+  if (!G.deity || SECT_DATA[sectId].deity !== G.deity) { log('教派不属于当前主神。', 'warn'); return; }
+  // 教派切换代价：虔诚 ×30（首次免费）
+  if (G.sect !== null) {
+    if (G.res.piety.v < 30) { log('虔诚不足，无法改换教派。', 'warn'); return; }
+    G.res.piety.v -= 30;
+  }
+  var oldSect = G.sect;
+  G.sect = sectId;
+  log('你加入了「' + SECT_DATA[sectId].n + '」教派。' + (oldSect ? '（虔诚 -30）' : ''), 'important');
+  rAll();
+}
+
+function convertDeity(newDeityId) {
+  if (!DEITY_DATA[newDeityId]) return;
+  if (G.deity === newDeityId) { log('已信奉此神。', 'warn'); return; }
+  if (G.deityCD > 0) { log('改宗冷却中，剩余 ' + G.deityCD + ' 季。', 'warn'); return; }
+  // 费用：卷轴 ×80 + 古币 ×30
+  if ((G.res.scroll?.v || 0) < 80) { log('卷轴不足。', 'warn'); return; }
+  if ((G.res.ancientCoin?.v || 0) < 30) { log('古币不足。', 'warn'); return; }
+  G.res.scroll.v -= 80;
+  G.res.ancientCoin.v -= 30;
+  G.res.piety.v = 0;
+  var oldName = DEITY_DATA[G.deity]?.n || '无';
+  G.deity = newDeityId;
+  G.sect = null;
+  G.deityCD = 5;
+  G._deityRitualCD = {};
+  G._deityRitualBuff = null;
+  G._deitySmallBuff = null;
+  log('改宗完成：「' + oldName + '」→「' + DEITY_DATA[newDeityId].n + '」。虔诚归零，5 季冷却。', 'important');
+  rAll();
+}
+
+function castDeityRitual(ritualId) {
+  var dr = DEITY_RITUAL_DATA[ritualId];
+  if (!dr) return;
+  if (G.deity !== dr.deity) { log('此仪式不属于当前主神。', 'warn'); return; }
+  if (!G._deityRitualCD) G._deityRitualCD = {};
+  if (G._deityRitualCD[ritualId] > 0) { log('仪式冷却中。', 'warn'); return; }
+  // 大仪式：检查是否已有活跃 buff
+  if (dr.dur !== 0 && G._deityRitualBuff) { log('已有大仪式效果生效中。', 'warn'); return; }
+  // 费用检查
+  for (var i = 0; i < dr.cost.length; i++) {
+    if ((G.res[dr.cost[i].r]?.v || 0) < dr.cost[i].a) { log('资源不足。', 'warn'); return; }
+  }
+  // 扣除费用
+  for (var i = 0; i < dr.cost.length; i++) {
+    G.res[dr.cost[i].r].v -= dr.cost[i].a;
+  }
+  // 设置冷却
+  G._deityRitualCD[ritualId] = dr.cd;
+  // 应用效果
+  if (dr.dur === 0) {
+    // 小仪式：本季即时效果
+    G._deitySmallBuff = { season: G.season, effects: dr.e };
+    // 特殊处理：祖灵庇佑（即时减少不安/污染）
+    if (dr.e._unrestReduce) G.unrest = Math.max(0, (G.unrest || 0) - dr.e._unrestReduce);
+    if (dr.e._pollReduce) G.pollution = Math.max(0, (G.pollution || 0) - dr.e._pollReduce);
+    // 特殊处理：知识窃取（立即获得研究进度）
+    if (dr.e._researchProgress) {
+      var maxCostRes = null, maxCost = 0;
+      for (var uid in UD) {
+        if (G.upg[uid]?.done) continue;
+        if (!chk(UD[uid].uq)) continue;
+        var totalCost = 0;
+        for (var rk in UD[uid].cost) totalCost += UD[uid].cost[rk];
+        if (totalCost > maxCost) { maxCost = totalCost; maxCostRes = uid; }
+      }
+      if (maxCostRes) {
+        for (var rk in UD[maxCostRes].cost) {
+          var need = UD[maxCostRes].cost[rk];
+          var add = need * dr.e._researchProgress;
+          if (G.res[rk]) G.res[rk].v = Math.min(G.res[rk].mx || Infinity, G.res[rk].v + add);
+        }
+        log('窃取了「' + UD[maxCostRes].n + '」15% 的知识。', 'event');
+      }
+    }
+    log(dr.n + '完成。', 'important');
+  } else if (dr.dur === -1) {
+    // 特殊持续（命丝编织：下次占卜生效）
+    G._deityRitualBuff = { id: ritualId, remain: 999, effects: dr.e };
+    log(dr.n + '已编织，下次占卜可选 4 签。', 'important');
+  } else {
+    // 大仪式：持续多季
+    G._deityRitualBuff = { id: ritualId, remain: dr.dur, effects: dr.e };
+    log(dr.n + '开始，持续 ' + dr.dur + ' 季。', 'important');
+  }
+  rAll();
+}
+
 // ===== v0.18 §六 3.4 占卜系统 =====
 function chooseDivination(idx) {
   if (G._divination !== null) return; // 已选过

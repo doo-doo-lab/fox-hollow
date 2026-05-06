@@ -338,6 +338,9 @@ function caravanArrivalProb() {
   for (var _cf in G.upgd) {
     if (G.upgd[_cf].done && UPGD[_cf]?.e?._caravanFreq) bonus += UPGD[_cf].e._caravanFreq;
   }
+  // v0.19 §七 4.5 六神被动+仪式：商队概率加成
+  if (G.deity && DEITY_DATA[G.deity]?.passive?._caravanProb) bonus += DEITY_DATA[G.deity].passive._caravanProb;
+  if (G._deityCaravanBuff) bonus += G._deityCaravanBuff;
   return Math.min(0.65, 0.5 + bonus);
 }
 
