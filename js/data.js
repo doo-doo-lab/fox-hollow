@@ -186,20 +186,20 @@ const BD = {
   berryPatch: {
     n: '莓果园', t: 'b', d: '每座持续产出野莓。',
     p: [{ r: 'berry', b: 8, k: 1.12 }],
-    e: { berryP: .5 },
+    e: { berryP: .3 },
     tip: ['把野的变成家的，把弯腰的变成等着的。']
   },
   berryGrove: {
     n: '野莓林', t: 'b', d: '丛林化的莓果园，与树林共生，产出大幅提升。',
     p: [{ r: 'plank', b: 30, k: 1.13 }, { r: 'brick', b: 15, k: 1.13 }, { r: 'wood', b: 80, k: 1.13 }],
-    e: { berryP: 2.0, berryMx: 500 },
+    e: { berryP: 1.5, berryMx: 500 },
     uq: { u: { calendar: 1 }, b: { berryPatch: 5 } },
     tip: ['一片懂事的林子，自己生莓子，也自己看着蜂。']
   },
   berryValley: {
     n: '野莓谷', t: 'b', d: '把整道山谷开成莓园——只有几座，但能撑起后期口粮。',
     p: [{ r: 'plank', b: 80, k: 1.15 }, { r: 'brick', b: 40, k: 1.15 }, { r: 'ancCoin', b: 3, k: 1.15 }],
-    e: { berryP: 6.0, berryMx: 2000 },
+    e: { berryP: 4.0, berryMx: 2000 },
     uq: { u: { branchLore: 1 }, b: { berryGrove: 8, storyTree: 2 }, custom: 5 },
     tip: ['整片山的甜度都被收编了。']
   },
