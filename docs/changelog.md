@@ -1,5 +1,105 @@
 # 小狐大世界 - 变更日志
 
+## 2026-05-07
+
+### UI - 全面简化第一轮（猫国式信息密度）
+
+> 参考猫国建设者 UI 密度，做信息量减负的结构性改动。视觉留给 design pass。
+
+**页签**
+- 加 `(N)` 计数：每个页签后显示当前可立即操作项数（资源足且前置满足）。0 时不显示。匹配建筑卡 `莓果园 (3)` 灰字括号样式
+- 计数覆盖：营火/村落/工坊/研究/山外/典制/宗教 7 个页签
+
+**建筑卡片**
+- 整行 = 一个大按钮：点击即建造（hp-wrap.bld-card 包整行）
+- 同组建筑 2 列网格（猫国式）：`.bld-grid { grid-template-columns: repeat(2, minmax(0,1fr)) }`
+- 单行布局：`名 (计数) ┃ 造价 [按钮]`
+- 造价短缺显示 `当前/需要`（如 `野莓 5/8`，红色）
+- 已建 ≥1 时旁边出小 `×` 出售按钮（.sell-btn-mini）
+- 不可建状态：虚线边框 + 浅灰底，文字保留 #666 可读（不再用 opacity 让人看不清）
+- 新增成就页签 `a`（始终可见，列出全部 30 个成就，未解锁也显示完整名称）
+
+**过滤栏（建筑列表顶部）**
+- 加 chips：`[全部 N] [可建造 N] [已建 N]`
+- 按当前 tab 内可见建筑数实时计数
+- 0 数量的 chip 灰掉不可点
+- 整个 tab 无可见建筑时过滤栏不显示（村落初期等）
+
+**资源面板**
+- 分类支持折叠：`基础`/`加工`/`知识`/`贸易`/`外交`/`研究`
+- 默认全部展开，点击折叠后 localStorage 记住
+- 类别 header 显示 `(N)` 资源数
+
+**全局按钮统一**
+- 灵术原用 `.bld-btn`（CSS 已删除→默认浏览器按钮，巨大丑陋）→ 改用 `.cr-row + .cr-btn`（与工坊配方一致）
+- CSS 加按钮选择器别名：`.cr-btn` `.bld-btn` `.exp-fox-btn` 共享同款极简样式
+- 现在全游戏建造/制作/施法/派遣/购买/激活/自动:开/1只/全部 都是同款 1px 边框
+
+**远行/商队**
+- 远行 UI：取消 3 只上限，加 `[全部 N]` 按钮（≥4 只可见时）；多斥候时显示 `×N% 时间`（每多 1 只 -10% 时间，下限 50%）
+- 商队购买：单次 → 每槽 10 次（取消 bought 一次性锁，改为计数器，UI 显示 `(N/10)`）
+
+### 修复 - audit 全面排查（roadmap-v2 §十五 E61 续修）
+
+**valleyVoice 半删修复**
+- 删除 `data.js` valleyVoice 研究定义（roadmap E18 已决议移除）
+- `councilLore.uq.u` 从 `valleyVoice` → `engraving`
+- `engine.js migrate` 加 `G.upg.valleyVoice` 清理
+
+**8 个 dead effect 升级激活**
+- `_bldConsReduce`（oilRecovery/combOpt）：engine 在 BD 产出循环加读取 + 应用减免
+- `_holyBldDiscount`（holyBlueprint）：bp() 加 `br='I'` 建筑造价 -8% 读取
+- `_railTradeBonus`（railSpeed）：caravanArrivalProb 加铁路提速 bonus
+- `_jobCapBonus`（diplomatDeepen）→ 改为 `jobM.diplomat: 0.30`（用现成机制）
+- `_fanaticCap`（massConversion）→ 改为 `jobM.fanatic: 0.20`
+- `_tradeGoodBonus`（mechWeave）→ 改为 `craftM.weave/spiceToSilk` 直接加成
+- `_spiritWeaveExtend`（spiritWeaveExt）→ 改用现有 `_spellDuration.spiritWeave` key
+- `_oilCraftBonus`（BD.oilPress）：collectCraftM 加圣油坊每座 +5% 到 holyOilCraft
+
+**成就描述同步**
+- `firstExpedition`：「派出第一次远行」→「完成第一次远行」（匹配 totalExpDone>=1）
+- `lore100`：「累计获得 100 学识」→「当前 100 学识」（匹配 .v >= 100）
+
+### 重命名 - 染丝→彩络 / 果酒→醴浆（全项目）
+
+> roadmap-v2 archived/v0.14+文本重写方案v2.md 中的占位名替换计划，本轮全项目落实。
+
+**代码层（之前已做）**
+- `RD.dye.n` / `RD.wine.n` 显示名替换
+- `CD.dye.n` / `CD.wine.n` 配方名替换
+- `SEASON_RITES.dye.name` / `wine.name`
+- engine.js / ui.js 全部日志 / hover 文案
+
+**文档层（本轮）**
+- `docs/RULES.md`、`docs/changelog.md`、`docs/design.md`
+- `docs/plan/branch-diplomat.md`、`branch-industry.md`、`branch-mystic.md`
+- 全文 0 残留（除 archived/）
+
+### 平衡 - 野莓建筑梯度
+
+**新增**
+- `berryGrove`（野莓林）：mid 阶段（calendar 研究 + 莓果园×5），`berryP: 2.0`
+- `berryValley`（野莓谷）：late 阶段（branchLore 研究 + 野莓林×8 + 树荫堂×2 + 5 已激活习俗），`berryP: 6.0`
+- `SPEC_BD.berryPatch.C` 归隐式：产量 +200% / 造价 +200%（孤注一掷）
+
+**调整**（roadmap E60 续修）
+- 野莓园 `berryP .3 → .5`
+- 伐木场 `woodP .06 → .12`、伐木工 `.12 → .24`（同步）
+- 采石坑 `stoneP .04 → .08`、矿工 `.08 → .16`（同步）
+- 集市摊 `coinP .004 → .008`、商贩 `.01 → .02`（同步）
+
+### 修复 - 切换标签后远行卡住（roadmap E60 续修）
+
+- `tick()` gap 阈值：5s → 1.5s
+- 浏览器隐藏标签时 setInterval 节流到 1Hz，原阈值不触发追赶；现在每次 gap > 1.5s 即调 simulateOffline 补算
+
+### 文档 - roadmap §二 清理
+
+- 删除过时"已有代码资产盘点"4 张分类表（描述 v0.16 baseline，与 v0.18 实装相差 3-10 倍）
+- 删除过时"关键缺口"表（项目几乎全部已解决）
+- 加 v0.18 实装快照 + 指向 changelog/§四-§十 的指针
+- 保留"分支规划总量"（branch doc 最终目标，仍有效）
+
 ## 2026-05-06
 
 ### 修复 - 资源 ID 拼写错误（roadmap-v2 §十五 E59）

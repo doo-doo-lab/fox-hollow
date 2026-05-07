@@ -7,19 +7,19 @@
 
 | 文件 | 行数 | 用途 |
 |------|------|------|
-| [roadmap-v2.md](roadmap-v2.md) | ~1955 | **主路线图**。7 个 Phase（v0.16 → v0.22）的实施计划、阶段映射、勘误记录、执行纪律 |
-| [branch-industry.md](branch-industry.md) | ~899 | 工业主线详细设计（5 阶段，资源/建筑/研究/职业/配方/升级 + 终局 hook） |
-| [branch-mystic.md](branch-mystic.md) | ~1231 | 灵修主线详细设计（5 阶段 + 灵术/灵契/寂石冥想 + 终局 hook） |
-| [branch-divine.md](branch-divine.md) | ~1145 | 神启副线总览（4 阶段 A-D + 神恩系统 + 仪式/占卜/6 神 占位设计） |
-| [branch-divine-doctrine.md](branch-divine-doctrine.md) | ~959 | 神启-教团路（工业+神启的子文档：教令系统、圣堂圣战、神佑终局） |
-| [branch-divine-mystery.md](branch-divine-mystery.md) | ~895 | 神启-秘仪路（灵修+神启的子文档：飞升阶梯、化神、飞升终局） |
-| [branch-diplomat.md](branch-diplomat.md) | ~821 | 通达副线（4 阶段 A-D + 声望/邦交系统，主线无关，仅追加结局叙事） |
+| [roadmap-v2.md](roadmap-v2.md) | ~2218 | **主路线图**。7 个 Phase（v0.16 → v0.22）的实施计划、阶段映射、勘误记录、执行纪律 |
+| [branch-industry.md](branch-industry.md) | ~903 | 工业主线详细设计（5 阶段，资源/建筑/研究/职业/配方/升级 + 终局 hook） |
+| [branch-mystic.md](branch-mystic.md) | ~1233 | 灵修主线详细设计（5 阶段 + 灵术/灵契/寂石冥想 + 终局 hook） |
+| [branch-divine.md](branch-divine.md) | ~1488 | 神启副线总览（4 阶段 A-D + 神恩系统 + 仪式/占卜/6 神 设计） |
+| [branch-divine-doctrine.md](branch-divine-doctrine.md) | ~963 | 神启-教团路（工业+神启的子文档：教令系统、圣堂圣战、神佑终局） |
+| [branch-divine-mystery.md](branch-divine-mystery.md) | ~899 | 神启-秘仪路（灵修+神启的子文档：飞升阶梯、化神、飞升终局） |
+| [branch-diplomat.md](branch-diplomat.md) | ~825 | 通达副线（4 阶段 A-D + 声望/邦交系统，主线无关，仅追加结局叙事） |
 
 ## AI 读取建议
 
 文档体量较大但不拆分，原因：
 1. AI 读取靠 `Grep ^##` 摸大纲 + `Read offset/limit` 精读章节即可
-2. 拆分会引入"主+分"多文件同步负担，反而增加交叉一致性风险（roadmap-v2 §十五 54 条勘误就是单文件审计的成果）
+2. 拆分会引入"主+分"多文件同步负担，反而增加交叉一致性风险（roadmap-v2 §十五 61 条勘误就是单文件审计的成果）
 3. 单 Phase 开发只需读对应阶段章节（200-400 行），不需要全文
 
 **推荐读取流程**：
