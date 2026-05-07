@@ -898,12 +898,10 @@ function rRes() {
     return;
   }
   var panel = document.getElementById('res-list');
-  // 资源分类默认展开/折叠（基础默认展开，其他默认折叠）
-  var DEFAULT_EXPANDED_CATS = { '基础': true };
+  // 资源分类默认全展开；玩家点过折叠的会被 localStorage 记住
   function isCatCollapsed(cat) {
     var k = 'resCat_' + cat;
-    if (k in collapsed) return collapsed[k];
-    return !DEFAULT_EXPANDED_CATS[cat];
+    return !!collapsed[k];
   }
   // 先按分类分组
   var catOrder = [], catItems = {};
