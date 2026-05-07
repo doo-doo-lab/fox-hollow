@@ -338,6 +338,8 @@ function caravanArrivalProb() {
   for (var _cb in G.upgd) {
     if (G.upgd[_cb].done && UPGD[_cb]?.e?._caravanBonusFlat) bonus += UPGD[_cb].e._caravanBonusFlat;
   }
+  // 铁路提速：_railTradeBonus × 铁路数量（calcR 中已预收集到 G._railTradeBonusTotal）
+  if (G._railTradeBonusTotal) bonus += G._railTradeBonusTotal;
   // v0.19 §七 4.4 通达升级：商队频至
   for (var _cf in G.upgd) {
     if (G.upgd[_cf].done && UPGD[_cf]?.e?._caravanFreq) bonus += UPGD[_cf].e._caravanFreq;

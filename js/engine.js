@@ -151,6 +151,8 @@ function bp(id, i) {
     if (G.upgd[_gb].done && UPGD[_gb]?.e?._bldCostM) _globalBldCostM += UPGD[_gb].e._bldCostM;
   }
   if (_globalBldCostM !== 0) cost = Math.ceil(cost * Math.max(0, 1 + _globalBldCostM));
+  // _holyBldDiscount（圣典蓝图：教团升级仅对工业建筑造价 -8%）
+  if (BD[id].br === 'I' && G._holyBldDiscount) cost = Math.ceil(cost * Math.max(0, 1 - G._holyBldDiscount));
   // v0.19 §七 4.5 六神被动：建筑造价减免
   if (G.deity && DEITY_DATA[G.deity]?.passive?._bldCostM)
     cost = Math.ceil(cost * Math.max(0, 1 + DEITY_DATA[G.deity].passive._bldCostM));
@@ -375,6 +377,17 @@ function collectCraftM() {
           result[cid].inpM[rk] = (result[cid].inpM[rk] || 0) + cm.inpM[rk];
       }
     }
+  }
+  // 圣油坊建筑被动 +_oilCraftBonus / 座 → 加到 holyOilCraft 配方 outMul
+  // 以及 oilPressRefine/pressEfficiency 升级的 _oilCraftBonusUp 提升每座加成
+  var oilPressCount = G.bld.oilPress?.c || 0;
+  if (oilPressCount > 0 && BD.oilPress?.e?._oilCraftBonus) {
+    var perSeat = BD.oilPress.e._oilCraftBonus;
+    for (var _u in G.upgd) {
+      if (G.upgd[_u].done && UPGD[_u]?.e?._oilCraftBonusUp) perSeat += UPGD[_u].e._oilCraftBonusUp;
+    }
+    if (!result.holyOilCraft) result.holyOilCraft = {};
+    result.holyOilCraft.outMul = (result.holyOilCraft.outMul || 0) + perSeat * oilPressCount;
   }
   return result;
 }
@@ -802,6 +815,39 @@ function calcR() {
   var _bldM = collectBldM();
   var _craftM = collectCraftM();
 
+  // 收集 _bldConsReduce { bldId: { resKey: reduceVal } }（如 oilRecovery 煅烧炉火油-25%）
+  var _bldConsReduce = {};
+  for (var _bcr in G.upgd) {
+    if (!G.upgd[_bcr].done) continue;
+    var bcrE = UPGD[_bcr]?.e?._bldConsReduce;
+    if (!bcrE) continue;
+    for (var bid in bcrE) {
+      _bldConsReduce[bid] = _bldConsReduce[bid] || {};
+      for (var rk in bcrE[bid]) {
+        _bldConsReduce[bid][rk] = (_bldConsReduce[bid][rk] || 0) + bcrE[bid][rk];
+      }
+    }
+  }
+
+  // 收集 _holyBldDiscount（圣典蓝图：工业建筑造价 -8%；只在 build cost 用，不在 calcR）
+  // 这里只记录到 G 供 bp() 使用
+  var _holyBldDiscount = 0;
+  for (var _hbd in G.upgd) {
+    if (G.upgd[_hbd].done && UPGD[_hbd]?.e?._holyBldDiscount) _holyBldDiscount += UPGD[_hbd].e._holyBldDiscount;
+  }
+  G._holyBldDiscount = _holyBldDiscount;
+
+  // 收集 _railTradeBonus（铁路提速：铁路商队加成 +N%；caravanArrivalProb 已读 _caravanBonusFlat 走通用通道，但 _railTradeBonus 是独立 flag）
+  // 复用 _caravanBonusFlat 通道：将 _railTradeBonus × railroad 数量 加到 caravanProb
+  // 这里也只暴露到 G 供 caravanArrivalProb 用
+  var _railTradeBonusTotal = 0;
+  for (var _rtb in G.upgd) {
+    if (G.upgd[_rtb].done && UPGD[_rtb]?.e?._railTradeBonus) {
+      _railTradeBonusTotal += UPGD[_rtb].e._railTradeBonus * (G.bld.railroad?.c || 0);
+    }
+  }
+  G._railTradeBonusTotal = _railTradeBonusTotal;
+
   // v0.19 §七 4.2 灵修 C 升级：_mysticBldAll（所有灵修建筑产出+N%）
   var _mysticBldAll = 0;
   for (var _mba in G.upgd) {
@@ -856,6 +902,11 @@ function calcR() {
       }
       // v0.14 习俗：老火传承 - 锻造炉矿铁产出 +10%（乘法叠加）
       if (id === 'smithy' && resKey === 'iron' && G.customs && G.customs.oldFire) val *= 1.1;
+      // _bldConsReduce：建筑消耗减免（仅对负 val 生效，如内燃机火油消耗 -30%）
+      // reduce 值通常为负，eg -0.25 表示减少 25%；val 是负的（消耗），val *= (1 + reduce) 缩小绝对值
+      if (val < 0 && _bldConsReduce[id] && _bldConsReduce[id][resKey] !== undefined) {
+        val *= Math.max(0, 1 + _bldConsReduce[id][resKey]);
+      }
       // v0.15.1 月歌台维持半效：断供时符咒产出 ×0.25
       if (id === 'moonStage' && resKey === 'charm' && !G.moonStageActive) val *= 0.25;
       // 进阶升级：建筑产出乘数 prodM（加法叠加，如矿道支撑 +40%）
@@ -3086,6 +3137,8 @@ function migrate() {
   if (G.tab === 'g') G.tab = 'k';
   // v0.16 §四 1.8 清理旧谷声字段（若存在）
   if (G.valleyVoice !== undefined) delete G.valleyVoice;
+  // E18 续修：valleyVoice 研究已删除，旧存档清理
+  if (G.upg && G.upg.valleyVoice) delete G.upg.valleyVoice;
   // v0.16 §四 1.10 Tier 1 路线（从 G.polity 推断旧存档；新存档为 null）
   if (G.tier1 === undefined) G.tier1 = null;
   if (!G.tier1 && G.polity) {

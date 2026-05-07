@@ -52,7 +52,7 @@
 #### 步骤 6 实现记录
 
 - **data.js（JD）**：新增 `deepMiner`（深层矿工，`coalP:.06`=0.03/s，解锁 `mine×1`）和 `smelter`（炉匠，`desc` 描述自动炼钢，解锁 `blastFurnace×2`）。炉匠使用空 `e:{}` 配合引擎特殊处理，与斥候模式一致。
-- **engine.js（calcR）**：职业产出循环后新增炉匠自动炼钢段——连续速率化 `TPD/60` per day per fox（等价60tick一次）；消耗铁×5+煤×8→钢×1；受训练、满意度、政体乘数、染丝节令(+5%)、祖灵(+50%)加成；库存检查（铁≥5 且 煤≥8 且 钢未满）。
+- **engine.js（calcR）**：职业产出循环后新增炉匠自动炼钢段——连续速率化 `TPD/60` per day per fox（等价60tick一次）；消耗铁×5+煤×8→钢×1；受训练、满意度、政体乘数、彩络节令(+5%)、祖灵(+50%)加成；库存检查（铁≥5 且 煤≥8 且 钢未满）。
 - **ui.js（resBreakdown）**：炉匠对铁/煤/钢三种资源的速率分解显示；授业按钮专用文案（"炼钢速率+10%"）。
 - **兼容性**：`resetG()` / `migrate()` / `updateUnlocks()` 均通过 JD 泛型遍历自动处理；离线补算调用同一 `calcR()` 无需额外逻辑。
 | 7 | 配方 | 炼钢、铸齿轮、压钢板、烧混凝 | ✅ 已完成 |
@@ -70,7 +70,7 @@
   - 消耗减免 #15-16：`coalBriq`(高炉煤耗-20%)、`insulatedWall`(高炉煤耗-15%)。
   - 跨系统 #17-20：`steelBow`(猎手产出+40%)、`steelScales`(商贩产出+30%)、`mineTownPlan`(矿坑/鼓风炉造价-10%，前置 concreteTech)、`coalLamp`(学者产出+20%，前置 deepMining)。
 - **engine.js（calcMx）**：新增两种 UPGD 效果支持——`mxM`(资源上限百分比加成，乘于总上限)和 `bldMxM`(建筑存储贡献乘数，乘于单建筑的 `*Mx` 贡献)。
-- **engine.js（calcR）**：新增 `jobM` 效果收集与应用——在三段职业循环（基础/染丝节令/祖灵）中统一乘以 `1 + _jobM[id]`，覆盖天赋额外产出。
+- **engine.js（calcR）**：新增 `jobM` 效果收集与应用——在三段职业循环（基础/彩络节令/祖灵）中统一乘以 `1 + _jobM[id]`，覆盖天赋额外产出。
 - **engine.js（bp）**：新增 `bldCostM` 效果——建筑特定造价百分比减免，在政体/政策造价乘数之后应用。
 - **ui.js（upgdEffects）**：支持 `mxM`/`bldMxM`/`jobM`/`bldCostM` 四种新效果类型的中文描述渲染。
 - **ui.js（resBreakdown）**：职业产出分解新增进阶升级 jobM 乘数，标注"（进阶+X%）"。
@@ -125,7 +125,7 @@
 - **engine-actions.js（craft）**：手动制作 `outMul` 同步新增工程师加成，逻辑与 calcR 段一致。
 - **ui.js（jobEffects）**：修改 `desc` 判断逻辑——当职业同时有 `desc` 和 `*P` 产出时（如工程师），两者均显示，而非 `desc` 独占。
 - **ui.js（trainSec）**：新增机师/工程师授业专用文案（"能量加成效率 +10%"/"配方加成与蓝本产出 +10%"）。
-- **兼容性**：`initState()` / `resetG()` / `migrate()` / `updateUnlocks()` 均通过 JD 泛型遍历自动处理新职业，无需额外逻辑。钻井工的 `oilP` 进入通用职业产出循环；工程师的 `draftP` 同理，且自动享受满意度/培训/染丝节令/祖灵/政体加成。机师无 `*P` 字段，不参与资源循环，仅通过 `calcEnergy` 影响能量平衡。离线补算调用同一 `calcEnergy()` + `calcR()` 路径，无需额外处理。
+- **兼容性**：`initState()` / `resetG()` / `migrate()` / `updateUnlocks()` 均通过 JD 泛型遍历自动处理新职业，无需额外逻辑。钻井工的 `oilP` 进入通用职业产出循环；工程师的 `draftP` 同理，且自动享受满意度/培训/彩络节令/祖灵/政体加成。机师无 `*P` 字段，不参与资源循环，仅通过 `calcEnergy` 影响能量平衡。离线补算调用同一 `calcEnergy()` + `calcR()` 路径，无需额外处理。
 
 #### 步骤 12 Bug 修复记录
 
@@ -133,7 +133,7 @@
   - **修复**：`engine.js` 炉匠段 `eBonus` 计算改为 `0.03 * c * (1 + train*0.1 + policyTrainFlat)`，与其他段一致。
 - **Bug#2（UI 显示偏差）：炉匠 resBreakdown 缺少政体/政策职业乘数**。`ui.js` 炉匠显示段 `smRate` 公式为 `TPD/60 * smC * smTrain * happy * smSeason`，而引擎 `calcR` 中为 `TPD/60 * smC * smTrain * happy * polityJobMul`（再乘季节）。有政体时 UI 数字偏离实际。
   - **修复**：`ui.js` 炉匠段新增 `smPolityJobMul` 计算（镜像 calcR 政体/政策 jobM 逻辑），乘入 `smRate`。
-- **设计确认**：机师不受染丝节令/祖灵影响（机械维护与季节无关）；工程师蓝本产出受全部乘数、配方加成只受训练+能量（有意区分，与猫国 Engineer 一致）。
+- **设计确认**：机师不受彩络节令/祖灵影响（机械维护与季节无关）；工程师蓝本产出受全部乘数、配方加成只受训练+能量（有意区分，与猫国 Engineer 一致）。
 
 | 13 | 配方 | 提炼火油、铸油桶、绘蓝本 | ✅ 已完成 |
 

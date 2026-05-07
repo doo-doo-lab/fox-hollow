@@ -133,7 +133,7 @@
 - **data.js**：JD 新增 2 个灵修 A 阶段职业，全部标记 `br: 'M'`。
   - `spiritSenser`（感应者）：标准产出职业，`spiritP: .06`。前置：灵泉×1。对标工业 `deepMiner`（深层矿工，coalP .03）。（原 ID `spiritChanneler`，§五 2.3 已 rename）
   - `silkWeaver`（织丝人）：自动转化职业，`e: {}`，每 60tick 消耗灵能×5 + 符咒×3 → 命丝×1。前置：灵塔×2。对标工业 `smelter`（炉匠，铁×5+煤×8→钢×1）。
-- **engine.js**：`calcR()` 末尾（炉匠自动炼钢块之后）新增织丝人自动织丝块。逻辑完全对标炉匠：连续速率化（TPD/60）× 人数 × 训练加成 × 满意度 × 政体乘数，含染丝节令 +5% 与祖灵 +50% 季节加成，预留进阶升级配方修正钩子（`_craftM.fateSilk`）。库存检查：灵能≥5 且符咒≥3 且命丝未满时生产。
+- **engine.js**：`calcR()` 末尾（炉匠自动炼钢块之后）新增织丝人自动织丝块。逻辑完全对标炉匠：连续速率化（TPD/60）× 人数 × 训练加成 × 满意度 × 政体乘数，含彩络节令 +5% 与祖灵 +50% 季节加成，预留进阶升级配方修正钩子（`_craftM.fateSilk`）。库存检查：灵能≥5 且符咒≥3 且命丝未满时生产。
 - **ui.js**：授业描述新增 `silkWeaver` 专用文案（"织丝人织丝速率 +10%"）；感应者作为标准产出职业使用默认描述。
 - **设计说明**：
   - 感应者的 spiritP: .06 与深掘者 coalP: .06 完全对齐，训练/满意度/政体/进阶升级乘数通过 calcR() 标准产出管道自动生效。
@@ -166,7 +166,7 @@
 - **设计说明**：
   - 冷却机制为真实计时器（tick 计数），同一季内冷却结束后理论上可再次施放。但引潮/织命同时有每季唯一限制（`*Season === G.season`），实际每季仅施放一次。灵视无每季限制，冷却结束后可对不同远行队伍再次使用。
   - 灵视与灵路使用独立标记（`usedSpiritSight` vs `usedSpiritPath`），同一远行可叠加两种加速：灵路 -30% 后灵视 -50%（剩余时间的 50%），合计约 -65%。
-  - 织命 +80% 与双工 +50% 加法叠加在 craftMul 上（总计 +130%），需同时消耗命丝×2 和果酒×2，高消耗对应高收益。
+  - 织命 +80% 与双工 +50% 加法叠加在 craftMul 上（总计 +130%），需同时消耗命丝×2 和醴浆×2，高消耗对应高收益。
   - 灵气外泄专精的 `spellCostMul: 0.8` 对三个新灵术同样生效（通过 `spellCostMul()` 函数统一处理）。
 | 8 | 升级 | #1–20 | ✅ |
 
@@ -190,7 +190,7 @@
   - `calcLeyline()`：新增升级效果预收集循环，读取 `_leyBonus`（#8 脉稳，逐座加成）和 `_leySetBonus`（#16 聚灵阵联，套装加成）。灵脉产出计算改为 `(leylineP + bonus) * count + setBonus`。
   - `calcUnrest()`：新增 `_unrestReduce` 预收集循环（#14 灵泉引流），对匹配建筑的 unrestP 乘以 `max(0, 1 + reduce)` 实现百分比减免。
   - `effectiveUnrest()`：新增 `_quietBonus` 预收集循环（#10 静室深修），对静室 unrestThresh 叠加额外值（50+30=80/座）。
-  - `calcR()` 职业产出段：新增 `_happyJobBonus` 收集（与 `_jobM` 同循环），对匹配职业的满意度乘数改为 `G.happy * (1 + bonus)`。同步应用于染丝节令段和祖灵加成段。
+  - `calcR()` 职业产出段：新增 `_happyJobBonus` 收集（与 `_jobM` 同循环），对匹配职业的满意度乘数改为 `G.happy * (1 + bonus)`。同步应用于彩络节令段和祖灵加成段。
   - `migrate()`：新增 spiritSpring→spiritWell、leylineArray→leyArray 建筑及专精迁移。
 - **engine-systems.js**：
   - `resolveExpedition()`：新增 `_expRewardBonus` 收集循环（#20 念珠护），乘入总奖励倍率 `mul`。

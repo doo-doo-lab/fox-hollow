@@ -881,20 +881,12 @@ const UD = {
     uq: { u: { calendar: 1 }, b: { shrine: 3 } },
     tip: ['发现自己是无数个"过去"终于长出的"现在"。']
   },
-  valleyVoice: {
-    n: '同声相应', d: '谷中的声音越传越远，共识渐渐成形。',
-    p: [{ r: 'lore', a: 250 }, { r: 'scroll', a: 30 }],
-    e: { hapB: .1 },
-    uq: { u: { engraving: 1 }, custom: 5 },
-    tip: ['全谷的声音放在一起，会听见一种从前听不到的话。', '当所有喉咙的震动找到了同一个频率。']
-  },
-
   // ===== v0.16 政体研究 =====
   councilLore: {
     n: '共谷议事', d: '解锁典制→治理分区与议事堂。',
     p: [{ r: 'lore', a: 300 }, { r: 'scroll', a: 20 }],
     e: {},
-    uq: { u: { valleyVoice: 1 }, custom: 5 },
+    uq: { u: { engraving: 1 }, custom: 5 },
     tip: ['坐下来说的第一句话不是决定，是"你先说"。']
   },
   polityLore: {
@@ -2066,11 +2058,11 @@ const UPGD = {
     e: { craftM: { scroll: { outMul: 1.0 } } },
     uq: { u: { steamPower: 1 } },
   },
-  // #46 机械织布：商贩丝帛产出 +50%
+  // #46 机械织布：丝帛配方产出 +50%
   mechWeave: {
-    n: '机械织布', d: '商贩丝帛产出+50%', br: 'I',
+    n: '机械织布', d: '纺丝帛/换丝帛 配方产出 +50%。', br: 'I',
     p: [{ r: 'gear', a: 12 }, { r: 'plate', a: 5 }, { r: 'silk', a: 3 }],
-    e: { _tradeGoodBonus: { silk: 0.5 } },
+    e: { craftM: { weave: { outMul: 0.5 }, spiceToSilk: { outMul: 0.5 } } },
     uq: { u: { steamPower: 1 } },
   },
   // #47 燃油灯塔：远行奖励 +15%
@@ -2582,7 +2574,7 @@ const UPGD = {
   spiritWeaveExt: {
     n: '灵织延续', d: '灵织灵术持续+1季', br: 'M',
     p: [{ r: 'resonance', a: 20 }],
-    e: { _spiritWeaveExtend: 1 },
+    e: { _spellDuration: { spiritWeave: 1 } },
     uq: { u: { leyExpand: 1 } },
   },
   // #42 自酿循环：灵液配方受灵酿坊加成 ×2
@@ -2941,9 +2933,9 @@ const UPGD = {
     uq: { u: { holyIronLore: 1 } }, sb: 'D', br: 'I',
   },
   massConversion: {
-    n: '大规模皈依', d: '狂信者上限 +3。',
+    n: '大规模皈依', d: '狂信者产出 +20%。',
     p: [{ r: 'piety', a: 120 }, { r: 'holyFlame', a: 10 }],
-    e: { _fanaticCap: 3 },
+    e: { jobM: { fanatic: 0.20 } },
     uq: { job: { fanatic: 6 } }, sb: 'D', br: 'I',
   },
   industrialFaith: {
@@ -3265,9 +3257,9 @@ const UPGD = {
     uq: { b: { guestQuarter: 3 } }, sb: 'T',
   },
   diplomatDeepen: {
-    n: '邦交官进阶', d: '邦交官上限 +1。',
+    n: '邦交官进阶', d: '邦交官产出 +30%。',
     p: [{ r: 'charter', a: 50 }, { r: 'exotic', a: 12 }],
-    e: { _jobCapBonus: { diplomat: 1 } },
+    e: { jobM: { diplomat: 0.30 } },
     uq: { u: { guestLore: 1 } }, sb: 'T',
   },
   exoticFlow: {
@@ -4476,11 +4468,11 @@ const ACHIEVEMENT_DATA = {
   firstResearch:  { n: '一卷读完',       d: '完成第一项研究' },
   firstCraft:     { n: '不是它们的东西', d: '手动制作第一件工艺品' },
   firstTrade:     { n: '第一笔便宜',     d: '与第一支商队完成交易' },
-  firstExpedition:{ n: '走出谷口',       d: '派出第一次远行队伍' },
+  firstExpedition:{ n: '走出谷口',       d: '完成第一次远行' },
   firstCustom:    { n: '谁都记得的规矩', d: '激活第一个习俗' },
   custom5:        { n: '默契成规',       d: '激活 5 个习俗' },
   berryHoard:     { n: '三千颗甜',       d: '囤积 3000 野莓' },
-  lore100:        { n: '记得比忘的多',   d: '累计获得 100 学识' },
+  lore100:        { n: '记得比忘的多',   d: '当前 100 学识' },
   scroll50:       { n: '满架还在塞',     d: '拥有 50 卷轴' },
   firstPolity:    { n: '写在外面的名字', d: '选定政体' },
   firstPolicy:    { n: '以后就这么办',   d: '选定第一个政策' },
