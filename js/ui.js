@@ -985,35 +985,36 @@ function renderBldRow(id) {
       }
     }
   }
-  var nameHtml = hpWrap(
-    '<span class="bld-name">' + d.n + '</span>',
-    sec,
-    { onclick: "toggleDetail('" + id + "')" }
-  );
-  var h = '<div class="bld-row">';
-  h += '<div class="bld-top">';
-  h += nameHtml;
-  h += '<span class="bld-cnt">(' + G.bld[id].c + ')';
+  // 建筑卡内部内容（名 + 计数 + 状态徽章 + 造价）
+  var inner = '<span class="bld-name">' + d.n + '</span>';
+  inner += '<span class="bld-cnt">(' + G.bld[id].c + ')';
   if (G.fogDisabled && G.fogDisabled.length) {
     var fogCnt = 0;
     for (var fi = 0; fi < G.fogDisabled.length; fi++) {
       if (G.fogDisabled[fi].id === id) fogCnt++;
     }
-    if (fogCnt > 0) h += '<span class="fog-disabled-note"> (' + fogCnt + '座受损)</span>';
+    if (fogCnt > 0) inner += '<span class="fog-disabled-note"> (' + fogCnt + '座受损)</span>';
   }
   if (G.bldSpec[id] && SPEC_BD[id]) {
     var specN = SPEC_BD[id][G.bldSpec[id]].n;
-    h += '<span class="spec-tag">「' + specN + '」</span>';
+    inner += '<span class="spec-tag">「' + specN + '」</span>';
   }
-  h += '</span>';
+  inner += '</span>';
   if (id === 'moonStage' && G.bld.moonStage.c > 0 && !G.moonStageActive)
-    h += '<span class="maint-warn"> ⚠ 半效</span>';
+    inner += '<span class="maint-warn"> ⚠ 半效</span>';
   if (id === 'artistry' && G.bld.artistry.c > 0 && !G.artistryActive)
-    h += '<span class="maint-warn"> ⚠ 半效</span>';
-  h += '<span class="bld-cost">' + costs + '</span>';
-  h += '<button class="bld-btn" onclick="build(\'' + id + '\')" ' + (ok ? '' : 'disabled') + '>建造</button>';
-  if (G.bld[id].c > 0) h += '<button class="bld-btn sell-btn" onclick="sell(\'' + id + '\')">出售</button>';
-  h += '</div>';
+    inner += '<span class="maint-warn"> ⚠ 半效</span>';
+  inner += '<span class="bld-cost">' + costs + '</span>';
+  // 整行 = 一个建造按钮（hover 出 desc/effects 浮窗）
+  var cardOnClick = ok ? ('build(\'' + id + '\')') : '';
+  var card = hpWrap(
+    '<span class="bld-inner">' + inner + '</span>',
+    sec,
+    { cls: 'bld-card' + (ok ? '' : ' dis'), onclick: cardOnClick }
+  );
+  var h = '<div class="bld-row">' + card;
+  // 旁边小出售按钮（只在已建≥1时显示）
+  if (G.bld[id].c > 0) h += '<button class="sell-btn-mini" onclick="sell(\'' + id + '\')" title="出售一座">×</button>';
   h += '</div>';
   return h;
 }
@@ -1078,19 +1079,21 @@ function renderBldList(tab) {
     var isCollapsed = groupCollapsed[gKey];
     h += '<div class="grp-hdr" onclick="toggleGroup(\'' + gKey + '\')">'
       + (isCollapsed ? '▶ ' : '▼ ') + grp.n + '</div>';
-    if (!isCollapsed) h += rows;
+    if (!isCollapsed) h += '<div class="bld-grid">' + rows + '</div>';
   }
   // 兜底：未归组的建筑仍然显示（防遗漏）
   var grouped = {};
   for (var gi = 0; gi < groups.length; gi++)
     for (var ii = 0; ii < groups[gi].ids.length; ii++) grouped[groups[gi].ids[ii]] = 1;
+  var orphanRows = '';
   for (var id in BD) {
     if (grouped[id]) continue;
     var d = BD[id];
     if (d.t && d.t !== tab) continue;
     if (!d.t && tab !== 'b') continue;
-    h += renderBldRow(id);
+    orphanRows += renderBldRow(id);
   }
+  if (orphanRows) h += '<div class="bld-grid">' + orphanRows + '</div>';
   return h;
 }
 

@@ -109,21 +109,21 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .bld-chip.dis:hover{color:#bbb;border-color:#ddd;}
 .bld-chip-n{color:#bbb;font-size:10px;margin-left:2px;}
 .bld-chip.on .bld-chip-n{color:#ccc;}
-.bld-row{padding:3px 0;border-bottom:1px solid #f5f5f5;}
-.bld-top{display:flex;align-items:baseline;gap:6px;}
-.bld-name{font-weight:bold;color:#333;cursor:pointer;}
-.bld-name:hover{text-decoration:underline;}
+.bld-grid{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:4px;margin-bottom:6px;}
+.bld-row{display:flex;align-items:stretch;gap:3px;min-width:0;}
+.bld-card{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;padding:4px 10px;background:#fafafa;border:1px solid #e5e5e5;border-radius:3px;cursor:pointer;user-select:none;transition:background .12s,border-color .12s;}
+.bld-card:hover{background:#f0f4ff;border-color:#88b;}
+.bld-card.dis{cursor:not-allowed;background:#f5f5f5;border-style:dashed;border-color:#d8d8d8;}
+.bld-card.dis:hover{background:#f5f5f5;border-color:#d8d8d8;}
+.bld-card.dis .bld-name{color:#666;}
+.bld-card.dis .bld-cnt{color:#aaa;}
+.bld-card .bld-inner{flex:1;display:flex;align-items:baseline;gap:6px;}
+.bld-name{font-weight:bold;color:#333;}
 .bld-cnt{color:#888;font-size:12px;}
 .bld-cost::before{content:"┃";color:#ddd;margin-right:6px;font-weight:normal;}
-.bld-btn{padding:1px 8px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:12px;color:#333;margin-left:4px;}
-.bld-btn:first-of-type{margin-left:auto;}
-.bld-btn:hover:not(:disabled){background:#eef;border-color:#88b;}
-.bld-btn:disabled{opacity:0.3;cursor:default;}
-.sell-btn{color:#888;border-color:#ccc;}
-.sell-btn:hover{color:#b00;border-color:#b00;background:#fff5f5;}
-.bld-detail{font-size:12px;color:#999;margin-top:1px;display:none;}
-.bld-detail.show{display:block;}
-.bld-cost{font-size:12px;color:#888;}
+.bld-cost{font-size:12px;color:#888;margin-left:auto;}
+.sell-btn-mini{width:22px;background:#fff;border:1px solid #ddd;border-radius:3px;color:#aaa;cursor:pointer;font-size:14px;font-weight:bold;line-height:1;padding:0;}
+.sell-btn-mini:hover{color:#b00;border-color:#b00;background:#fff5f5;}
 .bld-cost .short, .cr-cost .short, .exp-row .short, .cv-item .short{color:#b00;}
 
 /* JOB ROWS */
