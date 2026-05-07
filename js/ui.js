@@ -680,9 +680,9 @@ function rTabs() {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
     var n = tabActionableCount(t.id);
-    var badge = n > 0 ? '<span class="tab-badge">' + n + '</span>' : '';
+    var cnt = n > 0 ? '<span class="tab-cnt">(' + n + ')</span>' : '';
     return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + badge + '</div>';
+      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + cnt + '</div>';
   }).join('');
 }
 

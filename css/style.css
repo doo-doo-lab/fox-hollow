@@ -91,8 +91,8 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .tab{padding:4px 12px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:4px;}
 .tab:hover{color:#333;}
 .tab.on{color:#333;font-weight:bold;border-bottom-color:#333;}
-.tab-badge{display:inline-block;min-width:14px;padding:0 4px;background:#666;color:#fff;font-size:10px;font-weight:bold;border-radius:7px;text-align:center;line-height:14px;}
-.tab.on .tab-badge{background:#333;}
+.tab-cnt{color:#888;font-size:12px;font-weight:normal;}
+.tab.on .tab-cnt{color:#666;}
 
 /* GATHER BUTTONS */
 .gather-row{margin-bottom:8px;}
