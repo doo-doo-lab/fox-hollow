@@ -200,7 +200,7 @@ const BD = {
     n: '野莓谷', t: 'b', d: '把整道山谷开成莓园——只有几座，但能撑起后期口粮。',
     p: [{ r: 'plank', b: 80, k: 1.15 }, { r: 'brick', b: 40, k: 1.15 }, { r: 'ancCoin', b: 3, k: 1.15 }],
     e: { berryP: 6.0, berryMx: 2000 },
-    uq: { u: { engraving: 1 }, b: { berryGrove: 2, storyTree: 1 } },
+    uq: { u: { branchLore: 1 }, b: { berryGrove: 8, storyTree: 2 }, custom: 5 },
     tip: ['整片山的甜度都被收编了。']
   },
   hutch: {
