@@ -488,7 +488,19 @@ const BD = {
     uq: { b: { calcFurnace: 1 } },
   },
 
-  // ===== 工业分支 D阶段：辉能时代（v0.20 §八 5.1a） =====
+  // ===== 工业分支 D阶段：辉能时代（v0.20 §八 5.1） =====
+  accelerator: {
+    n: '加速器', t: 'b', d: '把寒钛塞进环形管道里来回甩——辉石就是它甩晕了之后吐出来的金属。', br: 'I', phase: 4,
+    p: [{ r: 'titan', b: 50, k: 1.22 }, { r: 'alloy', b: 15, k: 1.22 }, { r: 'draft', b: 10, k: 1.22 }],
+    e: { uraniumP: .003, titanP: -.015, energy: -5, pollutionP: .03 },
+    uq: { u: { fission: 1 } },
+  },
+  furnace: {
+    n: '熔炉', t: 'b', d: '辉石在炉膛里慢慢释放——比蒸汽更烫，比火油更稳，连影子都被它点亮。', br: 'I', phase: 4,
+    p: [{ r: 'titan', b: 30, k: 1.22 }, { r: 'alloy', b: 10, k: 1.22 }, { r: 'uranium', b: 5, k: 1.22 }],
+    e: { energy: 5, uraniumP: -.001, allM: .05, pollutionP: .025 },
+    uq: { u: { radiantPower: 1 } },
+  },
   radianceBox: {
     n: '辉匣', t: 'b', d: '装辉石的匣子——盖子合上之后，里面的光仍在自己转动。', br: 'I', phase: 4,
     p: [{ r: 'alloy', b: 10, k: 1.18 }, { r: 'uranium', b: 5, k: 1.18 }],
