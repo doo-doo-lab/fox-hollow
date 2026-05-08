@@ -1511,7 +1511,12 @@ reputeBonus = min(reputeCap, (sqrt(1 + renown/100) - 1) × 40%)
 
 | 步骤 | 标题 | 状态 | commit | 详细任务卡 |
 |------|------|------|--------|---------|
-| 5.1 | 工业 D — 辉能（辉石/重晶 + 高阶资源链） | ⬜ 未开始 | - | §八 5.1 |
+| 5.1a | 工业 D — 资源 + 存储辉匣 | ⏳ 进行中 | - | §八 5.1a |
+| 5.1b | 工业 D — 主建筑加速器+熔炉 | ⬜ 未开始 | - | §八 5.1b |
+| 5.1c | 工业 D — 研究链 13 项 | ⬜ 未开始 | - | §八 5.1c |
+| 5.1d | 工业 D — 职业辉能士 + 3 配方 | ⬜ 未开始 | - | §八 5.1d |
+| 5.1e | 工业 D — 升级 #79-106 | ⬜ 未开始 | - | §八 5.1e |
+| 5.1f | 工业 D — UI 集成 + 子阶段验收 | ⬜ 未开始 | - | §八 5.1f |
 | 5.2 | 灵修 D — 深寂（元念/寂石 + 灵契 + 寂石冥想） | ⬜ 未开始 | - | §八 5.2 |
 | 5.3 | 神启 Phase C（教团C/秘仪C + 飞升 3-4 门） | ⬜ 未开始 | - | §八 5.3 |
 | 5.4 | 通达 Phase C — 深盟（邦交深度 3-4 + 盟印） | ⬜ 未开始 | - | §八 5.4 |
@@ -1534,18 +1539,270 @@ reputeBonus = min(reputeCap, (sqrt(1 + renown/100) - 1) × 40%)
 
 #### 5.1 工业 D — 辉能
 
-**内容来源**: branch-industry.md Phase D
+**内容来源**: branch-industry.md Phase D（资源 §二.220-247、能量 §三.264-272、建筑 §五.339-373、研究 §四.493-509、升级 §九.718-768、配方 §六）
 
 | 维度 | 内容 |
 |------|------|
 | 资源 | 4：辉石 `uranium`、重晶 `thorium`、镜合金 `mirrorAlloy`、密典 `codex` |
 | 建筑 | 3：accelerator(加速器)、furnace(熔炉)、radianceBox(辉匣) |
-| 研究 | 13 |
-| 职业 | 1：辉能士 `radiance expert` |
-| 工艺 | 3 |
+| 研究 | 13：裂变/辉能/粒子学/屏蔽术/增殖论/重晶转化/超导/镜锻/幽理/辐射学/机关自驱/能网/深层辉脉 |
+| 职业 | 1：辉能士 `radianceExpert` |
+| 配方 | 3：转化重晶 `craftThorium`、锻镜合金 `craftMirrorAlloy`、编密典 `craftCodex` |
 | 升级 | #79-106（28 个） |
 
 **资源链**: …→ 寒钛/合金 → **辉石/重晶** → 镜合金/密典
+
+**关键平衡点**: 加速器吃 5 能量+寒钛、熔炉产 5 能量+全产出 +5%。两者互锁：先建熔炉补能源缺口，才能建加速器。
+
+##### 子任务拆分（按依赖顺序，每子任务一个 commit）
+
+| 子任务 | 标题 | 涉及范围 | 估算 LoC | 依赖 |
+|--------|------|---------|---------|------|
+| 5.1a | 资源 4 + 存储辉匣 | data.js RD 4 + BD radianceBox + migrate | ~80 | Phase 4 ✅ |
+| 5.1b | 主建筑加速器+熔炉 | data.js BD 2 条 | ~50 | 5.1a |
+| 5.1c | 研究链 13 项 | data.js UD 13 条 | ~80 | 5.1a + 5.1b |
+| 5.1d | 职业 1 + 配方 3 | data.js JD radianceExpert + CD 3 条 | ~50 | 5.1c |
+| 5.1e | 升级 #79-106（28 项） | data.js UPGD 28 条 + engine.js effect 处理 | ~150 | 5.1d |
+| 5.1f | UI 集成 + 5.1 整体验收 | ui.js 检查 + 旧存档兼容 + 能量平衡测试 | ~30 | 5.1a-e |
+
+> 每子任务独立 commit，独立通过验收清单。最终 5.1f 完成后整个 §八 5.1 标 ✅。
+
+---
+
+##### 5.1a 资源 4 + 存储辉匣
+
+> 📋 **任务卡** | **状态**：⏳ 进行中 | **前置**：✅ Phase 4 完成 (commit dd3f013)
+
+###### 涉及文件清单
+
+| 文件 | 行号 | 改动 | 内容 |
+|------|------|------|------|
+| data.js RD | 在 starchart 之后追加 | 新增 4 条 | uranium/thorium/mirrorAlloy/codex |
+| data.js BD | 在 titanVault 之后追加 | 新增 1 条 | radianceBox 辉匣 |
+| engine.js migrate() | phase 4 资源 init 之后 | 加 4 条 | G.res.uranium/thorium/mirrorAlloy/codex 默认值 |
+| index.html | data.js 行 | cache-bust 递增 | v=55→56 |
+
+###### 逐步执行（每步 verify）
+
+**步骤 1**：data.js RD 追加 4 资源
+- uranium: `{ n: '辉石', c: '工业', mx: 50, lock: 1 }`
+- thorium: `{ n: '重晶', c: '工业', mx: 30, lock: 1 }`
+- mirrorAlloy: `{ n: '镜合金', c: '工业', mx: 15, lock: 1 }`
+- codex: `{ n: '密典', c: '工业', mx: 10, lock: 1 }`
+- verify: `preview_eval "!!RD.uranium && !!RD.thorium && !!RD.mirrorAlloy && !!RD.codex"` → true
+
+**步骤 2**：data.js BD 追加 radianceBox
+- `n: '辉匣', t: 'f'`（存储建筑）
+- 造价：`p: [{ r: 'alloy', b: 10, k: 1.18 }, { r: 'uranium', b: 5, k: 1.18 }]`
+- 效果：`e: { uraniumMx: 30, thoriumMx: 10 }`
+- 解锁：`uq: { b: { accelerator: 1 } }, br: 'I', phase: 4`（先用 phase: 4 因为 accelerator 解锁需要"裂变"研究，研究在 5.1c）
+
+> ⚠️ **注意**：phase 字段保持 4 而非 5，因为 phase 5 还没引入新阶段判定。等 phase 5 阶段判定加上后再升 phase: 5（不在 5.1 范围）
+
+- verify: `preview_eval "!!BD.radianceBox && BD.radianceBox.e.uraniumMx === 30"` → true
+
+**步骤 3**：engine.js migrate() 加 4 资源默认值
+- 在 phase 4 资源 (`G.res.starchart` 等) init 之后追加
+- 模式：`G.res.uranium = G.res.uranium || { v: 0, mx: 50, on: false };`（其他 3 资源同模式）
+- verify: 旧存档加载后 G.res.uranium 存在 + console 0 error
+
+**步骤 4**：index.html data.js cache-bust 递增（v=55→56）
+
+###### 验收清单（5.1a 单独通过才 commit）
+
+- [ ] preview_console_logs level=error = 0
+- [ ] `preview_eval "[RD.uranium,RD.thorium,RD.mirrorAlloy,RD.codex].every(x=>x)"` → true
+- [ ] `preview_eval "BD.radianceBox && BD.radianceBox.t === 'f'"` → true
+- [ ] 旧存档加载：`preview_eval "G.res.uranium && G.res.uranium.v === 0"` → true
+- [ ] cache-buster: data.js v 已递增
+
+---
+
+##### 5.1b 主建筑加速器+熔炉
+
+> 📋 **任务卡** | **状态**：⬜ 未开始 | **前置**：✅ 5.1a
+
+###### 涉及文件清单
+
+| 文件 | 行号 | 改动 | 内容 |
+|------|------|------|------|
+| data.js BD | 在 radianceBox 之前 | 新增 2 条 | accelerator 加速器 + furnace 熔炉 |
+| index.html | data.js 行 | cache-bust 递增 | +1 |
+
+###### 逐步执行
+
+**步骤 1**：data.js BD 追加 accelerator
+- `n: '加速器', t: 'b'`
+- 造价：`p: [{ r: 'titan', b: 50, k: 1.22 }, { r: 'alloy', b: 15, k: 1.22 }, { r: 'draft', b: 10, k: 1.22 }]`
+- 效果：`e: { uraniumP: 0.003, titanP: -0.015, energy: -5, pollutionP: 0.03 }`
+- 解锁：`uq: { u: { fission: 1 } }, br: 'I', phase: 4`（fission = 裂变研究，5.1c 引入；先放 uq 待研究入库后才能解锁）
+- verify: `preview_eval "BD.accelerator.e.uraniumP === 0.003"` → true
+
+**步骤 2**：data.js BD 追加 furnace
+- `n: '熔炉', t: 'b'`
+- 造价：`p: [{ r: 'titan', b: 30, k: 1.22 }, { r: 'alloy', b: 10, k: 1.22 }, { r: 'uranium', b: 5, k: 1.22 }]`
+- 效果：`e: { energy: 5, uraniumP: -0.001, allM: 0.05, pollutionP: 0.025 }`（allM 全产出 +5%）
+- 解锁：`uq: { u: { radiantPower: 1 } }, br: 'I', phase: 4`（radiantPower = 辉能研究）
+- verify: `preview_eval "BD.furnace.e.allM === 0.05"` → true
+
+**步骤 3**：index.html data.js cache-bust 递增
+
+###### 验收清单
+
+- [ ] preview_console_logs level=error = 0
+- [ ] `preview_eval "BD.accelerator && BD.furnace"` → true
+- [ ] `preview_eval "BD.accelerator.e.energy === -5 && BD.furnace.e.energy === 5"` → true
+- [ ] 旧存档加载不崩
+- [ ] cache-buster: data.js v 已递增
+
+---
+
+##### 5.1c 研究链 13 项
+
+> 📋 **任务卡** | **状态**：⬜ 未开始 | **前置**：✅ 5.1a + 5.1b
+
+###### 涉及文件清单
+
+| 文件 | 改动 | 内容 |
+|------|------|------|
+| data.js UD | 新增 13 条 | fission/radiantPower/particle/shielding/proliferation/thoriumConv/superCond/mirrorForge/voidPrinciple/radiation/autoMech/powerNet/deepRadiance |
+| index.html | cache-bust | +1 |
+
+###### 13 项研究 ID 映射表
+
+| ID | 中文 | 费用 | 前置 | 解锁 |
+|---|---|---|---|---|
+| `fission` | 裂变 | 学识1800,寒钛50,合金10,蓝本10 | refining + 精炼厂×2 | 加速器、辉石、辉匣 |
+| `radiantPower` | 辉能 | 学识2000,辉石10,合金15 | fission + 加速器×1 | 熔炉 |
+| `particle` | 粒子学 | 学识1600,辉石15,合金8 | fission | 粒子聚焦升级 |
+| `shielding` | 屏蔽术 | 学识1500,辉石20,混凝柱5 | radiantPower | 屏蔽反应室升级 |
+| `proliferation` | 增殖论 | 学识1700,辉石30,蓝本10 | radiantPower + 熔炉×2 | 增殖反应升级 |
+| `thoriumConv` | 重晶转化 | 学识1500,辉石30 | radiantPower | 转化重晶配方、重晶 |
+| `superCond` | 超导 | 学识1800,合金15,辉石10 | particle | 超导线圈升级 |
+| `mirrorForge` | 镜锻 | 学识1600,合金10,辉石8 | refining + radiantPower | 锻镜合金配方、镜合金 |
+| `voidPrinciple` | 幽理 | 学识2000,纲要5,辉石15 | systemTheory + radiantPower | 编密典配方、密典 |
+| `radiation` | 辐射学 | 学识1500,辉石20,合金10 | radiantPower | 辐射防护升级 |
+| `autoMech` | 机关自驱 | 学识2200,合金15,辉石20,蓝本15 | automation + radiantPower | 工厂/煅烧炉无人运转 |
+| `powerNet` | 能网 | 学识1900,辉石15,合金12,混凝柱5 | superCond + 熔炉×2 | 能量共享 +20% |
+| `deepRadiance` | 深层辉脉 | 学识2100,辉石25,重晶8 | proliferation + 加速器×2 | 加速器寒钛-30%、辉石上限+50% |
+
+###### 验收清单
+
+- [ ] 13 项研究 ID 全在 UD 中
+- [ ] preview_console_logs level=error = 0
+- [ ] `preview_eval "Object.keys(UD).filter(k=>UD[k].phase===4&&UD[k].br==='I').length"` 数量增加 13
+- [ ] 解锁链：完成 fission 后 BD.accelerator 进 G.bld[].on
+- [ ] 旧存档加载不崩
+
+---
+
+##### 5.1d 职业辉能士 + 3 配方
+
+> 📋 **任务卡** | **状态**：⬜ 未开始 | **前置**：✅ 5.1c
+
+###### 涉及文件清单
+
+| 文件 | 改动 | 内容 |
+|------|------|------|
+| data.js JD | 新增 1 条 | radianceExpert 辉能士 |
+| data.js CD | 新增 3 条 | craftThorium/craftMirrorAlloy/craftCodex |
+| index.html | cache-bust | +1 |
+
+###### 逐步执行
+
+**步骤 1**：JD radianceExpert
+- `n: '辉能士', d: '辉石增产 + 熔炉效率'`
+- 产出：`e: { uraniumP: 0.005 }`
+- 解锁：`uq: { b: { furnace: 1 } }, br: 'I', phase: 4`
+
+**步骤 2**：CD 3 配方
+- `craftThorium`: `inp: [{r:'uranium',a:200}], out: [{r:'thorium',a:1}], uq: { u: { thoriumConv: 1 } }, br: 'I', phase: 4`（重晶浓缩升级后比率 200→150）
+- `craftMirrorAlloy`: `inp: [{r:'titan',a:20},{r:'alloy',a:10},{r:'uranium',a:5}], out: [{r:'mirrorAlloy',a:1}], uq: { u: { mirrorForge: 1 } }`
+- `craftCodex`: `inp: [{r:'outline',a:5},{r:'uranium',a:15},{r:'lore',a:200}], out: [{r:'codex',a:1}], uq: { u: { voidPrinciple: 1 } }`
+
+###### 验收清单
+
+- [ ] `preview_eval "JD.radianceExpert.e.uraniumP === 0.005"` → true
+- [ ] `preview_eval "CD.craftThorium && CD.craftMirrorAlloy && CD.craftCodex"` → true
+- [ ] preview_console_logs level=error = 0
+- [ ] 旧存档加载不崩
+
+---
+
+##### 5.1e 升级 #79-106（28 项）
+
+> 📋 **任务卡** | **状态**：⬜ 未开始 | **前置**：✅ 5.1d
+
+###### 升级分类
+
+| 类别 | 编号 | 数量 | 备注 |
+|------|------|------|------|
+| 工具类 | #79-81 | 3 | 钛镐头、合金锯、辉石钻头（叠加 #79-81 的第三层）|
+| 产出倍率类 | #82-90 | 9 | 粒子聚焦、增殖反应、镜面精磨、钍稳定器、辉石催化、重晶共鸣、深层煅烧、加速裂解、密典洞见 |
+| 存储类 | #91-93 | 3 | 辉石保险库、镜合金容器、辉能压缩仓 |
+| 消耗减免类 | #94-99 | 6 | 屏蔽反应室、超导线圈、重晶浓缩、辐射防护、辉能蓄池、密典注解 |
+| 自动化类 | #100-103 | 4 | 辉能自动锻、自动重晶转、自动镜锻、智能调度 |
+| 跨系统类 | #104-106 | 3 | 辉能灯塔、辉石铸币、辉能供暖 |
+
+###### 涉及文件清单
+
+| 文件 | 改动 | 内容 |
+|------|------|------|
+| data.js UPGD | 新增 28 条 | 见 branch-industry.md §九.718-768 |
+| engine.js | 加 effect 处理 | 处理新引入的 _effect 字段（如 `_uraniumDecayReduce`、`_energyShortageReduce` 等）|
+| index.html | cache-bust | +1 |
+
+###### 关键 effect 字段（engine.js 需读）
+
+- `_uraniumDecayReduce`: 加速器寒钛消耗减免（#95 超导线圈 -2 能耗、#99 密典注解 -15% 研究等）
+- `_energyShortageReduce`: 能量不足时衰减速率减免（#98 辉能蓄池 -50%）
+- `_powerNetBonus`: 能网激活后净能量盈余转产出（10 盈余 = +1% 全产出）
+- `_winterPenaltyReduce`: 冬季惩罚减免（#106 辉能供暖 -50%）
+
+> ⚠️ **不是所有 28 升级都需要 engine.js 改动**——大多数升级用现有 jobM/buildM/allM/_resCap 等已支持的字段。仅 `#95 超导线圈`/`#98 辉能蓄池`/`#106 辉能供暖`/`#108 能网` 等少数需要新 effect。在 5.1e 实施时逐项确认 effect 是否已支持。
+
+###### 验收清单
+
+- [ ] 28 升级全在 UPGD 中
+- [ ] `preview_eval "Object.keys(UPGD).filter(k=>UPGD[k].phase===4&&UPGD[k].br==='I').length"` 增加 28
+- [ ] preview_console_logs level=error = 0
+- [ ] 完成 #95 超导线圈：`preview_eval` 加速器能耗变 3 而非 5
+- [ ] 旧存档加载不崩
+
+---
+
+##### 5.1f UI 集成 + 5.1 整体验收
+
+> 📋 **任务卡** | **状态**：⬜ 未开始 | **前置**：✅ 5.1a-e
+
+###### 涉及文件清单
+
+| 文件 | 改动 | 内容 |
+|------|------|------|
+| ui.js | 检查 | 4 资源在资源面板「工业」分类正确显示 |
+| ui.js | 检查 | 加速器/熔炉/辉匣 在工坊页签正确显示 |
+| ui.js | 检查 | 辉能士在村落页签可分配 |
+| roadmap-v2.md | 5.1a-f 状态 ⏳→✅ | 进度表更新 |
+
+###### 整体验收清单（5.1 全部子任务通过 + 整体平衡测试）
+
+- [ ] preview reload 后 console.error = 0
+- [ ] 完整流程：
+  - 完成 fission 研究 → 看到加速器
+  - 建加速器 → uranium 开始产出，能量 -5
+  - 完成 radiantPower → 看到熔炉
+  - 建熔炉 → 能量 +5、全产出 +5%（净 0 能量）
+- [ ] 净能量 < 0 时建筑产出按比例衰减（产消博弈生效）
+- [ ] 配方面板可制作 craftThorium / craftMirrorAlloy / craftCodex
+- [ ] 旧存档（无 phase 5 字段）加载完整不崩，可推进
+- [ ] roadmap §八 进度表 5.1a-f 全 ✅，5.2 状态 ⬜→⏳
+
+###### 完成后
+
+1. 全部子任务验收过 → 5.1 整体 commit message：`docs: §八 5.1 工业 D 验收完成`（如有 docs 改动）
+2. 更新 roadmap §八 5.1a-f 全 ✅ + 填 commit SHA
+3. 5.2 状态 ⬜→⏳
+4. 不主动 push
 
 #### 5.2 灵修 D — 深寂
 
