@@ -1,0 +1,8 @@
+# 浏览器 MCP 副产物
+.playwright-cli/
+
+# 本地 zip 备份
+*.zip
+
+# LLM 模型输出缓存（按时间戳生成，无版本意义）
+tools/output/
