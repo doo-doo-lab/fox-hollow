@@ -3217,6 +3217,9 @@ function migrate() {
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };
+  // hotfix: 修复旧存档中已通过 craft 取得但未 unlock 的资源（v>0 但 on=false）
+  for (const k of Object.keys(G.res))
+    if (G.res[k] && G.res[k].v > 0 && !G.res[k].on) G.res[k].on = true;
   for (const k of Object.keys(BD))
     if (!G.bld[k]) G.bld[k] = { c: 0, on: !BD[k].uq };
   for (const k of Object.keys(JD))

@@ -559,8 +559,10 @@ function craft(id) {
       if (Math.random() < UPGD[_cd].e._craftDouble[id]) _craftDoubleMul = 2;
     }
   }
-  for (const p of CD[id].out)
+  for (const p of CD[id].out) {
     G.res[p.r].v = Math.min(G.res[p.r].v + Math.floor((p.a + _craftFlatBonus) * outMul * _craftDoubleMul), G.res[p.r].mx);
+    if (!G.res[p.r].on) G.res[p.r].on = true;  // hotfix: craft 产出资源应 unlock 可见性（与 ED 事件一致）
+  }
   if (_craftDoubleMul > 1) log('制作了' + CD[id].n + '（双产！）');
   else log('制作了' + CD[id].n);
   G._achFirstCraft = true;
