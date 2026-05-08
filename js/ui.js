@@ -35,13 +35,12 @@ try { var _gc = JSON.parse(localStorage.getItem('fhGroupCollapsed')); if (_gc) O
 const BLD_GROUPS = [
   { n: '基础设施', ids: ['berryPatch','hutch','lumberYard','quarry','tannery','warehouse','library','smithy','market','shrine','moonwell','plankHouse','vault','tradePost','trailroad','watchtower'] },
   { n: '文化设施', ids: ['storyTree','moonStage','memorial','artistry','assembly','ancestor'] },
+  { n: '治理设施', ids: ['councilHall','polityHall'] },
   { n: '工业设施', ids: ['mine','blastFurnace','chimney','purifier','steelVault','oilWell','oilTank','steamEngine','combustEngine','factory','railroad','windTower','calcFurnace','refinery','observatory','cleanForest','titanVault'], br: 'I' },
   { n: '灵修设施', ids: ['spiritWell','spiritTower','quietRoom','leyArray','resonTower','elixirBrewery','shapeHall','oracleHall','calmGrove'], br: 'M' },
   { n: '外交设施', ids: ['embassy','receptionHall','courierPost','charterHall','exoticVault','guestQuarter','alliancePlatform'], sb: 'T' },
 ];
-const BLD_GROUPS_V = [
-  { n: '治理设施', ids: ['councilHall','polityHall'] },
-];
+const BLD_GROUPS_V = [];
 // §五 2.4 工坊分组定义
 const CRAFT_GROUPS = [
   { n: '基础工艺', ids: ['plank','brick','scroll'] },

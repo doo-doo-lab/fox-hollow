@@ -2446,8 +2446,9 @@ function simulateOffline(seconds) {
       }
     }
   }
-  // 显示补算结果（离开不足 30 秒不提示）
-  if (seconds < 30) return;
+  // 显示补算结果（离开不足 5 分钟不提示——浏览器后台标签节流的 30-90 秒小 gap 静默补算，
+  // 避免日志被「离开了 59 秒」刷屏）
+  if (seconds < 300) return;
   var mins = Math.floor(seconds / 60);
   var hrs = Math.floor(mins / 60);
   var msg;
