@@ -223,7 +223,7 @@ const BD = {
   },
   quarry: {
     n: '采石坑', t: 'b', d: '提高碎石产出效率。',
-    p: [{ r: 'berry', b: 80, k: 1.12 }, { r: 'wood', b: 10, k: 1.12 }],
+    p: [{ r: 'berry', b: 80, k: 1.12 }, { r: 'stone', b: 10, k: 1.12 }],
     e: { stoneP: .08 },
     tip: ['往下挖，挖到大地开始心疼的地方。']
   },
@@ -1430,21 +1430,21 @@ const UD = {
 // ===== 工坊定义 =====
 const CD = {
   plank: {
-    n: '加工木板', d: '圆木 → 木板',
+    n: '木板', d: '圆木 → 木板',
     inp: [{ r: 'wood', a: 30 }],
     out: [{ r: 'plank', a: 1 }],
     uq: { u: { carpentry: 1 } },
     tip: ['锯开一根圆木，就像翻开一本年轮写的日记。']
   },
   brick: {
-    n: '烧制砖块', d: '碎石 → 砖块',
+    n: '砖块', d: '碎石 → 砖块',
     inp: [{ r: 'stone', a: 30 }],
     out: [{ r: 'brick', a: 1 }],
     uq: { u: { masonry: 1 } },
     tip: ['泥巴觉得自己这辈子就这样了，然后来了一把火。']
   },
   scroll: {
-    n: '抄录卷轴', d: '学识 → 卷轴',
+    n: '卷轴', d: '学识 → 卷轴',
     inp: [{ r: 'lore', a: 20 }],
     out: [{ r: 'scroll', a: 1 }],
     uq: { b: { library: 1 } },
@@ -1453,27 +1453,27 @@ const CD = {
 
   // ===== 工业分支 A阶段：煤钢配方 =====
   steel: {
-    n: '炼钢', d: '矿铁+煤 → 钢', br: 'I',
+    n: '钢', d: '矿铁+煤 → 钢', br: 'I',
     inp: [{ r: 'iron', a: 5 }, { r: 'coal', a: 8 }],
     out: [{ r: 'steel', a: 1 }],
     uq: { b: { blastFurnace: 1 } },
   },
   gear: {
-    n: '铸齿轮', d: '钢+矿铁 → 齿轮', br: 'I',
+    n: '齿轮', d: '钢+矿铁 → 齿轮', br: 'I',
     inp: [{ r: 'steel', a: 2 }, { r: 'iron', a: 3 }],
     out: [{ r: 'gear', a: 1 }],
     uq: { u: { fineCraft: 1 } },
     tip: ['一个齿咬住另一个齿，就像两只狐狸互相信任。']
   },
   plate: {
-    n: '压钢板', d: '钢+煤 → 钢板', br: 'I',
+    n: '钢板', d: '钢+煤 → 钢板', br: 'I',
     inp: [{ r: 'steel', a: 3 }, { r: 'coal', a: 2 }],
     out: [{ r: 'plate', a: 2 }],
     uq: { u: { forging: 1 } },
     tip: ['把钢锤薄，听它叹气，就知道够不够格了。']
   },
   concrete: {
-    n: '烧混凝', d: '砖块+煤 → 混凝', br: 'I',
+    n: '混凝', d: '砖块+煤 → 混凝', br: 'I',
     inp: [{ r: 'brick', a: 30 }, { r: 'coal', a: 5 }],
     out: [{ r: 'concrete', a: 1 }],
     uq: { u: { concreteTech: 1 } },
@@ -1482,21 +1482,21 @@ const CD = {
 
   // ===== 工业分支 B阶段：油火配方 =====
   oil: {
-    n: '提炼火油', d: '煤+矿铁 → 火油', br: 'I',
+    n: '火油', d: '煤+矿铁 → 火油', br: 'I',
     inp: [{ r: 'coal', a: 15 }, { r: 'iron', a: 3 }],
     out: [{ r: 'oil', a: 1 }],
     uq: { b: { oilWell: 1 } },
     tip: ['把煤烧到极致，黑色的血就从石头缝里渗出来了。']
   },
   barrel: {
-    n: '铸油桶', d: '钢板+钢 → 油桶', br: 'I',
+    n: '油桶', d: '钢板+钢 → 油桶', br: 'I',
     inp: [{ r: 'plate', a: 2 }, { r: 'steel', a: 1 }],
     out: [{ r: 'barrel', a: 1 }],
     uq: { b: { oilTank: 1 } },
     tip: ['密封、坚固、不漏一滴——对容器的全部要求。']
   },
   draft: {
-    n: '绘蓝本', d: '卷轴+学识 → 蓝本', br: 'I',
+    n: '蓝本', d: '卷轴+学识 → 蓝本', br: 'I',
     inp: [{ r: 'scroll', a: 5 }, { r: 'lore', a: 100 }],
     out: [{ r: 'draft', a: 1 }],
     uq: { u: { blueprintLore: 1 } },
@@ -1505,21 +1505,21 @@ const CD = {
 
   // ===== v0.14 文化工艺（占位名） =====
   dye: {
-    n: '染彩络', d: '丝帛+香草 → 彩络',
+    n: '彩络', d: '丝帛+香草 → 彩络',
     inp: [{ r: 'silk', a: 1 }, { r: 'spice', a: 1 }],
     out: [{ r: 'dye', a: 1 }],
     uq: { u: { folkLore: 1, engraving: 1 } },
     tip: ['一锅热水，几朵花的葬礼，一匹布的新生。']
   },
   wine: {
-    n: '酿醴浆', d: '野莓 → 醴浆',
+    n: '醴浆', d: '野莓 → 醴浆',
     inp: [{ r: 'berry', a: 30 }],
     out: [{ r: 'wine', a: 1 }],
     uq: { u: { calendar: 1 } },
     tip: ['什么都不干，干等。最考验狐狸的一道工坊活。']
   },
   ink: {
-    n: '制墨锭', d: '兽皮+碎石 → 墨锭',
+    n: '墨锭', d: '兽皮+碎石 → 墨锭',
     inp: [{ r: 'leather', a: 3 }, { r: 'stone', a: 2 }],
     out: [{ r: 'ink', a: 1 }],
     uq: { u: { engraving: 1 } },
@@ -1528,28 +1528,28 @@ const CD = {
 
   // ===== 工业分支 C阶段：精金配方（4 个） =====
   forgeAlloy: {
-    n: '锻合金', d: '寒钛+钢 → 合金',
+    n: '合金', d: '寒钛+钢 → 合金',
     inp: [{ r: 'titan', a: 2 }, { r: 'steel', a: 5 }],
     out: [{ r: 'alloy', a: 1 }],
     uq: { b: { refinery: 1 } },
     br: 'I',
   },
   drawOutline: {
-    n: '编纲要', d: '蓝本+卷轴 → 纲要',
+    n: '纲要', d: '蓝本+卷轴 → 纲要',
     inp: [{ r: 'draft', a: 3 }, { r: 'scroll', a: 10 }],
     out: [{ r: 'outline', a: 1 }],
     uq: { u: { systematics: 1 } },
     br: 'I',
   },
   castTitanPart: {
-    n: '铸钛构件', d: '寒钛+合金 → 钛构件',
+    n: '钛构件', d: '寒钛+合金 → 钛构件',
     inp: [{ r: 'titan', a: 5 }, { r: 'alloy', a: 1 }],
     out: [{ r: 'titanPart', a: 1 }],
     uq: { u: { precFab: 1 } },
     br: 'I',
   },
   pourPillar: {
-    n: '灌混凝柱', d: '混凝+钢 → 混凝柱',
+    n: '混凝柱', d: '混凝+钢 → 混凝柱',
     inp: [{ r: 'concrete', a: 5 }, { r: 'steel', a: 3 }],
     out: [{ r: 'pillar', a: 1 }],
     uq: { u: { heavyBuild: 1 } },
@@ -1558,14 +1558,14 @@ const CD = {
 
   // ===== v0.15 丝帛供应链配方 =====
   weave: {
-    n: '纺丝帛', d: '兽皮+圆木 → 丝帛',
+    n: '丝帛（纺）', d: '兽皮+圆木 → 丝帛',
     inp: [{ r: 'leather', a: 5 }, { r: 'wood', a: 5 }],
     out: [{ r: 'silk', a: 1 }],
     uq: { b: { artistry: 1 } },
     tip: ['不是正经蚕丝，但搓出来一样滑溜。']
   },
   spiceToSilk: {
-    n: '换丝帛', d: '香草+铜钱 → 丝帛',
+    n: '丝帛（换）', d: '香草+铜钱 → 丝帛',
     inp: [{ r: 'spice', a: 3 }, { r: 'coin', a: 5 }],
     out: [{ r: 'silk', a: 1 }],
     uq: { b: { tradePost: 1 } },
@@ -1574,7 +1574,7 @@ const CD = {
 
   // ===== 灵修分支 A阶段配方（4 个，编灵图留 C 阶段） =====
   fateSilk: {
-    n: '织命丝', d: '符咒+灵能 → 命丝',
+    n: '命丝', d: '符咒+灵能 → 命丝',
     inp: [{ r: 'charm', a: 8 }, { r: 'spirit', a: 3 }],
     out: [{ r: 'fateSilk', a: 1 }],
     uq: { u: { silkWeave: 1 } },
@@ -1582,7 +1582,7 @@ const CD = {
     tip: ['命丝不是纺出来的，是哄出来的——你得让灵能相信自己想变成线。']
   },
   bead: {
-    n: '串念珠', d: '符咒+碎石 → 念珠',
+    n: '念珠', d: '符咒+碎石 → 念珠',
     inp: [{ r: 'charm', a: 5 }, { r: 'stone', a: 20 }],
     out: [{ r: 'bead', a: 2 }],
     uq: { u: { beadCraft: 1 } },
@@ -1590,7 +1590,7 @@ const CD = {
     tip: ['每颗石子里都住着一个安静的念头，串起来就不会跑了。']
   },
   spiritInk: {
-    n: '磨灵墨', d: '墨锭+符咒 → 灵墨',
+    n: '灵墨', d: '墨锭+符咒 → 灵墨',
     inp: [{ r: 'ink', a: 3 }, { r: 'charm', a: 4 }],
     out: [{ r: 'spiritInk', a: 1 }],
     uq: { u: { inscription: 1 } },
@@ -1598,7 +1598,7 @@ const CD = {
     tip: ['普通的墨加了符咒就会在月光下发亮——这是好事还是坏事另说。']
   },
   sigil: {
-    n: '刻符纹', d: '灵墨+兽皮 → 符纹',
+    n: '符纹', d: '灵墨+兽皮 → 符纹',
     inp: [{ r: 'spiritInk', a: 2 }, { r: 'leather', a: 5 }],
     out: [{ r: 'sigil', a: 1 }],
     uq: { u: { inscription: 1 } },
@@ -1606,7 +1606,7 @@ const CD = {
     tip: ['刻下的线条比文字早，意义比语言深。']
   },
   drawChartBasic: {
-    n: '编灵图（基础）', d: '灵墨+卷轴 → 灵图',
+    n: '灵图（粗）', d: '灵墨+卷轴 → 灵图',
     inp: [{ r: 'spiritInk', a: 3 }, { r: 'scroll', a: 5 }],
     out: [{ r: 'spiritChart', a: 1 }],
     uq: { u: { chartDraw: 1 } },
@@ -1614,28 +1614,28 @@ const CD = {
   },
   // ===== 灵修分支 B阶段配方 =====
   resonance: {
-    n: '凝共振子', d: '灵能+命丝 → 共振子',
+    n: '共振子', d: '灵能+命丝 → 共振子',
     inp: [{ r: 'spirit', a: 10 }, { r: 'fateSilk', a: 3 }],
     out: [{ r: 'resonance', a: 1 }],
     uq: { u: { resonArt: 1 } },
     br: 'M',
   },
   elixir: {
-    n: '酿灵液', d: '灵能+野莓 → 灵液',
+    n: '灵液', d: '灵能+野莓 → 灵液',
     inp: [{ r: 'spirit', a: 15 }, { r: 'berry', a: 50 }],
     out: [{ r: 'elixir', a: 1 }],
     uq: { u: { elixirBrew: 1 } },
     br: 'M',
   },
   spectrum: {
-    n: '琢谱石', d: '共振子+念珠 → 谱石',
+    n: '谱石', d: '共振子+念珠 → 谱石',
     inp: [{ r: 'resonance', a: 3 }, { r: 'bead', a: 5 }],
     out: [{ r: 'spectrum', a: 1 }],
     uq: { u: { specAnalysis: 1 } },
     br: 'M',
   },
   insight: {
-    n: '悟片集', d: '卷轴+灵能 → 悟片',
+    n: '悟片', d: '卷轴+灵能 → 悟片',
     inp: [{ r: 'scroll', a: 8 }, { r: 'spirit', a: 12 }],
     out: [{ r: 'insight', a: 1 }],
     uq: { u: { sageWay: 1 } },
@@ -1644,35 +1644,35 @@ const CD = {
 
   // ===== 灵修分支 C阶段配方（5 个） =====
   weaveCrystal: {
-    n: '织晶丝', d: '命丝+灵能 → 晶丝',
+    n: '晶丝', d: '命丝+灵能 → 晶丝',
     inp: [{ r: 'fateSilk', a: 5 }, { r: 'spirit', a: 8 }],
     out: [{ r: 'crystalSilk', a: 1 }],
     uq: { u: { crystalize: 1 } },
     br: 'M',
   },
   forgeCore: {
-    n: '编灵核', d: '晶丝+共振子 → 灵核',
+    n: '灵核（造）', d: '晶丝+共振子 → 灵核',
     inp: [{ r: 'crystalSilk', a: 3 }, { r: 'resonance', a: 8 }],
     out: [{ r: 'spiritCore', a: 1 }],
     uq: { u: { coreCraft: 1 } },
     br: 'M',
   },
   drawChart: {
-    n: '绘灵图', d: '灵墨+悟片+辉芒 → 灵图',
+    n: '灵图（精）', d: '灵墨+悟片+辉芒 → 灵图',
     inp: [{ r: 'spiritInk', a: 5 }, { r: 'insight', a: 2 }, { r: 'radiance', a: 1 }],
     out: [{ r: 'spiritChart', a: 3 }],
     uq: { u: { starSense: 1 } },
     br: 'M',
   },
   shapeForm: {
-    n: '凝形魄', d: '晶丝+灵核 → 形魄',
+    n: '形魄', d: '晶丝+灵核 → 形魄',
     inp: [{ r: 'crystalSilk', a: 5 }, { r: 'spiritCore', a: 2 }],
     out: [{ r: 'formSoul', a: 1 }],
     uq: { u: { formStudy: 1 } },
     br: 'M',
   },
   forgeMirror: {
-    n: '灵核精炼', d: '灵核+辉芒 → 精炼灵核（高效灵核产出）',
+    n: '灵核（精）', d: '灵核+辉芒 → 精炼灵核（高效灵核产出）',
     inp: [{ r: 'spiritCore', a: 2 }, { r: 'radiance', a: 3 }],
     out: [{ r: 'spiritCore', a: 2 }],
     uq: { u: { coreFusion: 1 } },
@@ -1681,7 +1681,7 @@ const CD = {
 
   // ===== 神启副线 A阶段 =====
   holyOilCraft: {
-    n: '炼圣油', d: '以虔诚与野莓提炼圣油。',
+    n: '圣油', d: '以虔诚与野莓提炼圣油。',
     inp: [{ r: 'piety', a: 15 }, { r: 'berry', a: 50 }],
     out: [{ r: 'holyOil', a: 1 }],
     uq: { u: { graceLore: 1 } }, sb: 'D',
@@ -1689,13 +1689,13 @@ const CD = {
 
   // ===== 神启副线 B-教团配方 =====
   holyFlameCraft: {
-    n: '圣火锻', d: '煤+钢+虔诚 → 圣火',
+    n: '圣火', d: '煤+钢+虔诚 → 圣火',
     inp: [{ r: 'coal', a: 30 }, { r: 'steel', a: 5 }, { r: 'piety', a: 10 }],
     out: [{ r: 'holyFlame', a: 2 }],
     uq: { u: { holyFlameLore: 1 } }, sb: 'D', br: 'I',
   },
   holyIronCraft: {
-    n: '圣铁铸', d: '圣火+钢 → 圣铁',
+    n: '圣铁', d: '圣火+钢 → 圣铁',
     inp: [{ r: 'holyFlame', a: 3 }, { r: 'steel', a: 8 }],
     out: [{ r: 'holyIron', a: 1 }],
     uq: { u: { holyIronLore: 1 } }, sb: 'D', br: 'I',
@@ -1724,13 +1724,13 @@ const CD = {
 
   // ===== 神启副线 B-秘仪配方 =====
   ambrosiaDistill: {
-    n: '凝露', d: '虔诚+灵能 → 神露',
+    n: '神露', d: '虔诚+灵能 → 神露',
     inp: [{ r: 'piety', a: 20 }, { r: 'spirit', a: 15 }],
     out: [{ r: 'ambrosia', a: 1 }],
     uq: { u: { mysteryInit: 1 } }, sb: 'D', br: 'M',
   },
   gnosisFragment: {
-    n: '秘知残篇', d: '神露+卷轴 → 秘知',
+    n: '秘知', d: '神露+卷轴 → 秘知',
     inp: [{ r: 'ambrosia', a: 3 }, { r: 'scroll', a: 15 }],
     out: [{ r: 'gnosis', a: 5 }],
     uq: { u: { groveLore: 1 } }, sb: 'D', br: 'M',
@@ -1745,7 +1745,7 @@ const CD = {
 
   // ===== 通达副线 Phase A =====
   makeCredential: {
-    n: '制信物', d: '以声誉与卷轴制成正式信物。',
+    n: '信物（铸）', d: '以声誉与卷轴制成正式信物。',
     inp: [{ r: 'renown', a: 15 }, { r: 'scroll', a: 30 }],
     out: [{ r: 'credential', a: 1 }],
     uq: { u: { credentialLore: 1 } }, sb: 'T',
@@ -1753,19 +1753,19 @@ const CD = {
 
   // ===== 通达副线 Phase B：结邦（3 个配方） =====
   makeCharter: {
-    n: '制邦书', d: '以信物与卷轴制成正式邦书。',
+    n: '邦书', d: '以信物与卷轴制成正式邦书。',
     inp: [{ r: 'credential', a: 3 }, { r: 'scroll', a: 20 }],
     out: [{ r: 'charter', a: 1 }],
     uq: { u: { allianceInit: 1 } }, sb: 'T',
   },
   makeExotic: {
-    n: '远交礼包', d: '以信物与基础物资包装成远方认可的礼品。',
+    n: '异珍', d: '以信物与基础物资包装成远方认可的礼品。',
     inp: [{ r: 'credential', a: 2 }, { r: 'berry', a: 100 }, { r: 'plank', a: 5 }, { r: 'brick', a: 3 }],
     out: [{ r: 'exotic', a: 1 }],
     uq: { u: { exoticLore: 1 } }, sb: 'T',
   },
   charterToCredential: {
-    n: '邦书换信物', d: '以邦书与声誉换取更多信物。',
+    n: '信物（换）', d: '以邦书与声誉换取更多信物。',
     inp: [{ r: 'charter', a: 5 }, { r: 'renown', a: 30 }],
     out: [{ r: 'credential', a: 3 }],
     uq: { u: { allianceLore: 1 } }, sb: 'T',
