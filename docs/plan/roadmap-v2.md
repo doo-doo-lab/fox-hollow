@@ -1511,8 +1511,8 @@ reputeBonus = min(reputeCap, (sqrt(1 + renown/100) - 1) × 40%)
 
 | 步骤 | 标题 | 状态 | commit | 详细任务卡 |
 |------|------|------|--------|---------|
-| 5.1a | 工业 D — 资源 + 存储辉匣 | ⏳ 进行中 | - | §八 5.1a |
-| 5.1b | 工业 D — 主建筑加速器+熔炉 | ⬜ 未开始 | - | §八 5.1b |
+| 5.1a | 工业 D — 资源 + 存储辉匣 | ✅ 已完成 | 4db47a9 | §八 5.1a |
+| 5.1b | 工业 D — 主建筑加速器+熔炉 | ⏳ 进行中 | - | §八 5.1b |
 | 5.1c | 工业 D — 研究链 13 项 | ⬜ 未开始 | - | §八 5.1c |
 | 5.1d | 工业 D — 职业辉能士 + 3 配方 | ⬜ 未开始 | - | §八 5.1d |
 | 5.1e | 工业 D — 升级 #79-106 | ⬜ 未开始 | - | §八 5.1e |
@@ -1584,11 +1584,12 @@ reputeBonus = min(reputeCap, (sqrt(1 + renown/100) - 1) × 40%)
 
 ###### 逐步执行（每步 verify）
 
-**步骤 1**：data.js RD 追加 4 资源
-- uranium: `{ n: '辉石', c: '工业', mx: 50, lock: 1 }`
-- thorium: `{ n: '重晶', c: '工业', mx: 30, lock: 1 }`
-- mirrorAlloy: `{ n: '镜合金', c: '工业', mx: 15, lock: 1 }`
-- codex: `{ n: '密典', c: '工业', mx: 10, lock: 1 }`
+**步骤 1**：data.js RD 在 starchart 之后追加 4 资源
+- uranium: `{ n: '辉石', c: '加工', mx: 0, lock: 1 }` （核心资源，跟随 phase C titan/alloy 模式 mx:0；上限靠加速器/辉匣给）
+- thorium: `{ n: '重晶', c: '加工', mx: 30, lock: 1 }` （中间材料，跟随 outline 模式 mx:30）
+- mirrorAlloy: `{ n: '镜合金', c: '加工', mx: 15, lock: 1 }`
+- codex: `{ n: '密典', c: '知识', mx: 10, lock: 1 }` （密典是研究材料，归"知识"类）
+- ⚠️ c 字段只能用现有类别（'基础'/'加工'/'知识'/'贸易'/'研究'），不能新增"工业"类别——RD 类别系统不支持
 - verify: `preview_eval "!!RD.uranium && !!RD.thorium && !!RD.mirrorAlloy && !!RD.codex"` → true
 
 **步骤 2**：data.js BD 追加 radianceBox
