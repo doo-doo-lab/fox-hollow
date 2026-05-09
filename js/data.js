@@ -755,6 +755,9 @@ const JD = {
   // ===== 工业分支 C阶段职业 =====
   refiner:    { n: '精炼师', d: '精炼寒钛', desc: '全局被动：寒钛产出+0.002/s（需至少2座煅烧炉存在）', e: { titanP: .004 }, br: 'I', uq: { b: { calcFurnace: 2 } } },
 
+  // ===== 工业分支 D阶段职业（v0.20 §八 5.1d） =====
+  radianceExpert: { n: '辉能士', d: '辉石增产 + 熔炉效率', desc: '辉石产出+0.005/s（需至少1座熔炉存在）', e: { uraniumP: .005 }, br: 'I', phase: 4, uq: { b: { furnace: 1 } } },
+
   // ===== 灵修分支 A阶段职业 =====
   spiritSenser: { n: '感应者', d: '引导灵流', e: { spiritP: .02 }, br: 'M', uq: { b: { spiritWell: 1 } }, tip: ['闭着眼比睁着眼看得清——至少灵流是这样的。', '它们说灵流有方向，但每只狐狸感应到的方向都不一样。'] },
   silkWeaver:      { n: '织丝人', d: '织命丝',   desc: '命丝产出 +0.0075/s（需灵塔×2）', e: { fateSilkP: .015 }, br: 'M', uq: { b: { spiritTower: 2 } }, tip: ['命丝不是纺出来的，是哄出来的——你得让灵能相信自己想变成线。', '织到一半断了也别慌，命丝自己会找到另一头。'] },
@@ -1634,6 +1637,29 @@ const CD = {
     out: [{ r: 'pillar', a: 1 }],
     uq: { u: { heavyBuild: 1 } },
     br: 'I',
+  },
+
+  // ===== 工业分支 D阶段：辉能配方（v0.20 §八 5.1d, 3 个） =====
+  craftThorium: {
+    n: '重晶', d: '辉石 → 重晶（高温浓缩）',
+    inp: [{ r: 'uranium', a: 200 }],
+    out: [{ r: 'thorium', a: 1 }],
+    uq: { u: { thoriumConv: 1 } },
+    br: 'I', phase: 4,
+  },
+  craftMirrorAlloy: {
+    n: '镜合金', d: '寒钛+合金+辉石 → 镜合金',
+    inp: [{ r: 'titan', a: 20 }, { r: 'alloy', a: 10 }, { r: 'uranium', a: 5 }],
+    out: [{ r: 'mirrorAlloy', a: 1 }],
+    uq: { u: { mirrorForge: 1 } },
+    br: 'I', phase: 4,
+  },
+  craftCodex: {
+    n: '密典', d: '纲要+辉石+学识 → 密典',
+    inp: [{ r: 'outline', a: 5 }, { r: 'uranium', a: 15 }, { r: 'lore', a: 200 }],
+    out: [{ r: 'codex', a: 1 }],
+    uq: { u: { voidPrinciple: 1 } },
+    br: 'I', phase: 4,
   },
 
   // ===== v0.15 丝帛供应链配方 =====
