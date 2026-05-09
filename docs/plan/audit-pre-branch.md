@@ -129,7 +129,7 @@ berryGrove (←calendar + berryPatch×5)
 
 ### 🟡 警告
 
-#### W1. engraving 完成后扇出 6 项（信息过载）
+#### W1. engraving 完成后扇出 6 项（信息过载） ✅ 已修复
 
 完成「岁时有常 engraving」瞬间解锁：
 
@@ -139,10 +139,11 @@ berryGrove (←calendar + berryPatch×5)
 
 **问题**：玩家在 depth-1 研究完成的瞬间收到 6 项新内容，跟任务 B 用户反馈的"3 个研究同时解锁"是同类问题（信息过载、节奏被压扁）。
 
-**修复建议**：
-- 把 customsDeep 的 uq.u 改成 `engraving: 1, customs: 5`（加习俗激活数门槛），让它延后到玩家激活几个习俗后才出现
-- 或者把 dye/ink 配方解锁条件加 storyTree×1 / memorial×1 建筑前置，让玩家先建相关设施再得到配方
-- 选一项落实即可，目标降到 4 项以内
+**已实施修复**（commit 待回填，见 git log）：dye 配方 uq 加 `b: {artistry: 1}`，玩家完成 engraving 时立即可见从 6 项降到 5 项（customsDeep 已有 custom:5 门槛延后；dye 现需先建艺工坊）。
+- 实际玩家完成 engraving 时立即可见：memorial（如 storyTree 已建）/ artistryLore / councilLore / ink
+- dye 延后到 artistry 建好（artistryLore 完成 + moonStage 建好）
+
+> ⚠ 脚本 `audit-prelock.js` 仅扫 uq.u，看不到 uq.b 的"延后效果"，所以仍报 6 项。实际玩法已优化。
 
 ---
 
