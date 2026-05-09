@@ -795,6 +795,10 @@ const JD = {
   // ===== 灵修分支 C阶段职业 =====
   shapeMaster:     { n: '化形师', d: '化形守护', desc: '全局被动：灵图产出+10%，灵术冷却-5%', e: {}, br: 'M', uq: { b: { shapeHall: 2 } } },
 
+  // ===== 灵修分支 D阶段职业（v0.20 §八 5.2d） =====
+  silenceAdept:    { n: '深寂士', d: '元念专精', desc: '元念产出+0.002/s（需至少1座寂石窟存在）', e: { primordialP: .004 }, br: 'M', phase: 4, uq: { b: { silenceCave: 1 } } },
+  pactChanneler:   { n: '契灵使', d: '灵契沟通', desc: '当前活跃灵契产出+5%/人，灵契祭坛效果+3%/人（5.2f 灵契系统实装后激活）', e: {}, br: 'M', phase: 4, uq: { u: { spiritPactLore: 1 } } },
+
   // ===== 神启副线 A阶段 =====
   priest: { n: '祭司', e: { pietyP: .04 }, uq: { b: { scriptureHall: 1 } }, sb: 'D' },
 
@@ -1919,6 +1923,37 @@ const CD = {
     out: [{ r: 'spiritCore', a: 2 }],
     uq: { u: { coreFusion: 1 } },
     br: 'M',
+  },
+
+  // ===== 灵修分支 D阶段配方（v0.20 §八 5.2d, 4 个 + 1 内置） =====
+  // 注: "蒸元念" 为元念池建筑内置被动 (晶丝→元念)，不计入 CD 条目
+  craftSilenceStone: {
+    n: '寂石', d: '元念+晶丝 → 寂石',
+    inp: [{ r: 'primordial', a: 5 }, { r: 'crystalSilk', a: 3 }],
+    out: [{ r: 'silenceStone', a: 1 }],
+    uq: { u: { silenceCryst: 1 } },
+    br: 'M', phase: 4,
+  },
+  craftVoidCodex: {
+    n: '幽典', d: '悟片+元念+镜灵 → 幽典',
+    inp: [{ r: 'insight', a: 10 }, { r: 'primordial', a: 8 }, { r: 'mirrorSpirit', a: 1 }],
+    out: [{ r: 'voidCodex', a: 1 }],
+    uq: { u: { voidCodexLore: 1 } },
+    br: 'M', phase: 4,
+  },
+  craftPrimordial: {
+    n: '元念（锻）', d: '元念+灵核+寂石 → 元念（高效锻冶，净 -3 元念但产更纯）',
+    inp: [{ r: 'primordial', a: 8 }, { r: 'spiritCore', a: 3 }, { r: 'silenceStone', a: 1 }],
+    out: [{ r: 'primordial', a: 5 }],
+    uq: { u: { primordialForging: 1 } },
+    br: 'M', phase: 4,
+  },
+  refineSilenceStone: {
+    n: '寂石（淬）', d: '寂石+镜灵+幽典 → 浓缩寂石+灵液',
+    inp: [{ r: 'silenceStone', a: 3 }, { r: 'mirrorSpirit', a: 1 }, { r: 'voidCodex', a: 1 }],
+    out: [{ r: 'silenceStone', a: 2 }, { r: 'elixir', a: 1 }],
+    uq: { u: { spiritPactLore: 1 } },
+    br: 'M', phase: 4,
   },
 
   // ===== 神启副线 A阶段 =====
