@@ -933,7 +933,7 @@ const UD = {
     n: '择路而治', d: '山谷走到了岔路口——造物与灵术，只能择其一。',
     p: [{ r: 'lore', a: 400 }, { r: 'scroll', a: 40 }],
     e: {},
-    uq: { u: { polityLore: 1 }, polity: true, b: { councilHall: 2 }, custom: 5 },
+    uq: { u: { polityLore: 1, policyLore: 1 }, polity: true, b: { councilHall: 3 }, custom: 8 },
     tip: ['两条路都在脚下，但只有一条能走到底。']
   },
 
@@ -1283,7 +1283,7 @@ const UD = {
     n: '神启之学', d: '开启神恩之道，解锁虔诚资源与宗教页签。',
     p: [{ r: 'lore', a: 400 }, { r: 'scroll', a: 25 }, { r: 'charm', a: 30 }, { r: 'remnant', a: 5 }],
     e: { subBranch: 'D', pietyU: 1 },
-    uq: { polity: true, b: { shrine: 3 } },
+    uq: { u: { branchLore: 1 }, polity: true, b: { shrine: 3 } },
   },
   ritualBasic: {
     n: '祭祀礼法', d: '制定祭仪规范，解锁祭坛。',
