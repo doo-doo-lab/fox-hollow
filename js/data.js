@@ -737,7 +737,7 @@ const BD = {
     n: '圣火祭坛', d: '圣火不灭——只要还有狐狸记得，火就不熄。',
     p: [{ r: 'holyFlame', b: 30, k: 1.22 }, { r: 'holyIron', b: 8, k: 1.22 }, { r: 'piety', b: 120, k: 1.22 }],
     e: { holyFlameP: .03, holyFlameMx: 30 },
-    uq: { u: { holyFireEternal: 1 } }, sb: 'D', br: 'I', t: 'f', phase: 4,
+    uq: { u: { crusadeLore: 1 } }, sb: 'D', br: 'I', t: 'f', phase: 4,
   },
 
   // ===== 神启副线 B-秘仪（灵修+神启） =====
@@ -859,6 +859,10 @@ const JD = {
   // ===== 神启副线 B-教团 =====
   fanatic:   { n: '狂信者', d: '狂热信徒', desc: '虔诚+0.03/s，每多1名狂信者所有狂信者产出+5%', e: { pietyP: .03 }, uq: { b: { edictHall: 1 } }, sb: 'D', br: 'I' },
   holySmith: { n: '圣工匠', d: '锻造圣铁', desc: '圣铁+0.02/s（需圣工坊）', e: { holyIronP: .02 }, uq: { u: { holyIronLore: 1 }, b: { holyForge: 2 } }, sb: 'D', br: 'I' },
+
+  // ===== 神启副线 C-教团（v0.20 §八 5.3b） =====
+  cantor:   { n: '颂咏师', d: '颂咏产出', desc: '颂咏+0.005/s（需颂咏堂×1）', e: { hymnP: .005 }, uq: { b: { hymnHall: 1 } }, sb: 'D', br: 'I', phase: 4 },
+  crusader: { n: '十字军', d: '远行+虔诚双产', desc: '虔诚+0.02/s（需圣战营×1）；远行加成留 5.3c 升级实装', e: { pietyP: .02 }, uq: { b: { crusadeCamp: 1 } }, sb: 'D', br: 'I', phase: 4 },
 
   // ===== 神启副线 B-秘仪 =====
   mysticAdept: { n: '秘仪师', d: '研习秘知', desc: '秘知+0.02/s（仅在秘仪殿工作时生效）；效率递减', e: { gnosisP: .02 }, uq: { b: { mysteryHall: 1 } }, sb: 'D', br: 'M' },
@@ -1619,6 +1623,80 @@ const UD = {
     uq: { u: { holyIronLore: 1, judgmentLore: 1 } }, sb: 'D', br: 'I',
   },
 
+  // ===== 神启副线 C-教团：圣堂与圣战（v0.20 §八 5.3b, 12 项） =====
+  hymnArt: {
+    n: '颂咏术', d: '把祷词谱成调——唱出来的字比写下来的更难磨灭。',
+    p: [{ r: 'lore', a: 900 }, { r: 'piety', a: 150 }, { r: 'holyOil', a: 8 }],
+    e: { hymnU: 1 },
+    uq: { u: { churchArchLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  templeStudy: {
+    n: '圣堂学', d: '一座大教堂的图纸——不是建筑师画的，是几代狐狸念出来的。',
+    p: [{ r: 'lore', a: 1000 }, { r: 'hymn', a: 5 }, { r: 'concrete', a: 10 }],
+    e: {},
+    uq: { u: { hymnArt: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  pilgrimageLore: {
+    n: '朝圣论', d: '一条路走的次数够多，路本身就成了圣物。',
+    p: [{ r: 'lore', a: 1100 }, { r: 'hymn', a: 8 }, { r: 'holyOil', a: 10 }],
+    e: {},
+    uq: { u: { templeStudy: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  crusadeLore: {
+    n: '圣战论', d: '不是为夺取——是为夺还。词序不同，结局不同。',
+    p: [{ r: 'lore', a: 1200 }, { r: 'piety', a: 200 }, { r: 'holyIron', a: 8 }],
+    e: {},
+    uq: { u: { pilgrimageLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  relicLore: {
+    n: '圣骸学', d: '研究遗留下来的东西——它们记得的比活着的狐狸更多。',
+    p: [{ r: 'lore', a: 1100 }, { r: 'hymn', a: 5 }, { r: 'piety', a: 180 }],
+    e: { holyRelicU: 1 },
+    uq: { u: { hymnArt: 1 }, b: { tribunalHall: 3 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  relicTreatise: {
+    n: '遗物论', d: '每一块圣骸背后都有一个名字——这门学问就是记住那些名字。',
+    p: [{ r: 'lore', a: 1300 }, { r: 'holyRelic', a: 2 }, { r: 'scroll', a: 30 }],
+    e: {},
+    uq: { u: { relicLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  scriptureCompile: {
+    n: '圣典编纂', d: '把零散的训诫装订成册——书脊裂开的那一刻，新的教义诞生了。',
+    p: [{ r: 'lore', a: 1400 }, { r: 'hymn', a: 8 }, { r: 'scroll', a: 50 }],
+    e: { holyScriptureU: 1 },
+    uq: { u: { hymnArt: 1 }, b: { scriptureHall: 5 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  doctrineSystem: {
+    n: '教义系统化', d: '所有的"应该"被排进表格——一行行读下去，连呼吸都有节奏。',
+    p: [{ r: 'lore', a: 1500 }, { r: 'holyScripture', a: 2 }, { r: 'piety', a: 200 }],
+    e: {},
+    uq: { u: { scriptureCompile: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  grandEdictLore: {
+    n: '大教令论', d: '一道教令能让一整季的农事改道——研究的就是这个力量从哪来。',
+    p: [{ r: 'lore', a: 1700 }, { r: 'holyScripture', a: 3 }, { r: 'holyFlame', a: 20 }],
+    e: {},
+    uq: { u: { doctrineSystem: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  crusadePrep: {
+    n: '圣战备战', d: '战旗、口粮、誓词——三样齐备了，狐狸们也就齐备了。',
+    p: [{ r: 'lore', a: 1500 }, { r: 'holyFlame', a: 30 }, { r: 'piety', a: 250 }],
+    e: {},
+    uq: { u: { crusadeLore: 1 }, b: { cathedral: 2 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  expeditionTheology: {
+    n: '远征神学', d: '走出山谷的祷告，跟在山谷里念的，不是一回事。',
+    p: [{ r: 'lore', a: 1700 }, { r: 'piety', a: 300 }, { r: 'holyRelic', a: 1 }],
+    e: {},
+    uq: { u: { crusadePrep: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  holyLandReclaim: {
+    n: '圣地夺还', d: '原来那里曾经是的——这是一句研究的开始，也是一切的尽头。',
+    p: [{ r: 'lore', a: 2000 }, { r: 'holyRelic', a: 2 }, { r: 'holyScripture', a: 2 }, { r: 'piety', a: 400 }],
+    e: {},
+    uq: { u: { expeditionTheology: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+
   // ===== 神启副线 B-秘仪（灵修+神启） =====
   mysteryInit: {
     n: '秘仪入门', d: '有些仪式不在白天进行——有些知识不在书上。',
@@ -2050,6 +2128,40 @@ const CD = {
     inp: [{ r: 'holyIron', a: 2 }, { r: 'gear', a: 3 }],
     out: [{ r: '_holyGearBonus', a: .03 }],
     uq: { u: { churchArchLore: 1 } }, sb: 'D', br: 'I',
+    perm: true,
+  },
+
+  // ===== 神启副线 C-教团配方（v0.20 §八 5.3b, 5 个） =====
+  craftHymn: {
+    n: '颂咏', d: '圣油+卷轴 → 颂咏',
+    inp: [{ r: 'holyOil', a: 3 }, { r: 'scroll', a: 5 }],
+    out: [{ r: 'hymn', a: 1 }],
+    uq: { u: { hymnArt: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  craftHolyRelic: {
+    n: '圣骸', d: '颂咏+圣铁 → 圣骸',
+    inp: [{ r: 'hymn', a: 5 }, { r: 'holyIron', a: 3 }],
+    out: [{ r: 'holyRelic', a: 1 }],
+    uq: { u: { relicLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  craftHolyScripture: {
+    n: '圣典', d: '颂咏+卷轴+学识 → 圣典',
+    inp: [{ r: 'hymn', a: 10 }, { r: 'scroll', a: 20 }, { r: 'lore', a: 300 }],
+    out: [{ r: 'holyScripture', a: 1 }],
+    uq: { u: { scriptureCompile: 1 } }, sb: 'D', br: 'I', phase: 4,
+  },
+  craftCrusadeRation: {
+    n: '圣战军粮', d: '圣火+野莓 → 远行奖励永久+5%',
+    inp: [{ r: 'holyFlame', a: 10 }, { r: 'berry', a: 200 }],
+    out: [{ r: '_expRewardBonus', a: .05 }],
+    uq: { u: { crusadePrep: 1 } }, sb: 'D', br: 'I', phase: 4,
+    perm: true,
+  },
+  craftGraceWater: {
+    n: '恩典之水', d: '圣骸+圣油 → 神恩上限永久+2%',
+    inp: [{ r: 'holyRelic', a: 1 }, { r: 'holyOil', a: 3 }],
+    out: [{ r: '_graceCapBonus', a: .02 }],
+    uq: { u: { relicTreatise: 1 } }, sb: 'D', br: 'I', phase: 4,
     perm: true,
   },
 

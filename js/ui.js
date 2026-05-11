@@ -307,6 +307,10 @@ function upgEffects(e) {
     else if (k === 'silenceStoneU') r.push('解锁资源：寂石');
     else if (k === 'mirrorSpiritU') r.push('解锁资源：镜灵');
     else if (k === 'voidCodexU') r.push('解锁资源：幽典');
+    // 神启副线 C-教团 资源解锁
+    else if (k === 'hymnU') r.push('解锁资源：颂咏');
+    else if (k === 'holyRelicU') r.push('解锁资源：圣骸');
+    else if (k === 'holyScriptureU') r.push('解锁资源：圣典');
     // 灵修分支 A阶段资源解锁
     else if (k === 'spiritU') r.push('解锁资源：灵能');
     else if (k === 'fateSilkU') r.push('解锁资源：命丝');

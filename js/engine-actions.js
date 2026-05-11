@@ -120,6 +120,10 @@ function research(id) {
   if (UD[id].e?.silenceStoneU) { G.res.silenceStone.on = 1; }
   if (UD[id].e?.mirrorSpiritU) { G.res.mirrorSpirit.on = 1; }
   if (UD[id].e?.voidCodexU) { G.res.voidCodex.on = 1; }
+  // 神启副线 C-教团 资源解锁（hymn 在 RD.mx=0，需在解锁时设基础上限）
+  if (UD[id].e?.hymnU) { G.res.hymn.on = 1; G.res.hymn.mx = 30; }
+  if (UD[id].e?.holyRelicU) { G.res.holyRelic.on = 1; }
+  if (UD[id].e?.holyScriptureU) { G.res.holyScripture.on = 1; }
   // 灵修分支 C阶段资源解锁
   if (UD[id].e?.crystalSilkU) { G.res.crystalSilk.on = 1; }
   if (UD[id].e?.radianceU) { G.res.radiance.on = 1; }
