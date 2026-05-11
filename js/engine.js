@@ -3289,6 +3289,30 @@ function migrate() {
   if (G.upg.formStudy?.done && G.res.formSoul) G.res.formSoul.on = 1;
   if (G.upg.chartDraw?.done && G.res.spiritChart) G.res.spiritChart.on = 1;
 
+  // 通用资源解锁恢复：扫所有已 done 研究，确保对应 e.xxxU 字段所指资源已 on
+  // 修复历史 bug：旧存档完成研究时 RD.xxx 尚未引入 → if (G.res.xxx) 检查失败 →
+  // 后续 migrate 补 G.res.xxx 但研究已 done 不再触发 → 资源永远 on:false
+  // 同时硬编码修复 v0.14 文化资源（folkLore/calendar/engraving 用了 id===... 模式，不是 *U）
+  if (G.upg.folkLore?.done && G.res.dye && !G.res.dye.on) G.res.dye.on = 1;
+  if (G.upg.calendar?.done && G.res.wine && !G.res.wine.on) G.res.wine.on = 1;
+  if (G.upg.engraving?.done && G.res.ink && !G.res.ink.on) G.res.ink.on = 1;
+  for (var _uid in G.upg) {
+    if (!G.upg[_uid].done) continue;
+    var _ue = UD[_uid]?.e;
+    if (!_ue) continue;
+    for (var _ek in _ue) {
+      if (!_ek.endsWith('U')) continue;
+      var _resKey = _ek.slice(0, -1);
+      if (G.res[_resKey] && !G.res[_resKey].on) {
+        G.res[_resKey].on = 1;
+        // 基础 mx=0 的资源（uranium/primordial/hymn）解锁时需要基础上限
+        if (_resKey === 'uranium' && G.res.uranium.mx === 0) G.res.uranium.mx = 30;
+        if (_resKey === 'primordial' && G.res.primordial.mx === 0) G.res.primordial.mx = 30;
+        if (_resKey === 'hymn' && G.res.hymn.mx === 0) G.res.hymn.mx = 30;
+      }
+    }
+  }
+
   // v0.19 §七 4.5 六神系统
   if (G.deity === undefined) G.deity = null;
   if (G.sect === undefined) G.sect = null;
