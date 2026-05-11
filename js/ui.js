@@ -2457,8 +2457,9 @@ function renderPolityTab() {
       h += '<div class="policy-opt' + (isCurrent ? ' policy-opt-active' : '') + (isLocked ? ' policy-opt-locked' : '') + '">';
       var sec = {};
       if (opt.d) sec.desc = opt.d;
-      if (opt.e && Object.keys(opt.e).length > 0) sec.effects = policyEffectLines(opt.e).join(', ');
-      if (opt.pen && Object.keys(opt.pen).length > 0) sec.penalty = policyEffectLines(opt.pen).join(', ');
+      // hpWrap 期望 effects/notes 是数组（内部 .join('<br>')），不能预先 join
+      if (opt.e && Object.keys(opt.e).length > 0) sec.effects = policyEffectLines(opt.e);
+      if (opt.pen && Object.keys(opt.pen).length > 0) sec.notes = policyEffectLines(opt.pen);
       var nameHtml = hpWrap('<span class="policy-opt-name">' + opt.n + '</span>', sec);
       h += nameHtml;
       if (isCurrent) {
