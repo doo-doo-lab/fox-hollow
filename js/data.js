@@ -50,7 +50,7 @@ const RD = {
   starchart: { n: '星图', c: '知识', mx: 0, lock: 1 },
 
   // ===== 工业分支 D阶段：辉能时代（v0.20 §八 5.1a） =====
-  uranium:     { n: '辉石', c: '加工', mx: 0, lock: 1, tip: ['一块温热的、会自己唱歌的金属，凑得太近耳朵会嗡。'] },
+  uranium:     { n: '辉石', c: '加工', mx: 0, lock: 1, unlockBy: { u: 'fission' }, unlockMx: 30, tip: ['一块温热的、会自己唱歌的金属，凑得太近耳朵会嗡。'] },
   thorium:     { n: '重晶', c: '加工', mx: 30, lock: 1, tip: ['辉石冷却后留下的硬骨头——更稳，但也更沉默。'] },
   mirrorAlloy: { n: '镜合金', c: '加工', mx: 15, lock: 1, tip: ['表面映出的不是你，是站在你身后还没到的那个你。'] },
   codex:       { n: '密典', c: '知识', mx: 10, lock: 1, tip: ['纲要写到一万次，就开始自己往里面填字了。'] },
@@ -67,9 +67,9 @@ const RD = {
   ancCoin: { n: '古币', c: '贸易', mx: 0, lock: 1, tip: ['它见过一座城的最后一夜。'] },
 
   // v0.14 文化中间品（占位名）
-  dye:  { n: '彩络', c: '加工', mx: 0, lock: 1, tip: ['颜色是偷来的，花还不知道。'] },
-  wine: { n: '醴浆', c: '加工', mx: 0, lock: 1, tip: ['时间对野莓做的事，说出来不太体面。'] },
-  ink:  { n: '墨锭', c: '加工', mx: 0, lock: 1, tip: ['除了黑什么都不会。'] },
+  dye:  { n: '彩络', c: '加工', mx: 0, lock: 1, unlockBy: { u: 'folkLore' }, tip: ['颜色是偷来的，花还不知道。'] },
+  wine: { n: '醴浆', c: '加工', mx: 0, lock: 1, unlockBy: { u: 'calendar' }, tip: ['时间对野莓做的事，说出来不太体面。'] },
+  ink:  { n: '墨锭', c: '加工', mx: 0, lock: 1, unlockBy: { u: 'engraving' }, tip: ['除了黑什么都不会。'] },
 
   // v0.16 政体资源
 
@@ -94,7 +94,7 @@ const RD = {
   spiritChart: { n: '灵图', c: '知识', mx: 0, lock: 1 },
 
   // ===== 灵修分支 D阶段：深寂（v0.20 §八 5.2a） =====
-  primordial:    { n: '元念',  c: '加工', mx: 0,  lock: 1, tip: ['想着想着，连想本身也消失了——只剩想之前的那个东西。'] },
+  primordial:    { n: '元念',  c: '加工', mx: 0,  lock: 1, unlockBy: { u: 'primordialism' }, unlockMx: 30, tip: ['想着想着，连想本身也消失了——只剩想之前的那个东西。'] },
   silenceStone:  { n: '寂石',  c: '加工', mx: 20, lock: 1, tip: ['敲不响也磨不开。把它放在耳边，听见的是没有声音的声音。'] },
   mirrorSpirit:  { n: '镜灵',  c: '加工', mx: 5,  lock: 1, tip: ['朝它哈一口气，看见的是自己十年后的样子。'] },
   voidCodex:     { n: '幽典',  c: '知识', mx: 5,  lock: 1, tip: ['翻第一页是空的。翻第二页还是空的。但翻完合上，已经记住了所有事。'] },
@@ -106,7 +106,7 @@ const RD = {
   holyFlame: { n: '圣火', c: '加工', mx: 0, lock: 1 },
   holyIron:  { n: '圣铁', c: '加工', mx: 0, lock: 1 },
   // ===== 神启副线 C-教团（v0.20 §八 5.3a） =====
-  hymn:           { n: '颂咏',  c: '研究', mx: 0,  lock: 1, tip: ['唱到第三遍的时候，你会发现合唱里多了一个不像狐狸的声音。'] },
+  hymn:           { n: '颂咏',  c: '研究', mx: 0,  lock: 1, unlockBy: { u: 'hymnArt' }, unlockMx: 30, tip: ['唱到第三遍的时候，你会发现合唱里多了一个不像狐狸的声音。'] },
   holyRelic:      { n: '圣骸',  c: '加工', mx: 10, lock: 1, tip: ['它什么时候来到山谷的，没人记得；要把它送走，每只狐狸都说不行。'] },
   holyScripture:  { n: '圣典',  c: '知识', mx: 5,  lock: 1, tip: ['翻一页轻一两，翻到最后整本飘起来——读得到的人最先笑。'] },
   // ===== 神启副线 C-秘仪（v0.20 §八 5.3d） =====

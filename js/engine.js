@@ -237,6 +237,23 @@ function canC(id) {
   return true;
 }
 
+// P2 资源解锁结构化：扫 RD 中所有有 unlockBy 字段的资源，
+// 若条件满足且当前 on=false，则设 on=1（+ unlockMx 时设 mx）。
+// 跟旧 e.*U 模式并存（幂等）。research()/build()/migrate() 都可调。
+function syncResUnlocks() {
+  for (const r in RD) {
+    if (!G.res[r] || G.res[r].on) continue;
+    const ub = RD[r].unlockBy;
+    if (!ub) continue;
+    let match = false;
+    if (ub.u && G.upg[ub.u]?.done) match = true;
+    if (!match && ub.b && (G.bld[ub.b]?.c || 0) > 0) match = true;
+    if (!match) continue;
+    G.res[r].on = 1;
+    if (RD[r].unlockMx && G.res[r].mx === 0) G.res[r].mx = RD[r].unlockMx;
+  }
+}
+
 function chk(q) {
   if (!q) return true;
   if (q.b) for (const [k, n] of Object.entries(q.b))
@@ -3330,6 +3347,9 @@ function migrate() {
       }
     }
   }
+  // P2 结构化资源解锁: 走 RD.unlockBy 字段（dye/wine/ink + uranium/primordial/hymn 等试点资源）
+  // 跟上面的通用 e.*U 扫描幂等（双轨）
+  syncResUnlocks();
 
   // v0.19 §七 4.5 六神系统
   if (G.deity === undefined) G.deity = null;

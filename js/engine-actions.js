@@ -47,6 +47,9 @@ function research(id) {
   var inkPactUsed = (G.inkPact === G.season);
   for (const p of UD[id].p) G.res[p.r].v -= Math.ceil(p.a * rMul);
   G.upg[id].done = 1;
+  // P2 结构化资源解锁：扫 RD.unlockBy 字段 (dye/wine/ink/uranium/primordial/hymn 等)
+  // 下面的硬编码 e.xxxU 处理跟此调用幂等并存（旧资源用 e.xxxU，新资源用 unlockBy）
+  syncResUnlocks();
   if (UD[id].e?.plankU) { G.res.plank.on = 1; G.res.plank.mx = 100; }
   if (UD[id].e?.brickU) { G.res.brick.on = 1; G.res.brick.mx = 100; }
   // 工业分支 A阶段资源解锁
