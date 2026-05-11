@@ -109,6 +109,10 @@ const RD = {
   hymn:           { n: '颂咏',  c: '研究', mx: 0,  lock: 1, tip: ['唱到第三遍的时候，你会发现合唱里多了一个不像狐狸的声音。'] },
   holyRelic:      { n: '圣骸',  c: '加工', mx: 10, lock: 1, tip: ['它什么时候来到山谷的，没人记得；要把它送走，每只狐狸都说不行。'] },
   holyScripture:  { n: '圣典',  c: '知识', mx: 5,  lock: 1, tip: ['翻一页轻一两，翻到最后整本飘起来——读得到的人最先笑。'] },
+  // ===== 神启副线 C-秘仪（v0.20 §八 5.3d） =====
+  divineInk:        { n: '神墨',   c: '研究', mx: 0,  lock: 1, tip: ['不是墨——是把神看你的眼神，凝成一滴。'] },
+  apotheosisStone:  { n: '化神石', c: '加工', mx: 8,  lock: 1, tip: ['捏在掌心，听到自己变成另一只狐狸的声音。'] },
+  forbiddenCodex:   { n: '禁典',   c: '知识', mx: 5,  lock: 1, tip: ['封面贴着三道封条。读到第二章的狐狸，回来时只记得自己叫什么。'] },
   // ===== 神启副线 B-秘仪 =====
   ambrosia: { n: '神露', c: '研究', mx: 15, lock: 1 },
   gnosis:   { n: '秘知', c: '研究', mx: 0, lock: 1 },
@@ -764,6 +768,56 @@ const BD = {
     p: [{ r: 'ambrosia', b: 8, k: 1.18 }, { r: 'scroll', b: 30, k: 1.18 }, { r: 'gnosis', b: 10, k: 1.18 }],
     e: { gnosisMx: 80, loreP: .015 },
     uq: { u: { forbiddenLore: 1 } }, sb: 'D', br: 'M', t: 'f',
+  },
+
+  // ===== 神启副线 C-秘仪（灵修+神启）（v0.20 §八 5.3d, 8 个建筑） =====
+  divinityForge: {
+    n: '化神工坊', d: '一把锤子落下去——出来的不是器物，是某只狐狸更深的形状。',
+    p: [{ r: 'gnosis', b: 12, k: 1.20 }, { r: 'ambrosia', b: 5, k: 1.20 }, { r: 'crystalSilk', b: 10, k: 1.20 }],
+    e: { divineInkP: .003, divineInkMx: 20, unrestP: .03 },
+    uq: { u: { divineInkArt: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  prophecyHall: {
+    n: '预言殿', d: '殿里没椅子——预言一来，狐狸们都站直了听。',
+    p: [{ r: 'gnosis', b: 15, k: 1.20 }, { r: 'fateSilk', b: 10, k: 1.20 }, { r: 'concrete', b: 25, k: 1.20 }],
+    e: { gnosisP: .03, _expRewardBonus: .10 },
+    uq: { u: { prophecyArt: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  etherealGate: {
+    n: '灵界通道', d: '门后没有路。但从门后回来的狐狸，眼神变了。',
+    p: [{ r: 'apotheosisStone', b: 2, k: 1.22 }, { r: 'gnosis', b: 20, k: 1.22 }, { r: 'spirit', b: 100, k: 1.22 }],
+    e: { apotheosisStoneP: .001, leylineC: 2, unrestP: .04 },
+    uq: { u: { etherealLore: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  secretCellar: {
+    n: '秘知窖', d: '地窖里堆着的不是粮食——是别处没人记得的事。',
+    p: [{ r: 'gnosis', b: 15, k: 1.15 }, { r: 'stone', b: 100, k: 1.15 }, { r: 'scroll', b: 40, k: 1.15 }],
+    e: { gnosisMx: 60, loreP: .02 },
+    uq: { u: { etherealLore: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  ambrosiaSpring: {
+    n: '神露泉', d: '泉水尝过一次，就再也不知道渴是什么。',
+    p: [{ r: 'gnosis', b: 10, k: 1.18 }, { r: 'spirit', b: 50, k: 1.18 }, { r: 'stone', b: 80, k: 1.18 }],
+    e: { ambrosiaP: .02, ambrosiaMx: 25 },
+    uq: { u: { divineInkArt: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  apotheosisAltar: {
+    n: '化神祭坛', d: '上去的狐狸不一定下来，下来的不一定是同一只。',
+    p: [{ r: 'apotheosisStone', b: 3, k: 1.25 }, { r: 'gnosis', b: 30, k: 1.25 }, { r: 'ambrosia', b: 15, k: 1.25 }],
+    e: { gnosisP: .04, _hapFlat: .02 },
+    uq: { u: { apotheosisRite: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  pureMindHall: {
+    n: '净念殿', d: '把心里多出来的那一片摘掉——剩下的，是真正能装东西的地方。',
+    p: [{ r: 'gnosis', b: 10, k: 1.18 }, { r: 'ambrosia', b: 8, k: 1.18 }, { r: 'spirit', b: 60, k: 1.18 }],
+    e: { unrestP: -.08, _hapFlat: .01 },
+    uq: { u: { pureMindLore: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
+  },
+  forbiddenSpire: {
+    n: '禁典塔', d: '塔顶常年雾——爬上去过的狐狸不愿再说自己看见过什么。',
+    p: [{ r: 'forbiddenCodex', b: 2, k: 1.22 }, { r: 'gnosis', b: 25, k: 1.22 }, { r: 'concrete', b: 30, k: 1.22 }],
+    e: { forbiddenCodexMx: 10, _researchDiscount: .05, loreM: .15 },
+    uq: { u: { forbiddenCompile: 1 } }, sb: 'D', br: 'M', t: 'f', phase: 4,
   },
 
   // ===== 通达副线 Phase A：初交（3 个建筑） =====
