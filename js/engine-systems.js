@@ -373,6 +373,7 @@ function trySpawnCaravan(silent) {
   var picked = pool[Math.floor(Math.random() * pool.length)];
   G.caravan = { id: picked, bought: {}, blueprint: null, gift: null };
   G.caravanTimer = 0;
+  if (!G.caravanEverVisited) log('商队的旗子出现在山口。斥候趴在山脊上，数清了六只外来者，一匹驮兽，还有三只瘪的口袋。', 'echo');
   G.caravanEverVisited = true;  // §14.5 修复 5：玩家见过商队后才显示商队 UI 区域
   // 图纸携带概率：基础 50% + 商贩野路子（+10%）+ 藏书阁（+2%/座 上限 +10%）+ 墨契（+15% 一次性）
   var bpChance = 0.5;

@@ -2374,8 +2374,12 @@ function meetsResThreshold(item, threshold) {
 
 function updateUnlocks() {
   // BD 加 30% 资源门槛：玩家先攒到 30% 基础造价才能看到建筑（猫国设计原则）
-  for (const k of Object.keys(BD))
-    if (!G.bld[k].on && !anyBranchLocked(BD[k]) && chk(BD[k].uq) && meetsResThreshold(BD[k])) G.bld[k].on = 1;
+  // 例外：若建筑有研究前置（uq.u）且已通过，则跳过资源阈值检查（研究已是足够的进度门控）
+  for (const k of Object.keys(BD)) {
+    var _bd = BD[k], _uq = _bd && _bd.uq;
+    var _skipThreshold = _uq && _uq.u && Object.keys(_uq.u).length > 0;
+    if (!G.bld[k].on && !anyBranchLocked(_bd) && chk(_uq) && (_skipThreshold || meetsResThreshold(_bd))) G.bld[k].on = 1;
+  }
   for (const k of Object.keys(JD))
     if (!G.job[k].on && !anyBranchLocked(JD[k]) && chk(JD[k].uq)) G.job[k].on = 1;
   for (const k of Object.keys(UD))
@@ -3171,6 +3175,9 @@ function migrate() {
   G.pendingSeasonRites = G.pendingSeasonRites || { open: false };
   G.riteIntroSeen = G.riteIntroSeen ?? false;
   G.faithIntroSeen = G.faithIntroSeen ?? false;
+  G.dyeRiteEchoDone = G.dyeRiteEchoDone ?? false;
+  G.wineRiteEchoDone = G.wineRiteEchoDone ?? false;
+  G.inkRiteEchoDone = G.inkRiteEchoDone ?? false;
   G.offlineRiteLog = G.offlineRiteLog || [];
   G.lastRiteToast = G.lastRiteToast ?? -1;
   // 文化灵术

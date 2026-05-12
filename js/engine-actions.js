@@ -155,6 +155,12 @@ function research(id) {
   if (id === 'oilExtract' || id === 'inscription') G.phase = Math.max(G.phase || 0, 3);
   if (id === 'calcination' || id === 'crystalize') G.phase = Math.max(G.phase || 0, 4);
   log('研究完成：' + UD[id].n, 'important');
+  if (id === 'councilLore') log('木匠把最后一条长凳搬进石屋。十七只狐狸陆续坐下，爪子放在膝上。角落里那只负责记录的学者拧开墨瓶，在卷轴上写了第一行字。', 'echo');
+  if (id === 'branchLore') log('路径在苔藓下分岔，如古木的根系自行寻找水源。一种选择意味着一种遗忘，而山谷的喉咙尚未学会同时吟唱两种祷词。', 'echo');
+  if (id === 'oilExtract') log('矿工凿穿第四层岩壁，黑油渗出缝来。火焰第一次舔上它的时候，整个矿洞亮了。', 'echo');
+  if (id === 'inscription') log('凿子触碰花岗岩表面的那一刻，石头内部的晶体排列方式往同一个方向偏转了三度——纹路从此被固定在矿物记忆的最深层，刻痕学会了呼吸，花岗岩不再是沉默的。', 'echo');
+  if (id === 'calcination') log('炉膛冷下来。铁匠钳出那块金属，比铁轻，比铁硬。它落在砧上时，声音比铁薄。', 'echo');
+  if (id === 'crystalize') log('感知者把命丝封进锡匣，等了十二天。打开时，丝上长满了透明的晶柱，每一根都指向同一个方向。', 'echo');
   // v0.20 §八 hotfix: branchLore 完成后立即弹强制选路对话框
   // （之前只有 migrate() 在 load 时检测 → 玩家研究完不刷新就看不到选路 → 典制页签缺主线选项）
   if (id === 'branchLore' && !G.policies?.branch && typeof showBranchMigrationModal === 'function') {
@@ -697,6 +703,9 @@ function applySeasonRites(selection, silent) {
   if (skipped.length) {
     log('资源不足，跳过：' + skipped.join('、'), 'warn');
   }
+  if (G.seasonRites.dye && !G.dyeRiteEchoDone) { G.dyeRiteEchoDone = true; log('染坊把布匹分到每间窝棚。采集者穿上新衣，袖口上的蓝还没有干透。', 'echo'); }
+  if (G.seasonRites.wine && !G.wineRiteEchoDone) { G.wineRiteEchoDone = true; log('酿师撬开第一个陶瓮的泥封。醴浆的气味飘出来，采集者端着碗在瓮前排成一行。喝完的狐狸把碗扣在石头上，擦了擦嘴，背上竹篓走进了树林。', 'echo'); }
+  if (G.seasonRites.ink && !G.inkRiteEchoDone) { G.inkRiteEchoDone = true; log('烟炱在胶中拢合之后，墨锭学会了如何在砚台上卸下自己的身体。墨汁在石面上展开，每一下研磨都在砚池里留下一个不断扩散的圆，圆圈知道今夜会写到几时。', 'echo'); }
   rAll();
 }
 
