@@ -78,7 +78,7 @@ function research(id) {
     var sbId = UD[id].e.subBranch;
     if (!G.subBranches[sbId]) {
       G.subBranches[sbId] = true;
-      log('副线「' + (sbId === 'D' ? '神启' : sbId === 'T' ? '通达' : sbId) + '」已开启。', 'important');
+      log('「' + (sbId === 'D' ? '神启' : sbId === 'T' ? '通达' : sbId) + '」之道已开启。', 'important');
       if (sbId === 'D') log('祭司从旧墟带回一卷文书，纸页已经粘在一起了。它用水汽熏了两季，才把第一页揭开。上面的字是用爪尖刻的，笔画很浅，像写的人不敢用力。祭坛是用三块平石搭的，没有装饰。第一份供奉是一撮盐，一块磨刀石，一卷重新抄好的经文。', 'echo');
     }
   }
@@ -1190,7 +1190,7 @@ function publishEdict(edictId) {
   // 检查解锁
   if (def.uq && !chk(def.uq)) { log('尚未解锁该教令。', 'warn'); return; }
   // 检查副线
-  if (!G.subBranches?.D || G.mainLine !== 'industry') { log('需要工业+神启路线。', 'warn'); return; }
+  if (!G.subBranches?.D || G.mainLine !== 'industry') { log('需要工业与神启同时开启。', 'warn'); return; }
   // 检查同一教令未激活
   for (var i = 0; i < (G._edicts || []).length; i++) {
     if (G._edicts[i].id === edictId) { log('该教令已在生效中。', 'warn'); return; }
@@ -1254,7 +1254,7 @@ function publishEdict(edictId) {
 
 // ===== v0.19 §七 4.3 飞升阶梯 =====
 function openGate() {
-  if (!G.subBranches?.D || G.mainLine !== 'mystic') { log('需要灵修+神启路线。', 'warn'); return; }
+  if (!G.subBranches?.D || G.mainLine !== 'mystic') { log('需要灵修与神启同时开启。', 'warn'); return; }
   var gateIndex = G._gates || 0;
   if (gateIndex >= GATE_DEF.length) { log('已无更多门可开。', 'warn'); return; }
   // 阶段门控：phase 4 仅前 2 门，phase 5 前 4 门，phase 6+ 全开（与 ui.js 一致）

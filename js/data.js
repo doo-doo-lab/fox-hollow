@@ -1077,7 +1077,7 @@ const UD = {
     tip: ['众狐议事，各有各的尾巴翘法。']
   },
   branchLore: {
-    n: '择路而治', d: '开启主线分叉，造物（工业）与灵术（灵修）只能择其一。',
+    n: '择路而治', d: '造物（工业）与灵术（灵修），道路在此分叉，只能择其一深耕。',
     p: [{ r: 'lore', a: 400 }, { r: 'scroll', a: 40 }],
     e: {},
     uq: { u: { polityLore: 1, policyLore: 1 }, polity: true, b: { councilHall: 3 }, custom: 7 },
@@ -3808,7 +3808,7 @@ const UPGD = {
     uq: { b: { scriptureHall: 3 } }, sb: 'D',
   },
   crossFaith: {
-    n: '信仰共鸣', d: '每座主线建筑提供虔诚产出 +1%。',
+    n: '信仰共鸣', d: '每座所择方向的建筑，额外提供虔诚产出 +1%。',
     p: [{ r: 'piety', a: 80 }, { r: 'charm', a: 30 }, { r: 'remnant', a: 5 }],
     e: { _crossFaith: 0.01 },
     uq: { b: { divineAltar: 5 } }, sb: 'D',
@@ -4332,7 +4332,7 @@ const UPGD = {
     uq: { b: { courierPost: 3 } }, sb: 'T',
   },
   crossCulture: {
-    n: '文化共鸣', d: '声誉产出 +1%/每座主线建筑（加法叠入）。',
+    n: '文化共鸣', d: '每座所择方向的建筑，声誉产出 +1%（加法叠入）。',
     p: [{ r: 'renown', a: 70 }, { r: 'charm', a: 25 }, { r: 'remnant', a: 3 }],
     e: { _crossCulture: 1 },
     uq: { b: { embassy: 5 } }, sb: 'T',
@@ -4969,7 +4969,7 @@ const POLICY = {
     cost: [{ r: 'scroll', a: 50 }, { r: 'coin', a: 40 }],
     uq: { u: { policyLore: 1 }, polity: true },
     opts: {
-      open:   { n: '通邻径', d: '解锁外交副线全部内容。', e: { diplomatResM: .10 }, pen: {},
+      open:   { n: '通邻径', d: '开启与邻邦的往来之道。', e: { diplomatResM: .10 }, pen: {},
                 special: 'G.subBranches.T = true' },
       closed: { n: '闭谷栓', d: '不开外交，换取内政加成。', e: { baseProdM: .05, buildCostM: -.03 }, pen: {},
                 special: 'G.subBranches.T = false' },
@@ -5844,7 +5844,7 @@ const ACHIEVEMENT_DATA = {
   firstPolicy:    { n: '以后就这么办',   d: '选定第一个政策' },
 
   // --- 阶段二：分支觉醒（15 个）---
-  branchChosen:   { n: '路口分叉',       d: '选定工业或灵修路线' },
+  branchChosen:   { n: '路口分叉',       d: '择定工业或灵修，深耕一道' },
   coal10:         { n: '袖口的黑',       d: '拥有 10 煤', br: 'I' },
   steel5:         { n: '一块硬过石头',   d: '拥有 5 钢', br: 'I' },
   mine3:          { n: '山的三个肚子',   d: '建造 3 座矿坑', br: 'I' },

@@ -2496,7 +2496,7 @@ function renderPolityTab() {
   // ── 副线状态面板 ──
   if (G.subBranches && (G.subBranches.D || G.subBranches.T)) {
     h += '<div class="polity-section">';
-    h += '<div class="polity-section-title">副线</div>';
+    h += '<div class="polity-section-title">辟途</div>';
     if (G.subBranches.D) h += '<div class="policy-opt policy-opt-active"><span class="policy-opt-name">神启</span><span class="policy-opt-current">已开启</span></div>';
     if (G.subBranches.T) h += '<div class="policy-opt policy-opt-active"><span class="policy-opt-name">通达</span><span class="policy-opt-current">已开启</span></div>';
     h += '</div>';
@@ -2643,15 +2643,15 @@ function showOfflineGainsModal() {
 
 // §五 2.6: 旧存档强制选路对话框（branchLore 已完成但未选路）
 function showBranchMigrationModal() {
-  document.getElementById('modal-title').textContent = '存档迁移 — 请选择路线';
-  var h = '<div style="margin-bottom:10px;font-size:12px;color:#888;">检测到旧存档：「择路而治」研究已完成，但尚未选择主线路线。请立即选择，此选择不可逆。</div>';
+  document.getElementById('modal-title').textContent = '存档迁移 — 请择道而行';
+  var h = '<div style="margin-bottom:10px;font-size:12px;color:#888;">检测到旧存档：「择路而治」研究已完成，但尚未择定方向。请立即选择，此选择不可逆。</div>';
   var opts = POLICY.branch.opts;
   for (var oid in opts) {
     var o = opts[oid];
     h += '<div style="margin-bottom:8px;padding:8px;border:1px solid #ddd;background:#fafafa;cursor:pointer;" onmouseenter="this.style.borderColor=\'#46739a\'" onmouseleave="this.style.borderColor=\'#ddd\'">';
     h += '<div style="font-weight:bold;color:#333;">' + o.n + '</div>';
     h += '<div style="font-size:11px;color:#888;margin:2px 0;">' + o.d + '</div>';
-    h += '<div style="margin-top:6px;"><button class="confirm-yes" onclick="setPolicy(\'branch\',\'' + oid + '\');closeModal();log(\'路线已确立：' + o.n + '。\',\'important\')">选择此路线</button></div>';
+    h += '<div style="margin-top:6px;"><button class="confirm-yes" onclick="setPolicy(\'branch\',\'' + oid + '\');closeModal()">确认选择</button></div>';
     h += '</div>';
   }
   document.getElementById('modal-body').innerHTML = h;
