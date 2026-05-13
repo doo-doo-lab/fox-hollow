@@ -4585,13 +4585,13 @@ const UPGD = {
 // ===== 神启副线 A阶段：仪式 =====
 const RITUALS = {
   bless: {
-    n: '祈福', d: '本季全职业产出 +20%。',
-    cost: [{ r: 'piety', a: 15 }],
+    n: '祈福', d: '未来 2 季内全产出（建筑+职业）+40%。',
+    cost: [{ r: 'piety', a: 25 }],
     uq: { u: { graceLore: 1 } }, sb: 'D',
   },
   purify: {
-    n: '净化', d: '污染/内乱 -15。',
-    cost: [{ r: 'holyOil', a: 3 }],
+    n: '净化', d: '立即消除污染与躁念各 50。',
+    cost: [{ r: 'holyOil', a: 4 }],
     uq: { u: { graceLore: 1 } }, sb: 'D',
   },
 };

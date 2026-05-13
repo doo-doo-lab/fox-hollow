@@ -1562,9 +1562,9 @@ function calcR() {
     }
   }
 
-  // ===== 祈福仪式：本季全职业产出 +20% =====
-  if (G._blessSeason === G.season) {
-    for (const k of Object.keys(r)) if (r[k] > 0) r[k] *= 1.2;
+  // ===== 祈福仪式：持续 2 季全产出 +40%（仪式比同位灵术更广更长）=====
+  if (G._blessUntilTick && G.tick < G._blessUntilTick) {
+    for (const k of Object.keys(r)) if (r[k] > 0) r[k] *= 1.4;
   }
 
   // ===== v0.18 §六 3.4 占卜年签效果（产出类） =====
@@ -3116,7 +3116,7 @@ function resetG() {
   G.offlineGains = null;
   // v0.18 神启副线
   G._graceBonus = 0; G._graceCap = 0.50;
-  G._ritualCD = {}; G._blessSeason = -1;
+  G._ritualCD = {}; G._blessUntilTick = 0;
   // v0.19 教团：教令系统
   G._edicts = []; G._edictCD = {}; G._edictCDReduce = 0;
   G._holyGearBonus = 0; G._pietyMxPerm = 0;
@@ -3359,7 +3359,7 @@ function migrate() {
   G._graceBonus = G._graceBonus || 0;
   G._graceCap = G._graceCap ?? 0.50;
   G._ritualCD = G._ritualCD || {};
-  G._blessSeason = G._blessSeason ?? -1;
+  G._blessUntilTick = G._blessUntilTick ?? 0;
 
   // v0.18 §六 3.4 占卜系统
   G._divination = G._divination ?? null;

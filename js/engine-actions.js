@@ -1193,16 +1193,16 @@ function castRitual(id) {
   for (var i = 0; i < ritual.cost.length; i++) {
     G.res[ritual.cost[i].r].v -= ritual.cost[i].a;
   }
-  // 设置冷却（1 = 下季可用）
-  G._ritualCD[id] = 1;
-  // 应用效果
+  // 应用效果（每仪式独立冷却）
   if (id === 'bless') {
-    G._blessSeason = G.season;
-    log('祈福仪式完成，本季全产出 +20%。', 'important');
+    G._blessUntilTick = G.tick + 2 * DPS * TPD;
+    G._ritualCD[id] = 3;
+    log('祈福仪式完成，未来 2 季内全产出 +40%。', 'important');
   } else if (id === 'purify') {
-    G.pollution = Math.max(0, (G.pollution || 0) - 15);
-    G.unrest = Math.max(0, (G.unrest || 0) - 15);
-    log('净化仪式完成，污染与躁念各 -15。', 'important');
+    G.pollution = Math.max(0, (G.pollution || 0) - 50);
+    G.unrest = Math.max(0, (G.unrest || 0) - 50);
+    G._ritualCD[id] = 2;
+    log('净化仪式完成，污染与躁念各 -50。', 'important');
   }
   rAll();
 }
