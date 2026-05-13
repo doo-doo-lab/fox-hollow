@@ -2035,19 +2035,19 @@ function rTC() {
       if (G.upgd[uid]?.done) continue;
       if (!chk(UPGD[uid].uq) || anyBranchLocked(UPGD[uid])) continue;
       var ug = UPGD[uid];
-      var canBuy = true;
+      var canBuy = canUpgd(uid);
       var costStr = ug.p.map(function(p) {
         var have = G.res[p.r].v;
-        var ok = have >= p.a;
-        if (!ok) canBuy = false;
-        return (ok ? '' : '<span class="short">') + RD[p.r].n + ' ' + fmt(p.a) + (ok ? '' : '</span>');
+        return (have < p.a ? '<span class="short">' : '') +
+          RD[p.r].n + ' ' + fmt(p.a) + (have < p.a ? '</span>' : '');
       }).join(', ');
-      var sec = { desc: ug.d };
-      divUpgH += hpWrap(
-        '<button class="btn' + (canBuy ? '' : ' dis') + '" onclick="buyUpgd(\'' + uid + '\')">'
-        + ug.n + '</button><span class="cost">' + costStr + '</span>',
-        sec
-      );
+      var sec = { desc: ug.d, effects: upgdEffects(ug.e), tip: ug.tip ? pickTip('upgd_' + uid, ug.tip) : '' };
+      var nameHtml = hpWrap('<span class="cr-name">' + ug.n + '</span>', sec);
+      divUpgH += '<div class="cr-row upgd-row"><div class="cr-top">' +
+        nameHtml +
+        '<span class="cr-cost">' + costStr + '</span>' +
+        '<button class="cr-btn" onclick="buyUpgd(\'' + uid + '\')" ' +
+        (canBuy ? '' : 'disabled') + '>购买</button></div></div>';
     }
     if (divUpgH) {
       h += '<div class="section-label">升级</div>' + divUpgH;
@@ -2055,7 +2055,7 @@ function rTC() {
 
     // 下区：仪式
     if (G.upg.graceLore?.done && typeof RITUALS !== 'undefined') {
-      h += '<div class="section-label">仪式</div>';
+      var ritH = '';
       for (var rid in RITUALS) {
         var rt = RITUALS[rid];
         if (!chk(rt.uq) || anyBranchLocked(rt)) continue;
@@ -2067,13 +2067,15 @@ function rTC() {
           if (!ok) canCast = false;
           return (ok ? '' : '<span class="short">') + RD[p.r].n + ' ' + fmt(p.a) + (ok ? '' : '</span>');
         }).join(', ');
-        var sec = { desc: rt.d + (cd ? ' (冷却中)' : '') };
-        h += hpWrap(
-          '<button class="btn' + (canCast ? '' : ' dis') + '" onclick="castRitual(\'' + rid + '\')">'
-          + rt.n + (cd ? ' ⏳' : '') + '</button><span class="cost">' + costStr + '</span>',
-          sec
-        );
+        var rSec = { desc: rt.d + (cd ? ' (冷却中)' : '') };
+        var rNameHtml = hpWrap('<span class="cr-name">' + rt.n + (cd ? ' ⏳' : '') + '</span>', rSec);
+        ritH += '<div class="cr-row"><div class="cr-top">' +
+          rNameHtml +
+          '<span class="cr-cost">' + costStr + '</span>' +
+          '<button class="cr-btn" onclick="castRitual(\'' + rid + '\')" ' +
+          (canCast ? '' : 'disabled') + '>施法</button></div></div>';
       }
+      if (ritH) h += '<div class="section-label">仪式</div>' + ritH;
     }
 
     // v0.19 §七 4.3 教团：教令面板
