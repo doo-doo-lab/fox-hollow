@@ -2851,7 +2851,7 @@ function startGame() {
     showOfflineGainsModal();
   }
   rAll();
-  setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
+  setInterval(function() { if (window._offlineSimRunning) return; tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
   setInterval(save, 30000);
 
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)

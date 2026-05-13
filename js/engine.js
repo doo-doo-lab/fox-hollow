@@ -2434,14 +2434,48 @@ function rmFox() {
 }
 
 // ===== 离线/后台进度补算 =====
-function simulateOffline(seconds) {
+// 离线补算遮罩（避免补算期间页面假死）
+function showOfflineOverlay() {
+  if (document.getElementById('offline-overlay')) return;
+  var div = document.createElement('div');
+  div.id = 'offline-overlay';
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;';
+  div.innerHTML = '<div style="background:#222;padding:24px 32px;border-radius:4px;text-align:center;min-width:280px;">' +
+    '<div style="margin-bottom:12px;">正在补算离线收益…</div>' +
+    '<div style="height:8px;background:#444;border-radius:4px;overflow:hidden;">' +
+    '<div id="offline-progress-fill" style="height:100%;width:0%;background:#46739a;transition:width 0.1s;"></div>' +
+    '</div>' +
+    '<div id="offline-progress-text" style="margin-top:8px;font-size:12px;color:#aaa;">0%</div>' +
+    '</div>';
+  document.body.appendChild(div);
+}
+function updateOfflineOverlay(ratio) {
+  var fill = document.getElementById('offline-progress-fill');
+  var text = document.getElementById('offline-progress-text');
+  var pct = Math.round(ratio * 100);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = pct + '%';
+}
+function hideOfflineOverlay() {
+  var div = document.getElementById('offline-overlay');
+  if (div) div.remove();
+}
+
+function simulateOffline(seconds, onComplete) {
   // 限制最大补算时间为 24 小时
   seconds = Math.min(seconds, 86400);
   var ticksToRun = Math.floor(seconds * 1000 / TMS);
+  if (ticksToRun <= 0) { if (onComplete) onComplete(); return; }
   var offlineFogCount = 0; // 限制离线灰雾事件次数
   var offlineDemonCount = 0; // 限制离线心魔事件次数
-  // 静默跑 tick（不输出日志、不触发迁入）
-  for (var i = 0; i < ticksToRun; i++) {
+  var ticksDone = 0;
+  var CHUNK = 500;  // 每 setTimeout 跑 500 ticks（约 50-100ms 计算量，剩下让 UI 喘气）
+  var showProgress = seconds >= 60;  // 离开 ≥1 分钟才显示进度条
+  window._offlineSimRunning = true;
+  if (showProgress) showOfflineOverlay();
+
+  // 单 tick 的所有工作（与原 for 循环体完全一致）
+  function _offlineTickOnce() {
     G.tick++;
     G.day += 1 / TPD;
     if (G.day >= DPS) {
@@ -2552,47 +2586,69 @@ function simulateOffline(seconds) {
       }
     }
   }
-  // 显示补算结果（离开不足 5 分钟不提示——浏览器后台标签节流的 30-90 秒小 gap 静默补算，
-  // 避免日志被「离开了 59 秒」刷屏）
-  if (seconds < 300) return;
-  var mins = Math.floor(seconds / 60);
-  var hrs = Math.floor(mins / 60);
-  var msg;
-  if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
-  else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
-  else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
-  log(msg + '，资源已自动补算。', 'important');
-  // 显示离线期间返回的远行
-  if (G.pendingNarr && G.pendingNarr.length) {
-    for (var i = 0; i < G.pendingNarr.length; i++)
-      log(G.pendingNarr[i], 'echo');
-    G.pendingNarr = [];
-  }
-  // v0.15 节令离线总结
-  if (G.offlineRiteLog && G.offlineRiteLog.length) {
-    var consumed = { dye: 0, wine: 0, ink: 0 };
-    var trinityCount = 0;
-    var seasonsCount = G.offlineRiteLog.length;
-    for (var i = 0; i < G.offlineRiteLog.length; i++) {
-      var rec = G.offlineRiteLog[i];
-      if (rec.applied?.dye) consumed.dye++;
-      if (rec.applied?.wine) consumed.wine++;
-      if (rec.applied?.ink) consumed.ink++;
-      if (rec.applied?.all) trinityCount++;
+  // 收尾（结果日志 + 远行回执 + 节令汇总），跑完所有 tick 后执行
+  function _offlineFinalize() {
+    window._offlineSimRunning = false;
+    lastRealTime = Date.now();  // 避免主循环 tick() 立即又触发一次 gap 补算
+    if (showProgress) hideOfflineOverlay();
+    // 显示补算结果（离开不足 5 分钟不提示——浏览器后台标签节流的 30-90 秒小 gap 静默补算，
+    // 避免日志被「离开了 59 秒」刷屏）
+    if (seconds >= 300) {
+      var mins = Math.floor(seconds / 60);
+      var hrs = Math.floor(mins / 60);
+      var msg;
+      if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
+      else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
+      else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
+      log(msg + '，资源已自动补算。', 'important');
+      // 显示离线期间返回的远行
+      if (G.pendingNarr && G.pendingNarr.length) {
+        for (var i = 0; i < G.pendingNarr.length; i++)
+          log(G.pendingNarr[i], 'echo');
+        G.pendingNarr = [];
+      }
+      // v0.15 节令离线总结
+      if (G.offlineRiteLog && G.offlineRiteLog.length) {
+        var consumed = { dye: 0, wine: 0, ink: 0 };
+        var trinityCount = 0;
+        var seasonsCount = G.offlineRiteLog.length;
+        for (var i = 0; i < G.offlineRiteLog.length; i++) {
+          var rec = G.offlineRiteLog[i];
+          if (rec.applied?.dye) consumed.dye++;
+          if (rec.applied?.wine) consumed.wine++;
+          if (rec.applied?.ink) consumed.ink++;
+          if (rec.applied?.all) trinityCount++;
+        }
+        var parts = [];
+        if (consumed.dye > 0) parts.push('彩络 -' + consumed.dye);
+        if (consumed.wine > 0) parts.push('醴浆 -' + consumed.wine);
+        if (consumed.ink > 0) parts.push('墨锭 -' + consumed.ink);
+        if (parts.length) {
+          var rmsg = '离开期间 ' + seasonsCount + ' 季节令均按上次设置应用（' + parts.join('，') + '）';
+          if (trinityCount > 0) rmsg += '；其中 ' + trinityCount + ' 季三全礼生效';
+          log(rmsg, 'event');
+        } else {
+          log('离开期间 ' + seasonsCount + ' 季节令均因资源不足跳过。', 'warn');
+        }
+        G.offlineRiteLog = [];
+      }
     }
-    var parts = [];
-    if (consumed.dye > 0) parts.push('彩络 -' + consumed.dye);
-    if (consumed.wine > 0) parts.push('醴浆 -' + consumed.wine);
-    if (consumed.ink > 0) parts.push('墨锭 -' + consumed.ink);
-    if (parts.length) {
-      var rmsg = '离开期间 ' + seasonsCount + ' 季节令均按上次设置应用（' + parts.join('，') + '）';
-      if (trinityCount > 0) rmsg += '；其中 ' + trinityCount + ' 季三全礼生效';
-      log(rmsg, 'event');
+    if (onComplete) onComplete();
+  }
+
+  // 分片驱动：每 setTimeout 跑 CHUNK 个 tick，让出主线程
+  function _runChunk() {
+    var endIdx = Math.min(ticksDone + CHUNK, ticksToRun);
+    for (var j = ticksDone; j < endIdx; j++) _offlineTickOnce();
+    ticksDone = endIdx;
+    if (ticksDone < ticksToRun) {
+      if (showProgress) updateOfflineOverlay(ticksDone / ticksToRun);
+      setTimeout(_runChunk, 0);
     } else {
-      log('离开期间 ' + seasonsCount + ' 季节令均因资源不足跳过。', 'warn');
+      _offlineFinalize();
     }
-    G.offlineRiteLog = [];
   }
+  setTimeout(_runChunk, 0);
 }
 
 // ===== §五 2.9 成就系统 =====
@@ -2670,8 +2726,7 @@ function tick() {
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
   if (gap > 1.5) {
-    simulateOffline(gap - TMS / 1000);
-    rAll();
+    simulateOffline(gap - TMS / 1000, function() { rAll(); });
     return;
   }
 
@@ -3437,17 +3492,19 @@ function load() {
           // 快照离线前资源
           var before = {};
           for (var k in G.res) { if (G.res[k].on) before[k] = G.res[k].v; }
-          simulateOffline(offlineGap);
-          // 计算增量
-          var gains = {};
-          var capped = [];
-          for (var k in G.res) {
-            if (!G.res[k].on) continue;
-            var delta = G.res[k].v - (before[k] || 0);
-            if (Math.abs(delta) > 0.005) gains[k] = Math.round(delta * 100) / 100;
-            if (G.res[k].mx > 0 && G.res[k].v >= G.res[k].mx - 0.01) capped.push(k);
-          }
-          G.offlineGains = { duration: Math.min(offlineGap, 86400), gains: gains, capped: capped };
+          simulateOffline(offlineGap, function() {
+            // 计算增量（补算完成后才能读到正确终值）
+            var gains = {};
+            var capped = [];
+            for (var k in G.res) {
+              if (!G.res[k].on) continue;
+              var delta = G.res[k].v - (before[k] || 0);
+              if (Math.abs(delta) > 0.005) gains[k] = Math.round(delta * 100) / 100;
+              if (G.res[k].mx > 0 && G.res[k].v >= G.res[k].mx - 0.01) capped.push(k);
+            }
+            G.offlineGains = { duration: Math.min(offlineGap, 86400), gains: gains, capped: capped };
+            if (typeof rAll === 'function') rAll();
+          });
         }
       }
     }
@@ -3517,7 +3574,7 @@ function copyCode() {
 function showCodeImport() {
   document.getElementById('modal-title').textContent = '导入存档码';
   document.getElementById('modal-body').innerHTML =
-    '<textarea id="code-in" placeholder="在此粘贴存档码…" style="width:100%;height:100px;font-size:11px;font-family:monospace;resize:vertical;border:1px solid #ccc;padding:4px;"></textarea>' +
+    '<textarea id="code-in" maxlength="500000" placeholder="在此粘贴存档码…" style="width:100%;height:100px;font-size:11px;font-family:monospace;resize:vertical;border:1px solid #ccc;padding:4px;"></textarea>' +
     '<div style="margin-top:6px;">' +
     '<button onclick="applyCode()" style="padding:3px 12px;cursor:pointer;border:1px solid #bbb;background:#fff;font-size:12px;">恢复存档</button>' +
     '<span id="import-msg" style="margin-left:8px;font-size:12px;"></span></div>';
@@ -3527,6 +3584,13 @@ function showCodeImport() {
 function applyCode() {
   var code = document.getElementById('code-in').value.trim();
   if (!code) return;
+  // 防止粘了非存档码的大文件（zip/图片等）导致 atob/JSON.parse 同步冻死主线程
+  if (code.length > 500000) {
+    document.getElementById('import-msg').style.color = '#b00';
+    document.getElementById('import-msg').textContent = '内容过大（' + Math.round(code.length / 1024) + ' KB）——不像是存档码。';
+    log('存档码导入失败：内容过大。', 'warn');
+    return;
+  }
   try {
     var json = decodeURIComponent(escape(atob(code)));
     var data = JSON.parse(json);
