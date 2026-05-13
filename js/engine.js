@@ -604,6 +604,8 @@ function calcPollution() {
     }
   }
   G.pollutionRate = rate;
+  // 净化仪式：一次性永久 -30% 污染产出
+  if (G._ritualsPerformed && G._ritualsPerformed.purify) G.pollutionRate *= 0.70;
   // v0.18 §六 3.4 占卜年签：隐逸签污染产出 -10%
   var _divPoll = getDivinationEffects();
   if (_divPoll && _divPoll.bonus.pollReduce) G.pollutionRate *= (1 - _divPoll.bonus.pollReduce);
@@ -1562,9 +1564,9 @@ function calcR() {
     }
   }
 
-  // ===== 祈福仪式：持续 2 季全产出 +40%（仪式比同位灵术更广更长）=====
-  if (G._blessUntilTick && G.tick < G._blessUntilTick) {
-    for (const k of Object.keys(r)) if (r[k] > 0) r[k] *= 1.4;
+  // ===== 祈福仪式：一次性永久 +15% 全产出 =====
+  if (G._ritualsPerformed && G._ritualsPerformed.bless) {
+    for (const k of Object.keys(r)) if (r[k] > 0) r[k] *= 1.15;
   }
 
   // ===== v0.18 §六 3.4 占卜年签效果（产出类） =====
@@ -3116,7 +3118,7 @@ function resetG() {
   G.offlineGains = null;
   // v0.18 神启副线
   G._graceBonus = 0; G._graceCap = 0.50;
-  G._ritualCD = {}; G._blessUntilTick = 0;
+  G._ritualCD = {}; G._blessUntilTick = 0; G._ritualsPerformed = {};
   // v0.19 教团：教令系统
   G._edicts = []; G._edictCD = {}; G._edictCDReduce = 0;
   G._holyGearBonus = 0; G._pietyMxPerm = 0;
@@ -3360,6 +3362,7 @@ function migrate() {
   G._graceCap = G._graceCap ?? 0.50;
   G._ritualCD = G._ritualCD || {};
   G._blessUntilTick = G._blessUntilTick ?? 0;
+  G._ritualsPerformed = G._ritualsPerformed || {};
 
   // v0.18 §六 3.4 占卜系统
   G._divination = G._divination ?? null;

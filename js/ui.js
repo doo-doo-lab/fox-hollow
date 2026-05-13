@@ -2081,6 +2081,8 @@ function rTC() {
       for (var rid in RITUALS) {
         var rt = RITUALS[rid];
         if (!chk(rt.uq) || anyBranchLocked(rt)) continue;
+        // 一次性永久仪式：已完成则不再显示
+        if (rt.perm && G._ritualsPerformed && G._ritualsPerformed[rid]) continue;
         var cd = (G._ritualCD && G._ritualCD[rid] > 0);
         var canCast = !cd;
         var costStr = rt.cost.map(function(p) {

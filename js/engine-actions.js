@@ -1182,27 +1182,25 @@ function castRitual(id) {
   if (!ritual) return;
   if (!chk(ritual.uq)) return;
   if (anyBranchLocked(ritual)) return;
-  // 冷却检查
-  if (!G._ritualCD) G._ritualCD = {};
-  if (G._ritualCD[id] > 0) { log('仪式尚在冷却中。', 'warn'); return; }
+  // 一次性永久仪式：已完成则不能再施
+  if (!G._ritualsPerformed) G._ritualsPerformed = {};
+  if (ritual.perm && G._ritualsPerformed[id]) {
+    log('该仪式已经举行过，永久生效中。', 'warn'); return;
+  }
   // 费用检查
   for (var i = 0; i < ritual.cost.length; i++) {
-    if (G.res[ritual.cost[i].r].v < ritual.cost[i].a) { log('资源不足。', 'warn'); return; }
+    if (G.res[ritual.cost[i].r].v < ritual.cost[i].a) { log('资源不足，无法举行仪式。', 'warn'); return; }
   }
   // 扣除费用
   for (var i = 0; i < ritual.cost.length; i++) {
     G.res[ritual.cost[i].r].v -= ritual.cost[i].a;
   }
-  // 应用效果（每仪式独立冷却）
+  // 应用永久效果
+  G._ritualsPerformed[id] = true;
   if (id === 'bless') {
-    G._blessUntilTick = G.tick + 2 * DPS * TPD;
-    G._ritualCD[id] = 3;
-    log('祈福仪式完成，未来 2 季内全产出 +40%。', 'important');
+    log('祈福仪式完成。山谷自此全产出永久 +15%——神恩长存。', 'important');
   } else if (id === 'purify') {
-    G.pollution = Math.max(0, (G.pollution || 0) - 50);
-    G.unrest = Math.max(0, (G.unrest || 0) - 50);
-    G._ritualCD[id] = 2;
-    log('净化仪式完成，污染与躁念各 -50。', 'important');
+    log('净化仪式完成。山谷污染产出永久 -30%——浊气自消。', 'important');
   }
   rAll();
 }

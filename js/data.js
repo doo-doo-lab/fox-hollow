@@ -4583,16 +4583,19 @@ const UPGD = {
 };
 
 // ===== 神启副线 A阶段：仪式 =====
+// 仪式 = 一次性永久效果。门槛高、消耗大，施完即永久生效，仪式从面板消失。
 const RITUALS = {
   bless: {
-    n: '祈福', d: '未来 2 季内全产出（建筑+职业）+40%。',
-    cost: [{ r: 'piety', a: 25 }],
-    uq: { u: { graceLore: 1 } }, sb: 'D',
+    n: '祈福', d: '永久全产出 +15%（一次性仪式，无法重复）。',
+    cost: [{ r: 'piety', a: 300 }, { r: 'holyOil', a: 30 }],
+    perm: true,
+    uq: { u: { graceLore: 1, scriptureLore: 1 }, b: { scriptureHall: 3, divineAltar: 3 } }, sb: 'D',
   },
   purify: {
-    n: '净化', d: '立即消除污染与躁念各 50。',
-    cost: [{ r: 'holyOil', a: 4 }],
-    uq: { u: { graceLore: 1 } }, sb: 'D',
+    n: '净化', d: '永久污染产出 -30%（一次性仪式，无法重复）。',
+    cost: [{ r: 'holyOil', a: 40 }, { r: 'ancCoin', a: 30 }, { r: 'stone', a: 200 }],
+    perm: true,
+    uq: { u: { graceLore: 1 }, b: { divineAltar: 5 } }, sb: 'D',
   },
 };
 
