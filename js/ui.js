@@ -2136,11 +2136,12 @@ function rTC() {
         if (G._edicts) { for (var _ea = 0; _ea < G._edicts.length; _ea++) { if (G._edicts[_ea].id === eid) { alreadyActive = true; break; } } }
         if (alreadyActive) canIssue = false;
         var eSec = { desc: '持续 ' + ed.dur + ' 季' + (eCD ? ' (冷却中: ' + G._edictCD[eid] + '季)' : '') + (alreadyActive ? ' (已生效)' : '') };
-        h += hpWrap(
-          '<button class="btn' + (canIssue ? '' : ' dis') + '" onclick="publishEdict(\'' + eid + '\')">'
-          + ed.n + (eCD ? ' ⏳' : '') + '</button><span class="cost">' + eCostStr.join(', ') + '</span>',
-          eSec
-        );
+        var eNameHtml = hpWrap('<span class="cr-name">' + ed.n + (eCD ? ' ⏳' : '') + '</span>', eSec);
+        h += '<div class="cr-row"><div class="cr-top">' +
+          eNameHtml +
+          '<span class="cr-cost">' + eCostStr.join(', ') + '</span>' +
+          '<button class="cr-btn" onclick="publishEdict(\'' + eid + '\')" ' +
+          (canIssue ? '' : 'disabled') + '>颁布</button></div></div>';
       }
     }
 
@@ -2174,11 +2175,12 @@ function rTC() {
             gCostStr.push((ok ? '' : '<span class="short">') + (RD[gr] ? RD[gr].n : gr) + ' ' + fmt(need) + (ok ? '' : '</span>'));
           }
           var gSec = { desc: nextG.tip };
-          h += hpWrap(
-            '<button class="btn' + (canOpen ? '' : ' dis') + '" onclick="openGate()">'
-            + nextG.n + '</button><span class="cost">' + gCostStr.join(', ') + '</span>',
-            gSec
-          );
+          var gNameHtml = hpWrap('<span class="cr-name">' + nextG.n + '</span>', gSec);
+          h += '<div class="cr-row"><div class="cr-top">' +
+            gNameHtml +
+            '<span class="cr-cost">' + gCostStr.join(', ') + '</span>' +
+            '<button class="cr-btn" onclick="openGate()" ' +
+            (canOpen ? '' : 'disabled') + '>开门</button></div></div>';
         } else {
           h += '<div style="color:#999;font-size:12px;">下一扇门尚未开放（需更高阶段）。</div>';
         }
@@ -2253,11 +2255,12 @@ function rTC() {
             return (ok ? '' : '<span class="short">') + (RD[p.r] ? RD[p.r].n : p.r) + ' ' + fmt(p.a) + (ok ? '' : '</span>');
           }).join(', ');
           var drSec = { desc: drt.d + (drCD ? ' (冷却: ' + G._deityRitualCD[drid] + '季)' : '') + (drt.dur > 0 ? ' [持续' + drt.dur + '季]' : '') };
-          h += hpWrap(
-            '<button class="btn' + (drCan ? '' : ' dis') + '" onclick="castDeityRitual(\'' + drid + '\')">'
-            + drt.n + (drCD ? ' ⏳' : '') + '</button><span class="cost">' + drCostStr + '</span>',
-            drSec
-          );
+          var drNameHtml = hpWrap('<span class="cr-name">' + drt.n + (drCD ? ' ⏳' : '') + '</span>', drSec);
+          h += '<div class="cr-row"><div class="cr-top">' +
+            drNameHtml +
+            '<span class="cr-cost">' + drCostStr + '</span>' +
+            '<button class="cr-btn" onclick="castDeityRitual(\'' + drid + '\')" ' +
+            (drCan ? '' : 'disabled') + '>施法</button></div></div>';
         }
         // 大仪式进行中提示
         if (G._deityRitualBuff) {
