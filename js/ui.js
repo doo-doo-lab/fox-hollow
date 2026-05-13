@@ -88,6 +88,20 @@ function pickTip(key, arr) {
 // label: 显示的名称文字
 // sections: { desc, effects[], notes[], tip }
 // opts: { tag, cls, onclick } 外层标签配置
+// B2 智能去重：判断 effect 行是否已经被 desc 覆盖
+// 规则：effect 里的所有数字都出现在 desc，且至少一个 2+ 字中文词也出现 → 视为重复
+function _effectSubsumedByDesc(desc, effect) {
+  var plainDesc = desc.replace(/<[^>]+>/g, '');  // 剥 HTML 标签
+  var plainEff = effect.replace(/<[^>]+>/g, '');
+  var nums = plainEff.match(/[+\-]?\d+(?:\.\d+)?%?/g) || [];
+  if (!nums.length) return false;
+  var words = plainEff.match(/[一-鿿]{2,}/g) || [];
+  if (!words.length) return false;
+  var allNumsInDesc = nums.every(function(n) { return plainDesc.indexOf(n) !== -1; });
+  var someWordInDesc = words.some(function(w) { return plainDesc.indexOf(w) !== -1; });
+  return allNumsInDesc && someWordInDesc;
+}
+
 function hpWrap(label, sections, opts) {
   opts = opts || {};
   var tag = opts.tag || 'span';
@@ -96,9 +110,17 @@ function hpWrap(label, sections, opts) {
   var h = '<' + tag + ' class="hp-wrap ' + cls + '"' + onclick + '>';
   h += label;
   h += '<div class="hp">';
+  // B2: 若 desc 已覆盖所有 effect 行，去掉 effect 区
+  var effects = sections.effects;
+  if (sections.desc && effects && effects.length) {
+    var allCovered = effects.every(function(eff) {
+      return _effectSubsumedByDesc(sections.desc, eff);
+    });
+    if (allCovered) effects = null;
+  }
   if (sections.desc) h += '<div class="hp-desc">' + sections.desc + '</div>';
-  if (sections.effects && sections.effects.length)
-    h += '<div class="hp-eff">' + sections.effects.join('<br>') + '</div>';
+  if (effects && effects.length)
+    h += '<div class="hp-eff">' + effects.join('<br>') + '</div>';
   if (sections.notes && sections.notes.length)
     h += '<div class="hp-note">' + sections.notes.join('<br>') + '</div>';
   if (sections.tip) h += '<div class="hp-tip">' + sections.tip + '</div>';

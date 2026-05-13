@@ -910,7 +910,7 @@ const JD = {
   pactChanneler:   { n: '契灵使', d: '灵契沟通', desc: '当前活跃灵契产出+5%/人，灵契祭坛效果+3%/人', e: {}, br: 'M', phase: 4, uq: { u: { spiritPactLore: 1 } } },
 
   // ===== 神启副线 A阶段 =====
-  priest: { n: '祭司', e: { pietyP: .04 }, uq: { b: { scriptureHall: 1 } }, sb: 'D' },
+  priest: { n: '祭司', d: '诵经积虔', desc: '虔诚+0.04/s（需经阁）', e: { pietyP: .04 }, uq: { b: { scriptureHall: 1 } }, sb: 'D' },
 
   // ===== 神启副线 B-教团 =====
   fanatic:   { n: '狂信者', d: '狂热信徒', desc: '虔诚+0.03/s，每多1名狂信者所有狂信者产出+5%', e: { pietyP: .03 }, uq: { b: { edictHall: 1 } }, sb: 'D', br: 'I' },
