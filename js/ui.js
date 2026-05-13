@@ -88,6 +88,26 @@ function pickTip(key, arr) {
 // label: 显示的名称文字
 // sections: { desc, effects[], notes[], tip }
 // opts: { tag, cls, onclick } 外层标签配置
+// 神祇/教派被动效果字段 → 中文描述（避免 hover 里出现 bldCostM/stoneM 等 dev 名）
+var _PASSIVE_LABEL = {
+  _bldCostM: '建筑造价', _stoneM: '碎石产出', _brickM: '砖块产出',
+  _hapFlat: '满意度', _hapDecayReduce: '满意度衰减',
+  _gatherM: '手动采集', _charmM: '符咒产出', _spellBoost: '灵术效果',
+  _loreM: '学识产出', _scrollM: '卷轴产出', _scrollCraftM: '卷轴工艺',
+  _maxFoxFlat: '狐狸上限', _jobEffM: '职业效率',
+  _caravanProb: '商队概率', _caravanReward: '商队报酬',
+  _coinM: '铜钱产出', _bldHpM: '建筑耐久', _baseProdM: '基础产出',
+  _pietyM: '虔诚产出', _foodM: '食物产出',
+  _researchDiscount: '研究花费折扣', _expGainM: '远行收益',
+  _tradeDiscount: '贸易折扣',
+};
+function _passiveLabel(k, v) {
+  var label = _PASSIVE_LABEL[k] || k.replace(/^_/, '');
+  var sign = (typeof v === 'number' && v < 0) ? '' : '+';
+  var val = (typeof v === 'number' && Math.abs(v) < 1) ? (v * 100).toFixed(0) + '%' : v;
+  return label + ' ' + sign + val;
+}
+
 // B2 智能去重：判断 effect 行是否已经被 desc 覆盖
 // 规则：effect 里的所有数字都出现在 desc，且至少一个 2+ 字中文词也出现 → 视为重复
 function _effectSubsumedByDesc(desc, effect) {
@@ -2198,20 +2218,17 @@ function rTC() {
         for (var did in DEITY_DATA) {
           var dd = DEITY_DATA[did];
           var descParts = [];
-          for (var pk in dd.passive) {
-            var v = dd.passive[pk];
-            descParts.push(pk.replace(/^_/,'') + (v > 0 ? ' +' : ' ') + (Math.abs(v) < 1 ? (v*100).toFixed(0)+'%' : v));
-          }
+          for (var pk in dd.passive) descParts.push(_passiveLabel(pk, dd.passive[pk]));
           if (dd.passiveByLine) {
             var lp = dd.passiveByLine[G.mainLine] || {};
-            for (var lpk in lp) descParts.push(lpk.replace(/^_/,'') + ' +' + (Math.abs(lp[lpk]) < 1 ? (lp[lpk]*100).toFixed(0)+'%' : lp[lpk]));
+            for (var lpk in lp) descParts.push(_passiveLabel(lpk, lp[lpk]));
           }
           var dSec = { desc: dd.theme + ' — ' + descParts.join('，') };
-          h += hpWrap(
-            '<button class="btn" onclick="chooseDeity(\'' + did + '\')">'
-            + dd.n + '</button>',
-            dSec
-          );
+          var dNameHtml = hpWrap('<span class="cr-name">' + dd.n + '</span>', dSec);
+          h += '<div class="cr-row"><div class="cr-top">' +
+            dNameHtml +
+            '<button class="cr-btn" onclick="chooseDeity(\'' + did + '\')">选择</button>' +
+            '</div></div>';
         }
       } else {
         // 已选神：显示当前主神信息
@@ -2227,16 +2244,14 @@ function rTC() {
             var sdef = SECT_DATA[sid];
             var isCur = (G.sect === sid);
             var sectDesc = [];
-            for (var spk in sdef.passive) {
-              var sv = sdef.passive[spk];
-              sectDesc.push(spk.replace(/^_/,'') + (sv > 0 ? ' +' : ' ') + (Math.abs(sv) < 1 ? (sv*100).toFixed(0)+'%' : sv));
-            }
+            for (var spk in sdef.passive) sectDesc.push(_passiveLabel(spk, sdef.passive[spk]));
             var sSec = { desc: sectDesc.join('，') + (isCur ? '' : G.sect ? '（改换代价：虔诚 ×30）' : '') };
-            h += hpWrap(
-              '<button class="btn' + (isCur ? ' dis' : '') + '" onclick="chooseSect(\'' + sid + '\')">'
-              + sdef.n + (isCur ? ' ✓' : '') + '</button>',
-              sSec
-            );
+            var sNameHtml = hpWrap('<span class="cr-name">' + sdef.n + (isCur ? ' ✓' : '') + '</span>', sSec);
+            h += '<div class="cr-row"><div class="cr-top">' +
+              sNameHtml +
+              '<button class="cr-btn" onclick="chooseSect(\'' + sid + '\')" ' +
+              (isCur ? 'disabled' : '') + '>选择</button>' +
+              '</div></div>';
           }
         }
         // 专属仪式
@@ -2270,14 +2285,17 @@ function rTC() {
             + (G._deityRitualBuff.remain < 900 ? '（剩余 ' + G._deityRitualBuff.remain + ' 季）' : '')
             + '</div>';
         }
-        // 改宗按钮
+        // 改宗按钮（cr-row 格式）
         h += '<div style="margin-top:8px;">';
-        if (G.deityCD > 0) {
-          h += '<button class="btn dis">改宗（冷却 ' + G.deityCD + ' 季）</button>';
-        } else {
-          h += '<button class="btn" onclick="showConvertDeityModal()">改宗</button>';
-          h += '<span class="cost" style="margin-left:6px;">卷轴 80 + 古币 30 + 虔诚归零</span>';
-        }
+        h += '<div class="cr-row"><div class="cr-top">' +
+          '<span class="cr-name">改宗</span>' +
+          '<span class="cr-cost">' + (G.deityCD > 0
+            ? '冷却中：' + G.deityCD + ' 季'
+            : '卷轴 80, 古币 30, 虔诚归零') + '</span>' +
+          '<button class="cr-btn" ' +
+          (G.deityCD > 0 ? 'disabled' : 'onclick="showConvertDeityModal()"') +
+          '>改宗</button>' +
+          '</div></div>';
         h += '</div>';
       }
     }
