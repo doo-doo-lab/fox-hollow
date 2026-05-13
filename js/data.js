@@ -4021,7 +4021,7 @@ const UPGD = {
     uq: { b: { oilPress: 3 } }, sb: 'D', br: 'I',
   },
   ironSmithFocus: {
-    n: '圣工匠专注', d: '圣工匠 jobM +40%。',
+    n: '圣工匠专注', d: '圣工匠产出 +40%。',
     p: [{ r: 'holyIron', a: 5 }, { r: 'piety', a: 100 }],
     e: { jobM: { holySmith: 0.4 } },
     uq: { job: { holySmith: 3 } }, sb: 'D', br: 'I',
@@ -4033,19 +4033,19 @@ const UPGD = {
     uq: { u: { holyIronLore: 1 }, b: { blastFurnace: 4 } }, sb: 'D', br: 'I',
   },
   kilnSurge: {
-    n: '窑炉增产', d: '圣火窑 prodM +30%。',
+    n: '窑炉增产', d: '圣火窑产出 +30%。',
     p: [{ r: 'holyFlame', a: 15 }, { r: 'piety', a: 80 }],
     e: { bldM: { holyKiln: { prodM: 0.3 } } },
     uq: { ud: { kilnExpand: 1 } }, sb: 'D', br: 'I',
   },
   altarSurge: {
-    n: '祭坛增产', d: '祭坛 prodM +30%（与 #1 加法叠加共 +80%）。',
+    n: '祭坛增产', d: '祭坛产出 +30%（与"祭坛精修"叠加）。',
     p: [{ r: 'piety', a: 100 }, { r: 'holyOil', a: 6 }],
     e: { bldM: { divineAltar: { prodM: 0.3 } } },
     uq: { ud: { altarRefine: 1 } }, sb: 'D', br: 'I',
   },
   priestSchool: {
-    n: '神学院', d: '祭司 jobM +20%（与 #3 叠加）。',
+    n: '神学院', d: '祭司产出 +20%（与"祭司虔心"叠加）。',
     p: [{ r: 'piety', a: 120 }, { r: 'lore', a: 300 }],
     e: { jobM: { priest: 0.2 } },
     uq: { ud: { priestDevotion: 1 } }, sb: 'D', br: 'I',
