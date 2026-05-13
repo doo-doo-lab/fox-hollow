@@ -924,7 +924,7 @@ const JD = {
   mysticAdept: { n: '秘仪师', d: '研习秘知', desc: '秘知+0.02/s（仅在秘仪殿工作时生效）；效率递减', e: { gnosisP: .02 }, uq: { b: { mysteryHall: 1 } }, sb: 'D', br: 'M' },
 
   // ===== 通达副线 Phase A =====
-  envoy: { n: '使者', e: { renownP: .04 }, uq: { b: { receptionHall: 1 } }, sb: 'T' },
+  envoy: { n: '使者', d: '招待远客', desc: '声望+0.04/s（需迎宾堂）', e: { renownP: .04 }, uq: { b: { receptionHall: 1 } }, sb: 'T' },
   // ===== 通达副线 Phase B =====
   diplomat: { n: '邦交官', d: '签发邦书', desc: '邦书+0.015/s（需邦交堂）', e: { charterP: .015 }, uq: { b: { charterHall: 1 } }, sb: 'T' },
 };
