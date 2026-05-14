@@ -402,31 +402,31 @@ const BD = {
     p: [{ r: 'plank', b: 10, k: 1.12 }, { r: 'brick', b: 8, k: 1.12 }, { r: 'iron', b: 5, k: 1.12 }],
     e: { coalP: .04, coalMx: 50, pollutionP: .01 },
     uq: { u: { deepMining: 1 } },
-  },
+   tip: ['往下挖，光线短得只剩一截。']},
   blastFurnace: {
     n: '高炉', t: 'b', d: '高温将铁与煤熔合为钢；炼钢配方自此可制，炉匠这门职业也可授业。', br: 'I',
     p: [{ r: 'brick', b: 15, k: 1.12 }, { r: 'iron', b: 10, k: 1.12 }, { r: 'coal', b: 20, k: 1.12 }],
     e: { steelP: .01, steelMx: 30, pollutionP: .02 },
     uq: { b: { mine: 2 }, u: { steelWork: 1 } },
-  },
+   tip: ['炉口的热风，吹乱了它的胡须。']},
   chimney: {
     n: '烟囱', t: 'b', d: '高耸的排烟通道——不减少污染，但把惩罚门槛往后推。', br: 'I',
     p: [{ r: 'brick', b: 20, k: 1.12 }, { r: 'steel', b: 5, k: 1.12 }],
     e: { pollThresh: 50 },
     uq: { b: { blastFurnace: 1 } },
-  },
+   tip: ['云朵吓得翻跟头。']},
   purifier: {
     n: '净化池', t: 'b', d: '用水与沉淀的力量缓缓消解工业污渍。', br: 'I',
     p: [{ r: 'brick', b: 25, k: 1.12 }, { r: 'iron', b: 15, k: 1.12 }, { r: 'wood', b: 40, k: 1.12 }],
     e: { pollutionP: -.04 },
     uq: { u: { pollControl: 1 } },
-  },
+   tip: ['泡儿咕嘟咕嘟往上冒。']},
   steelVault: {
     n: '钢仓', t: 'b', d: '堆放煤与钢等重型工业原料的露天场地。', br: 'I', phase: 3,
     p: [{ r: 'steel', b: 10, k: 1.12 }, { r: 'brick', b: 15, k: 1.12 }],
     e: { steelMx: 50, coalMx: 80 },
     uq: { b: { blastFurnace: 1 } },
-  },
+   tip: ['钢一摞，齐齐喊"立正"。']},
 
   // ===== 工业分支 B阶段：油火时代（7 个建筑） =====
   oilWell: {
@@ -434,43 +434,43 @@ const BD = {
     p: [{ r: 'steel', b: 5, k: 1.12 }, { r: 'gear', b: 5, k: 1.12 }, { r: 'brick', b: 10, k: 1.12 }],
     e: { oilP: .02, oilMx: 25, pollutionP: .016 },
     uq: { u: { oilExtract: 1 } },
-  },
+   tip: ['黑油涌上来，面上映着天光。']},
   oilTank: {
     n: '油缸', t: 'b', d: '密封的铁皮容器，让火油不再到处乱跑。', br: 'I',
     p: [{ r: 'steel', b: 5, k: 1.12 }, { r: 'brick', b: 5, k: 1.12 }],
     e: { oilMx: 30, coalMx: 30 },
     uq: { b: { oilWell: 1 } },
-  },
+   tip: ['凑近闻，鼻子先黑半圈。']},
   steamEngine: {
     n: '蒸汽机房', t: 'b', d: '铁壳里的水被煤火烧沸，蒸汽推动活塞日夜不休。', br: 'I',
     p: [{ r: 'steel', b: 8, k: 1.12 }, { r: 'gear', b: 5, k: 1.12 }, { r: 'brick', b: 8, k: 1.12 }],
     e: { energyP: 1, pollutionP: .02 },
     uq: { u: { steamPower: 1 } },
-  },
+   tip: ['屋顶下雨，地上发烫。']},
   combustEngine: {
     n: '内燃机', t: 'b', d: '火油在气缸里爆燃——比蒸汽更暴烈，也更有力。', br: 'I', phase: 4,
     p: [{ r: 'steel', b: 15, k: 1.12 }, { r: 'gear', b: 10, k: 1.12 }, { r: 'oil', b: 10, k: 1.12 }],
     e: { energyP: 3, oilP: -.04, pollutionP: .03 },
     uq: { u: { combustion: 1 } },
-  },
+   tip: ['一动起来，连凳子都坐不稳。']},
   factory: {
     n: '工厂', t: 'b', d: '标准化流程让每一道配方都更高效——但噪音和黑烟也随之而来。', br: 'I', phase: 4,
     p: [{ r: 'steel', b: 20, k: 1.12 }, { r: 'gear', b: 15, k: 1.12 }, { r: 'draft', b: 1, k: 1.12 }],
     e: { craftAllM: .05, energyC: 2, pollutionP: .04 },
     uq: { u: { assemblyLine: 1 } },
-  },
+   tip: ['一个动作做了一千遍。']},
   railroad: {
     n: '铁路', t: 'b', d: '钢轨铺平了远方——商队更快到达，远行更快归来。', br: 'I', phase: 4,
     p: [{ r: 'steel', b: 15, k: 1.12 }, { r: 'gear', b: 8, k: 1.12 }, { r: 'concrete', b: 5, k: 1.12 }],
     e: { caravanM: .08, expTimeM: .8, pollutionP: .01 },
     uq: { u: { roadwork: 1 } },
-  },
+   tip: ['把铜钱放轨上，等车碾扁。']},
   windTower: {
     n: '风力塔', t: 'b', d: '高塔上的叶片日夜旋转，既净化空气，也收集一点微弱的风能。', br: 'I',
     p: [{ r: 'steel', b: 10, k: 1.12 }, { r: 'brick', b: 12, k: 1.12 }, { r: 'iron', b: 5, k: 1.12 }],
     e: { pollutionP: -.06, energyP: .5 },
     uq: { u: { cleanWind: 1 } },
-  },
+   tip: ['风大了，尾巴跟着转。']},
 
   // ===== 工业分支 C阶段：精金时代（5 个建筑） =====
   calcFurnace: {
@@ -478,31 +478,31 @@ const BD = {
     p: [{ r: 'steel', b: 25, k: 1.12 }, { r: 'concrete', b: 10, k: 1.12 }, { r: 'draft', b: 3, k: 1.12 }],
     e: { titanP: .003, ironP: .05, stoneP: -.1, oilP: -.01, energyC: 1, pollutionP: .02 },
     uq: { u: { calcination: 1 } },
-  },
+   tip: ['炉火越烫，寒钛越冷。']},
   refinery: {
     n: '精炼厂', t: 'b', d: '将粗钛与钢熔融精炼——合金锻造效率的基石。', br: 'I',
     p: [{ r: 'titan', b: 10, k: 1.12 }, { r: 'steel', b: 30, k: 1.12 }, { r: 'draft', b: 5, k: 1.12 }],
     e: { _refineryEff: .10, energyC: 2, pollutionP: .015 },
     uq: { u: { refining: 1 } },
-  },
+   tip: ['它对炉子念了一句：合！']},
   observatory: {
     n: '望远台', t: 'b', d: '山巅的透镜对准夜空——每座望远台将星辰的位置记入星图。', br: 'I',
     p: [{ r: 'titan', b: 5, k: 1.12 }, { r: 'steel', b: 15, k: 1.12 }, { r: 'scroll', b: 20, k: 1.12 }],
     e: { starchartP: .005, starchartMx: 25 },
     uq: { u: { stargazing: 1 } },
-  },
+   tip: ['它对着夜空，夜空也回望。']},
   cleanForest: {
     n: '净林', t: 'b', d: '种下经过筛选的树苗，让森林替你吸走浓烟。', br: 'I',
     p: [{ r: 'titan', b: 5, k: 1.12 }, { r: 'alloy', b: 3, k: 1.12 }, { r: 'draft', b: 2, k: 1.12 }],
     e: { pollutionP: -.05 },
     uq: { u: { refining: 1 }, b: { refinery: 1 } },
-  },
+   tip: ['新栽的树，叶子上落了一层灰。']},
   titanVault: {
     n: '钛库', t: 'b', d: '寒钛需要特殊存储——普通仓库装不住这种脾气古怪的金属。', br: 'I',
     p: [{ r: 'titan', b: 15, k: 1.12 }, { r: 'pillar', b: 3, k: 1.12 }],
     e: { titanMx: 40, alloyMx: 20 },
     uq: { b: { calcFurnace: 1 } },
-  },
+   tip: ['刚开库门，毛全立起来。']},
 
   // ===== 工业分支 D阶段：辉能时代（v0.20 §八 5.1） =====
   accelerator: {
@@ -510,19 +510,19 @@ const BD = {
     p: [{ r: 'titan', b: 50, k: 1.22 }, { r: 'alloy', b: 15, k: 1.22 }, { r: 'draft', b: 10, k: 1.22 }],
     e: { uraniumP: .003, titanP: -.015, energyC: 5, pollutionP: .03 },
     uq: { u: { fission: 1 } },
-  },
+   tip: ['绕了七百圈，吐出一颗光。']},
   furnace: {
     n: '熔炉', t: 'b', d: '辉石在炉膛里慢慢释放——比蒸汽更烫，比火油更稳，连影子都被它点亮。', br: 'I', phase: 4,
     p: [{ r: 'titan', b: 30, k: 1.22 }, { r: 'alloy', b: 10, k: 1.22 }, { r: 'uranium', b: 5, k: 1.22 }],
     e: { energyP: 5, uraniumP: -.001, allM: .05, pollutionP: .025 },
     uq: { u: { radiantPower: 1 } },
-  },
+   tip: ['炉火一舔，它胡须卷了边。']},
   radianceBox: {
     n: '辉匣', t: 'b', d: '装辉石的匣子——盖子合上之后，里面的光仍在自己转动。', br: 'I', phase: 4,
     p: [{ r: 'alloy', b: 10, k: 1.18 }, { r: 'uranium', b: 5, k: 1.18 }],
     e: { uraniumMx: 30, thoriumMx: 10 },
     uq: { b: { accelerator: 1 } },
-  },
+   tip: ['匣子掀开，光跳出来糊它一脸。']},
 
   // ===== 灵修分支 A阶段：初感（4 个建筑） =====
   // 造价/效果以 branch-mystic.md 第六节表为准
@@ -560,31 +560,31 @@ const BD = {
     p: [{ r: 'sigil', b: 5, k: 1.15 }, { r: 'bead', b: 10, k: 1.15 }, { r: 'fateSilk', b: 8, k: 1.15 }],
     e: { resonanceP: .015, resonanceMx: 25, spiritP: -.02, leylineP: 3, unrestP: .02 },
     uq: { u: { resonArt: 1 } },
-  },
+   tip: ['绕塔三圈，耳根开始发痒。']},
   elixirBrewery: {
     n: '灵酿坊', t: 'b', d: '灵修配方的效率源泉——每座提升灵修配方产出。', br: 'M',
     p: [{ r: 'plank', b: 30, k: 1.12 }, { r: 'bead', b: 15, k: 1.12 }, { r: 'spiritInk', b: 5, k: 1.12 }],
     e: { craftSpiritM: .05, unrestP: .01 },
     uq: { u: { elixirBrew: 1 } },
-  },
+   tip: ['酒香引来了不认识的昆虫。']},
   shapeHall: {
     n: '化形殿', t: 'b', d: '灵流在此凝聚为形体——化形之道由此开启，深耗灵脉。', br: 'M',
     p: [{ r: 'fateSilk', b: 15, k: 1.15 }, { r: 'sigil', b: 8, k: 1.15 }, { r: 'spectrum', b: 3, k: 1.15 }],
     e: { leylineC: 2, unrestP: .03 },
     uq: { u: { shapeBasic: 1 } },
-  },
+   tip: ['灵流聚成人形，站了一息，又散开。']},
   oracleHall: {
     n: '通灵阁', t: 'b', d: '在沉静中聆听灵脉的低语——持续产出悟片。', br: 'M',
     p: [{ r: 'plank', b: 40, k: 1.12 }, { r: 'scroll', b: 20, k: 1.12 }, { r: 'fateSilk', b: 10, k: 1.12 }],
     e: { insightP: .005, insightMx: 15, unrestP: .015 },
     uq: { u: { oracleArt: 1 } },
-  },
+   tip: ['听见谁说话，转头又只有自己。']},
   calmGrove: {
     n: '净念林', t: 'b', d: '古树与灵泉共鸣——消解躁念，回归安宁。', br: 'M',
     p: [{ r: 'wood', b: 100, k: 1.12 }, { r: 'spiritInk', b: 8, k: 1.12 }, { r: 'sigil', b: 3, k: 1.12 }],
     e: { unrestP: -.04 },
     uq: { u: { calmMind: 1 } },
-  },
+   tip: ['落叶堆得很厚，踩上去没有声音。']},
 
   // ===== 灵修分支 C阶段建筑（5 个） =====
   crystalCave: {
@@ -592,31 +592,31 @@ const BD = {
     p: [{ r: 'fateSilk', b: 20, k: 1.15 }, { r: 'spectrum', b: 5, k: 1.15 }, { r: 'bead', b: 20, k: 1.15 }],
     e: { crystalSilkP: .008, fateSilkP: -.01, spiritP: -.02, leylineC: 1, unrestP: .025 },
     uq: { u: { crystalize: 1 } },
-  },
+   tip: ['黑暗里，有东西在缓慢地凝结。']},
   radianceDais: {
     n: '辉映台', t: 'b', d: '晶丝在台上折射——辉芒是光线走了弯路后留下的东西。', br: 'M', phase: 4,
     p: [{ r: 'crystalSilk', b: 5, k: 1.15 }, { r: 'spectrum', b: 8, k: 1.15 }, { r: 'sigil', b: 10, k: 1.15 }],
     e: { radianceP: .003, leylineC: 2, unrestP: .03 },
     uq: { u: { radiant: 1 } },
-  },
+   tip: ['嘀嘀嗒嗒闪起小亮灯。']},
   coreForge: {
     n: '灵核炉', t: 'b', d: '晶丝和共振子在炉中翻搅——灵核就是灵力的心脏。', br: 'M', phase: 4,
     p: [{ r: 'crystalSilk', b: 8, k: 1.18 }, { r: 'resonance', b: 15, k: 1.18 }, { r: 'spiritCore', b: 2, k: 1.18 }],
     e: { spiritCoreP: .002, crystalSilkP: -.005, resonanceP: -.01, unrestP: .02 },
     uq: { u: { coreCraft: 1 } },
-  },
+   tip: ['炉心微微发光，它不敢眨眼。']},
   radiantGrove: {
     n: '净辉林', t: 'b', d: '辉芒浸润了每一棵树——连风也变得安静了。', br: 'M', phase: 4,
     p: [{ r: 'crystalSilk', b: 3, k: 1.15 }, { r: 'elixir', b: 2, k: 1.15 }, { r: 'spectrum', b: 5, k: 1.15 }],
     e: { unrestP: -.08 },
     uq: { u: { pureRadiance: 1 } },
-  },
+   tip: ['林子里光在跑。']},
   chartHall: {
     n: '灵图阁', t: 'b', d: '灵图是灵脉的地图——画得越多，看得越远。', br: 'M', phase: 4,
     p: [{ r: 'insight', b: 5, k: 1.12 }, { r: 'spiritInk', b: 10, k: 1.12 }, { r: 'scroll', b: 30, k: 1.12 }],
     e: { spiritChartP: .001, unrestP: .01 },
     uq: { u: { chartDraw: 1 } },
-  },
+   tip: ['一墙的牛皮，山脉在上面活着。']},
 
   // ===== 灵修分支 D阶段：深寂（v0.20 §八 5.2a-b） =====
   primordialPool: {
@@ -624,19 +624,19 @@ const BD = {
     p: [{ r: 'crystalSilk', b: 15, k: 1.18 }, { r: 'spiritCore', b: 5, k: 1.18 }, { r: 'spectrum', b: 10, k: 1.18 }],
     e: { primordialP: .001, crystalSilkP: -.003, leylineC: 5, unrestP: .05 },
     uq: { u: { primordialism: 1 } },
-  },
+   tip: ['水底慢慢起了一个想法。']},
   silenceCave: {
     n: '寂石窟', t: 'b', d: '从洞里取出来的石头不会响，把它放回洞里，连风也安静下来。', br: 'M', phase: 4,
     p: [{ r: 'primordial', b: 10, k: 1.20 }, { r: 'spiritCore', b: 8, k: 1.20 }, { r: 'formSoul', b: 3, k: 1.20 }],
     e: { silenceStoneP: .0005, leylineP: 5, unrestP: .04, allM: .05 },
     uq: { u: { silenceCryst: 1 } },
-  },
+   tip: ['喊一声，连回声都没追上来。']},
   spiritVault: {
     n: '灵匣', t: 'b', d: '装灵性物的匣子——盖上之后，里面的东西仍在自己浮动。', br: 'M', phase: 4,
     p: [{ r: 'crystalSilk', b: 10, k: 1.15 }, { r: 'silenceStone', b: 2, k: 1.15 }, { r: 'insight', b: 8, k: 1.15 }],
     e: { primordialMx: 30, silenceStoneMx: 20 },
     uq: { b: { primordialPool: 1 } },
-  },
+   tip: ['一收一开，东西换了位置。']},
 
   // ===== 神启副线 A阶段：初悟 =====
   divineAltar: {
@@ -644,13 +644,13 @@ const BD = {
     p: [{ r: 'charm', b: 25, k: 1.12 }, { r: 'stone', b: 40, k: 1.12 }, { r: 'scroll', b: 8, k: 1.12 }],
     e: { pietyP: .02, pietyMx: 30 },
     uq: { u: { ritualBasic: 1 } }, sb: 'D', t: 'f',
-  },
+   tip: ['香在烧，它的影子也跪着。']},
   scriptureHall: {
     n: '经阁', d: '收藏圣典，扩展虔诚容量。',
     p: [{ r: 'plank', b: 20, k: 1.12 }, { r: 'scroll', b: 15, k: 1.12 }, { r: 'charm', b: 15, k: 1.12 }],
     e: { pietyMx: 50, loreP: .01 },
     uq: { u: { scriptureLore: 1 } }, sb: 'D', t: 'f',
-  },
+   tip: ['整夜读经，月光走过三页。']},
   prayerPool: {
     n: '祈愿池', d: '安宁之水，福泽山谷。',
     p: [{ r: 'stone', b: 50, k: 1.15 }, { r: 'charm', b: 20, k: 1.15 }, { r: 'piety', b: 10, k: 1.15 }],
