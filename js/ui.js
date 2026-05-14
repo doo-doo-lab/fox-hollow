@@ -2487,7 +2487,7 @@ function renderPolityTab() {
   h += '<div class="polity-section">';
   h += '<div class="polity-section-title">取向</div>';
   if (!G.upg.polityLore?.done) {
-    h += '<div class="polity-locked">完成研究「' + (UD.polityLore?.n || '法度通论') + '」后解锁取向选择。</div>';
+    h += '<div class="polity-locked">完成研究「' + (UD.polityLore?.n || '治世经纬') + '」后解锁取向选择。</div>';
   } else if (!G.tier1) {
     h += '<div class="polity-choose-hint">请先选定取向（不可逆）：</div>';
     h += '<div class="polity-grid">';
@@ -2524,7 +2524,7 @@ function renderPolityTab() {
   h += '<div class="polity-section">';
   h += '<div class="polity-section-title">治风</div>';
   if (!G.upg.polityLore?.done) {
-    h += '<div class="polity-locked">完成研究「' + (UD.polityLore?.n || '法度通论') + '」后解锁治风选择。</div>';
+    h += '<div class="polity-locked">完成研究「' + (UD.polityLore?.n || '治世经纬') + '」后解锁治风选择。</div>';
   } else if (!G.tier1) {
     h += '<div class="polity-locked">请先选定取向。</div>';
   } else if (!G.polity) {

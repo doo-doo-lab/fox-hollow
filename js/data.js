@@ -932,7 +932,7 @@ const JD = {
 // ===== 研究定义 =====
 const UD = {
   stoneTools: {
-    n: '石制工具', d: '提高采集与伐木效率。',
+    n: '石器之始', d: '提高采集与伐木效率。',
     p: [{ r: 'lore', a: 8 }, { r: 'stone', a: 15 }],
     e: { berryM: .5, woodM: .3 },
     uq: { b: { library: 1 } },
@@ -941,56 +941,56 @@ const UD = {
 
 
   carpentry: {
-    n: '木工技艺', d: '学会木板加工。',
+    n: '斫木成材', d: '学会木板加工。',
     p: [{ r: 'lore', a: 20 }, { r: 'wood', a: 30 }],
     e: { plankU: 1, woodM: .3 },
     uq: { b: { library: 1, lumberYard: 1 } },
     tip: ['当狐狸学会量尺寸，木头就紧张了。', '木头终于学会了配合你的想象力。']
   },
   masonry: {
-    n: '石砌术', d: '学会砖块加工。',
+    n: '琢石成砖', d: '学会砖块加工。',
     p: [{ r: 'lore', a: 25 }, { r: 'stone', a: 35 }],
     e: { brickU: 1, stoneM: .3 },
     uq: { b: { library: 1, quarry: 1 } },
     tip: ['不是所有石头都愿意叠在一起，得看缘分和灰浆。', '教一群碎石表演叠罗汉，并要求它们坚持一百年。']
   },
   forestLore: {
-    n: '林间密语', d: '（被动）大幅提升伐木效率。',
+    n: '熟谙林木', d: '（被动）大幅提升伐木效率。',
     p: [{ r: 'lore', a: 35 }, { r: 'wood', a: 20 }],
     e: { woodM: .5 },
     uq: { u: { stoneTools: 1 } },
     tip: ['老树根底下压着的，是只有狐狸听得懂的话。']
   },
   ironWorking: {
-    n: '铁器冶炼', d: '提高矿铁产出。',
+    n: '百炼成铁', d: '提高矿铁产出。',
     p: [{ r: 'lore', a: 40 }, { r: 'iron', a: 5 }],
     e: { ironM: .5 },
     uq: { b: { smithy: 1 } },
     tip: ['火候差一分，铁就只是块有脾气的石头。']
   },
   foxFolklore: {
-    n: '狐灵传说', d: '提升符咒之力与满意度。',
+    n: '狐灵旧闻', d: '提升符咒之力与满意度。',
     p: [{ r: 'lore', a: 50 }, { r: 'charm', a: 3 }],
     e: { charmM: .5, hapB: .1 },
     uq: { b: { shrine: 1 } },
     tip: ['先祖说的话，一半在风里，一半在梦里。']
   },
   spiritShelter: {
-    n: '灵狐庇护', d: '（被动）减轻寒冬对野莓产量的影响。',
+    n: '灵荫御寒', d: '（被动）减轻寒冬对野莓产量的影响。',
     p: [{ r: 'lore', a: 45 }, { r: 'charm', a: 8 }, { r: 'scroll', a: 3 }],
     e: { winterBuff: 1 },
     uq: { u: { foxFolklore: 1 } },
     tip: ['爪子搭在你肩上，暖烘烘的，但别回头。']
   },
   ancestorEye: {
-    n: '先祖之眼', d: '（被动）减少狐狸的野莓消耗。',
+    n: '先祖训俭', d: '（被动）减少狐狸的野莓消耗。',
     p: [{ r: 'lore', a: 35 }, { r: 'charm', a: 5 }, { r: 'scroll', a: 2 }],
     e: { foxEat: 1 },
     uq: { u: { foxFolklore: 1 } },
     tip: ['窝顶上蹲着先祖，碗里不敢剩东西。']
   },
   craftMastery: {
-    n: '工法精要', d: '工坊配方可自行制作。',
+    n: '匠艺天成', d: '工坊配方可自行制作。',
     p: [{ r: 'lore', a: 30 }, { r: 'plank', a: 3 }, { r: 'brick', a: 2 }],
     e: { autoCraft: 1 },
     uq: { u: { carpentry: 1, masonry: 1 } },
@@ -1004,7 +1004,7 @@ const UD = {
     tip: ['出了山谷才发现，世界比尾巴还长。']
   },
   longJourney: {
-    n: '远途跋涉', d: '（被动）远行奖励 +50%。',
+    n: '跋涉致远', d: '（被动）远行奖励 +50%。',
     p: [{ r: 'lore', a: 45 }, { r: 'silk', a: 1 }, { r: 'ancCoin', a: 1 }],
     e: { expReward: .5 },
     uq: { b: { trailroad: 2 }, exp: { oldRuin: 1 } },
@@ -1020,7 +1020,7 @@ const UD = {
     tip: ['有只幼狐的后爪，不自觉地抠进了土里。']
   },
   calendar: {
-    n: '月令新酿', d: '月歌台可建起，醴浆入账，两种新习俗成形。',
+    n: '月令酿歌', d: '月歌台可建起，醴浆入账，两种新习俗成形。',
     p: [{ r: 'lore', a: 100 }, { r: 'scroll', a: 5 }],
     e: { hapB: .02, berryM: .05 },
     uq: { u: { folkLore: 1 }, b: { storyTree: 1 } },
@@ -1056,28 +1056,28 @@ const UD = {
   },
   // ===== v0.16 政体研究 =====
   councilLore: {
-    n: '共谷议事', d: '议事堂建起，典制下「治理」一脉由此开启。',
+    n: '群策共治', d: '议事堂建起，典制下「治理」一脉由此开启。',
     p: [{ r: 'lore', a: 300 }, { r: 'scroll', a: 20 }],
     e: {},
     uq: { u: { engraving: 1 }, custom: 5 },
     tip: ['坐下来说的第一句话，往往是"你先说"。']
   },
   polityLore: {
-    n: '法度通论', d: '治风堂可建起，山谷可在大势之间择道。',
+    n: '治世经纬', d: '治风堂可建起，山谷可在大势之间择道。',
     p: [{ r: 'lore', a: 400 }, { r: 'scroll', a: 40 }],
     e: {},
     uq: { u: { councilLore: 1 }, b: { councilHall: 2 } },
     tip: ['规矩是大家同意走的那条路，没人把它当笼子。']
   },
   policyLore: {
-    n: '集议传统', d: '山谷的政事可分域而议。',
+    n: '分曹议政', d: '山谷的政事可分域而议。',
     p: [{ r: 'lore', a: 350 }, { r: 'coin', a: 50 }, { r: 'scroll', a: 30 }],
     e: {},
     uq: { u: { polityLore: 1 }, polity: true },
     tip: ['众狐议事，各有各的尾巴翘法。']
   },
   branchLore: {
-    n: '择路而治', d: '造物（工业）与灵术（灵修），道路在此分叉，只能择其一深耕。',
+    n: '分野定途', d: '造物（工业）与灵术（灵修），道路在此分叉，只能择其一深耕。',
     p: [{ r: 'lore', a: 400 }, { r: 'scroll', a: 40 }],
     e: {},
     uq: { u: { polityLore: 1, policyLore: 1 }, polity: true, b: { councilHall: 3 }, custom: 7 },
