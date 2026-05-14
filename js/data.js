@@ -1340,14 +1340,14 @@ const UD = {
 
   // ===== 灵修分支 A阶段：初感（6 个研究） =====
   spiritSense: {
-    n: '感应术', d: '闭上眼，用爪尖去触碰看不见的东西——第一缕灵流。', br: 'M',
+    n: '触灵', d: '闭上眼，用爪尖去触碰看不见的东西——第一缕灵流。', br: 'M',
     p: [{ r: 'lore', a: 200 }, { r: 'charm', a: 30 }],
     e: { spiritU: 1 },
     uq: { b: { shrine: 2 } },
     tip: ['闭上眼之后反而看见了更多——这不科学，但管用。']
   },
   leylineLore: {
-    n: '灵脉学', d: '地底有一张看不见的网，灵流沿着它奔涌——学会追踪灵脉的走向。', br: 'M',
+    n: '寻脉', d: '地底有一张看不见的网，灵流沿着它奔涌——学会追踪灵脉的走向。', br: 'M',
     p: [{ r: 'lore', a: 250 }, { r: 'charm', a: 40 }, { r: 'spirit', a: 10 }],
     e: { fateSilkU: 1 },
     uq: { u: { spiritSense: 1 }, b: { spiritWell: 2 } },
@@ -1375,7 +1375,7 @@ const UD = {
     tip: ['安静是一门手艺，需要比喧嚣更大的力气。']
   },
   beadCraft: {
-    n: '念珠功', d: '把灵能凝成珠子，一颗装一个念头——刚好够用。', br: 'M',
+    n: '念珠', d: '把灵能凝成珠子，一颗装一个念头——刚好够用。', br: 'M',
     p: [{ r: 'lore', a: 250 }, { r: 'spirit', a: 15 }],
     e: { beadU: 1 },
     uq: { u: { leylineLore: 1 } },
@@ -1383,7 +1383,7 @@ const UD = {
   },
   // ===== 灵修分支 B阶段研究 =====
   resonArt: {
-    n: '共鸣术', d: '让灵脉的节律与自身共振——共振子诞生的起点。', br: 'M', phase: 3,
+    n: '共鸣', d: '让灵脉的节律与自身共振——共振子诞生的起点。', br: 'M', phase: 3,
     p: [{ r: 'lore', a: 400 }, { r: 'spirit', a: 50 }, { r: 'fateSilk', a: 10 }],
     e: { resonanceU: 1 },
     uq: { u: { silkWeave: 1 }, b: { spiritTower: 2 } },
@@ -1401,19 +1401,19 @@ const UD = {
     uq: { u: { resonArt: 1 } },
   },
   shapeBasic: {
-    n: '化形基础', d: '灵流不只是力量，也是形状——学会用灵流塑形。', br: 'M', phase: 3,
+    n: '塑形', d: '灵流不只是力量，也是形状——学会用灵流塑形。', br: 'M', phase: 3,
     p: [{ r: 'lore', a: 500 }, { r: 'resonance', a: 10 }, { r: 'spectrum', a: 3 }],
     e: {},
     uq: { u: { elixirBrew: 1 }, b: { elixirBrewery: 2 } },
   },
   sageWay: {
-    n: '悟道法', d: '在安静中听到灵脉说话——那是悟道的第一步。', br: 'M', phase: 3,
+    n: '聆灵', d: '在安静中听到灵脉说话——那是悟道的第一步。', br: 'M', phase: 3,
     p: [{ r: 'lore', a: 450 }, { r: 'scroll', a: 30 }, { r: 'spirit', a: 60 }],
     e: { insightU: 1 },
     uq: { u: { resonArt: 1 }, b: { resonTower: 2 } },
   },
   oracleArt: {
-    n: '通灵术', d: '悟片是灵脉留下的碎语——学会收集与解读。', br: 'M', phase: 3,
+    n: '通灵', d: '悟片是灵脉留下的碎语——学会收集与解读。', br: 'M', phase: 3,
     p: [{ r: 'lore', a: 500 }, { r: 'insight', a: 5 }, { r: 'fateSilk', a: 20 }],
     e: {},
     uq: { u: { sageWay: 1 } },
@@ -1425,7 +1425,7 @@ const UD = {
     uq: { u: { pureMind: 1 }, b: { quietRoom: 2 } },
   },
   leyExpand: {
-    n: '脉扩', d: '灵脉不是固定的管道——它可以被拓宽。', br: 'M', phase: 3,
+    n: '拓脉', d: '灵脉不是固定的管道——它可以被拓宽。', br: 'M', phase: 3,
     p: [{ r: 'lore', a: 500 }, { r: 'resonance', a: 8 }, { r: 'sigil', a: 10 }],
     e: {},
     uq: { u: { resonArt: 1 }, b: { resonTower: 3 } },
@@ -1433,7 +1433,7 @@ const UD = {
 
   // ===== 灵修分支 C阶段研究（12 个） =====
   crystalize: {
-    n: '结晶术', d: '命丝在黑暗中会自己长出形状——前提是你别去碰它。', br: 'M', phase: 4,
+    n: '结晶', d: '命丝在黑暗中会自己长出形状——前提是你别去碰它。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 600 }, { r: 'fateSilk', a: 30 }, { r: 'resonance', a: 15 }],
     e: { crystalSilkU: 1 },
     uq: { u: { oracleArt: 1 }, b: { resonTower: 3 } },
@@ -1445,19 +1445,19 @@ const UD = {
     uq: { u: { crystalize: 1 } },
   },
   coreCraft: {
-    n: '灵核锻造', d: '灵核不是从地里挖的——它是晶丝和共振子在炉中认了亲。', br: 'M', phase: 4,
+    n: '凝灵核', d: '灵核不是从地里挖的——它是晶丝和共振子在炉中认了亲。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 700 }, { r: 'crystalSilk', a: 8 }, { r: 'resonance', a: 20 }],
     e: { spiritCoreU: 1 },
     uq: { u: { crystalize: 1 }, b: { crystalCave: 2 } },
   },
   formStudy: {
-    n: '形魄学', d: '万物都有形，但不是所有形都有魄——区别在于有没有灵核。', br: 'M', phase: 4,
+    n: '形魄', d: '万物都有形，但不是所有形都有魄——区别在于有没有灵核。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 750 }, { r: 'spiritCore', a: 5 }, { r: 'crystalSilk', a: 10 }],
     e: { formSoulU: 1 },
     uq: { u: { coreCraft: 1 } },
   },
   chartDraw: {
-    n: '灵图编', d: '灵脉的走向不是猜出来的——是一笔一笔画出来的。', br: 'M', phase: 4,
+    n: '绘脉', d: '灵脉的走向不是猜出来的——是一笔一笔画出来的。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 600 }, { r: 'insight', a: 10 }, { r: 'spiritInk', a: 15 }],
     e: { spiritChartU: 1 },
     uq: { u: { sageWay: 1 }, b: { oracleHall: 2 } },
@@ -1487,7 +1487,7 @@ const UD = {
     uq: { b: { shapeHall: 2 } },
   },
   coreFusion: {
-    n: '灵核融合', d: '五颗灵核靠在一起——就会变成一颗更大的。', br: 'M', phase: 4,
+    n: '融灵核', d: '五颗灵核靠在一起——就会变成一颗更大的。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 850 }, { r: 'spiritCore', a: 5 }, { r: 'radiance', a: 8 }],
     e: {},
     uq: { u: { coreCraft: 1 } },
@@ -1507,19 +1507,19 @@ const UD = {
 
   // ===== 灵修分支 D阶段：深寂研究链（v0.20 §八 5.2c, 18 项） =====
   primordialism: {
-    n: '元念术', d: '把心里那个最初的念头剥出来——它薄得像光，但能压住一座山。', br: 'M', phase: 4,
+    n: '元念', d: '把心里那个最初的念头剥出来——它薄得像光，但能压住一座山。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1000 }, { r: 'crystalSilk', a: 20 }, { r: 'spiritCore', a: 10 }],
     e: { primordialU: 1 },
     uq: { u: { coreFusion: 1 }, b: { crystalCave: 3 } },
   },
   silenceCryst: {
-    n: '寂石凝', d: '把元念压紧、再压紧——压到它自己也安静下来，就成了石头。', br: 'M', phase: 4,
+    n: '凝寂', d: '把元念压紧、再压紧——压到它自己也安静下来，就成了石头。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1100 }, { r: 'primordial', a: 8 }, { r: 'radiance', a: 10 }],
     e: { silenceStoneU: 1 },
     uq: { u: { primordialism: 1 }, b: { radianceDais: 2 } },
   },
   mirrorArt: {
-    n: '镜术', d: '寂石磨成镜——照不出脸，但照得出心里漏掉的字。', br: 'M', phase: 4,
+    n: '磨镜', d: '寂石磨成镜——照不出脸，但照得出心里漏掉的字。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1200 }, { r: 'silenceStone', a: 3 }, { r: 'spiritCore', a: 12 }],
     e: { mirrorSpiritU: 1 },
     uq: { u: { silenceCryst: 1 } },
@@ -1549,13 +1549,13 @@ const UD = {
     uq: { u: { coreFusion: 1, primordialism: 1 } },
   },
   silenceResonance: {
-    n: '寂弦感应', d: '寂石之间会响——但只有寂石听得见。', br: 'M', phase: 4,
+    n: '寂弦', d: '寂石之间会响——但只有寂石听得见。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1800 }, { r: 'silenceStone', a: 10 }, { r: 'crystalSilk', a: 30 }],
     e: {},
     uq: { u: { silenceCryst: 1 } },
   },
   deepLeyline: {
-    n: '深层灵脉', d: '灵脉之下还有灵脉——更深的那条不流，但通往任何地方。', br: 'M', phase: 4,
+    n: '渊脉', d: '灵脉之下还有灵脉——更深的那条不流，但通往任何地方。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 2000 }, { r: 'silenceStone', a: 15 }, { r: 'primordial', a: 20 }],
     e: {},
     uq: { u: { silenceResonance: 1 } },
@@ -1567,7 +1567,7 @@ const UD = {
     uq: { u: { coreFusion: 1, primordialism: 1 } },
   },
   voidCodexLore: {
-    n: '幽典编', d: '把所有幽理写下来——空白处的字最重。', br: 'M', phase: 4,
+    n: '幽典', d: '把所有幽理写下来——空白处的字最重。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1800 }, { r: 'insight', a: 20 }, { r: 'primordial', a: 15 }],
     e: { voidCodexU: 1 },
     uq: { u: { cosmicSpec: 1, primordialism: 1 } },
@@ -1579,13 +1579,13 @@ const UD = {
     uq: { u: { spiritGrid: 1, primordialism: 1 } },
   },
   silenceField: {
-    n: '寂界术', d: '推开一扇看不见的门——门后没有时间。', br: 'M', phase: 4,
+    n: '寂界', d: '推开一扇看不见的门——门后没有时间。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 2200 }, { r: 'silenceStone', a: 15 }, { r: 'mirrorSpirit', a: 5 }],
     e: {},
     uq: { u: { silenceResonance: 1, mirrorForging: 1 } },
   },
   spiritPactLore: {
-    n: '灵契学', d: '跟看不见的东西签字——签完了，它就一直在你身后。', br: 'M', phase: 4,
+    n: '灵契', d: '跟看不见的东西签字——签完了，它就一直在你身后。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 2000 }, { r: 'spiritCore', a: 18 }, { r: 'primordial', a: 15 }, { r: 'voidCodex', a: 3 }],
     e: {},
     uq: { u: { spiritWeb: 1, voidCodexLore: 1 } },
@@ -1597,19 +1597,19 @@ const UD = {
     uq: { u: { voidLore: 1, pureRadiance: 1 } },
   },
   primordialForging: {
-    n: '元念锻冶', d: '把元念塞进炉子——出来的不再是念，是会发烫的真。', br: 'M', phase: 4,
+    n: '炼念', d: '把元念塞进炉子——出来的不再是念，是会发烫的真。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1800 }, { r: 'primordial', a: 18 }, { r: 'spiritCore', a: 15 }, { r: 'silenceStone', a: 8 }],
     e: {},
     uq: { u: { primordialDrive: 1 }, b: { primordialPool: 3 } },
   },
   mirrorSpiritFocus: {
-    n: '镜灵聚焦', d: '一面镜灵不够——三面对着一处，照出的不再是当下。', br: 'M', phase: 4,
+    n: '叠镜', d: '一面镜灵不够——三面对着一处，照出的不再是当下。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 2000 }, { r: 'mirrorSpirit', a: 5 }, { r: 'silenceStone', a: 12 }, { r: 'radiance', a: 10 }],
     e: {},
     uq: { u: { mirrorForging: 1, hyperSense: 1 } },
   },
   voidCodexCompile: {
-    n: '幽典纂', d: '一本幽典写到第二本——记忆开始向外渗。', br: 'M', phase: 4,
+    n: '续典', d: '一本幽典写到第二本——记忆开始向外渗。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 2200 }, { r: 'voidCodex', a: 5 }, { r: 'insight', a: 25 }, { r: 'primordial', a: 20 }],
     e: {},
     uq: { u: { voidCodexLore: 1, spiritWeb: 1 } },
