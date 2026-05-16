@@ -1640,6 +1640,7 @@ function rTC() {
       h += '<div class="res-cat" style="margin-top:8px;">已完成</div>';
       for (var i = 0; i < done.length; i++) {
         var uid = done[i][0];
+        if (!UD[uid]) continue;  // 第二期 Part A：合并后旧 id 残留时 UD[uid]=undefined 会 crash
         var sec = { effects: upgEffects(UD[uid].e), tip: pickTip('upg_' + uid, UD[uid].tip) };
         var nameHtml = hpWrap('✓ ' + UD[uid].n, sec);
         h += '<div class="cr-done">' + nameHtml + '</div>';

@@ -1253,6 +1253,7 @@ function calcR() {
   // 研究加成
   for (const [id, s] of Object.entries(G.upg)) {
     if (!s.done) continue;
+    if (!UD[id]) continue;  // 第二期 Part A：合并后旧 id 残留时 UD[id]=undefined 会 crash
     const e = UD[id].e; if (!e) continue;
     for (const [k, v] of Object.entries(e))
       if (k.endsWith('M') && !k.startsWith('hap') && k !== 'plankU' && k !== 'brickU' && k !== 'winterBuff' && k !== 'foxEat')
@@ -3466,6 +3467,11 @@ function migrate() {
 
   // §五 2.9 成就
   if (!G.achievements) G.achievements = {};
+
+  // 第二期 Part A 防御：清理孤立 id（合并后被吃 id 残留在 G.upg/G.upgd）
+  // load() 已对旧档直接重置，但这里双保险——防异常存档触达崩溃点
+  for (var _k in G.upg) if (!UD[_k]) delete G.upg[_k];
+  for (var _k in G.upgd) if (!UPGD[_k]) delete G.upgd[_k];
 }
 
 // ===== 存档 =====
@@ -3476,6 +3482,9 @@ function save() {
     delete G._fogRestore;
     // v0.17 §五 2.8: 记录存档时间戳（用于离线收益计算）
     G.lastSaveTime = Date.now();
+    // 第二期 Part A：研究合并后存档版本号 2。旧档（无 _saveVersion 或 != 2）
+    // 在 load() 里直接重置（避免悬空 id 触发崩溃点）。
+    G._saveVersion = 2;
     localStorage.setItem('fhSave', JSON.stringify(G));
     saveFailLogged = false;
   } catch (e) {
@@ -3490,8 +3499,16 @@ function load() {
   try {
     const s = localStorage.getItem('fhSave');
     if (s) {
+      // 第二期 Part A：旧档（无 _saveVersion 或 != 2）含已合并的旧研究 id，
+      // 直接重置——旧 id 进入运行时会让崩溃点 engine.js 遍历 UD[id].e 报错。
+      const parsed = JSON.parse(s);
+      if (parsed._saveVersion !== 2) {
+        try { localStorage.removeItem('fhSave'); } catch (e) { }
+        log('检测到旧版本存档（研究系统已重构），已重置。', 'important');
+        return;
+      }
       resetG();
-      Object.assign(G, JSON.parse(s));
+      Object.assign(G, parsed);
       migrate();
       log('读取了存档。');
       // v0.17 §五 2.8: 离线收益——检测离线时长并补算
