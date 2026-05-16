@@ -1688,33 +1688,21 @@ const UD = {
   },
   templeStudy: {
     n: '圣堂', d: '一座大教堂的图纸——几代狐狸用诵经声念出来的。',
-    p: [{ r: 'lore', a: 1000 }, { r: 'hymn', a: 5 }, { r: 'concrete', a: 10 }],
+    p: [{ r: 'lore', a: 2100 }, { r: 'hymn', a: 13 }, { r: 'concrete', a: 10 }, { r: 'holyOil', a: 10 }],
     e: {},
     uq: { u: { hymnArt: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
-  pilgrimageLore: {
-    n: '朝圣', d: '一条路走的次数够多，路本身就成了圣物。',
-    p: [{ r: 'lore', a: 1100 }, { r: 'hymn', a: 8 }, { r: 'holyOil', a: 10 }],
-    e: {},
-    uq: { u: { templeStudy: 1 } }, sb: 'D', br: 'I', phase: 4,
-  },
   crusadeLore: {
     n: '圣战', d: '不是为夺取——是为夺还。词序不同，结局不同。',
-    p: [{ r: 'lore', a: 1200 }, { r: 'piety', a: 200 }, { r: 'holyIron', a: 8 }],
+    p: [{ r: 'lore', a: 2700 }, { r: 'piety', a: 450 }, { r: 'holyIron', a: 8 }, { r: 'holyFlame', a: 30 }],
     e: {},
-    uq: { u: { pilgrimageLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { templeStudy: 1 }, b: { cathedral: 2 } }, sb: 'D', br: 'I', phase: 4,
   },
   relicLore: {
     n: '圣骸', d: '研究遗留下来的东西——它们记得的比活着的狐狸更多。',
-    p: [{ r: 'lore', a: 1100 }, { r: 'hymn', a: 5 }, { r: 'piety', a: 180 }],
+    p: [{ r: 'lore', a: 2400 }, { r: 'hymn', a: 5 }, { r: 'piety', a: 180 }, { r: 'scroll', a: 30 }],
     e: { holyRelicU: 1 },
     uq: { u: { hymnArt: 1 }, b: { tribunalHall: 3 } }, sb: 'D', br: 'I', phase: 4,
-  },
-  relicTreatise: {
-    n: '遗名录', d: '每一块圣骸背后都有一个名字——这门学问就是记住那些名字。',
-    p: [{ r: 'lore', a: 1300 }, { r: 'holyRelic', a: 2 }, { r: 'scroll', a: 30 }],
-    e: {},
-    uq: { u: { relicLore: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   scriptureCompile: {
     n: '圣典编纂', d: '把零散的训诫装订成册——书脊裂开的那一刻，新的教义诞生了。',
@@ -1724,33 +1712,15 @@ const UD = {
   },
   doctrineSystem: {
     n: '教纲', d: '所有的"应该"被排进表格——一行行读下去，连呼吸都有节奏。',
-    p: [{ r: 'lore', a: 1500 }, { r: 'holyScripture', a: 2 }, { r: 'piety', a: 200 }],
+    p: [{ r: 'lore', a: 3200 }, { r: 'holyScripture', a: 5 }, { r: 'piety', a: 200 }, { r: 'holyFlame', a: 20 }],
     e: {},
     uq: { u: { scriptureCompile: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
-  grandEdictLore: {
-    n: '大教令', d: '一道教令能让一整季的农事改道——研究的就是这个力量从哪来。',
-    p: [{ r: 'lore', a: 1700 }, { r: 'holyScripture', a: 3 }, { r: 'holyFlame', a: 20 }],
-    e: {},
-    uq: { u: { doctrineSystem: 1 } }, sb: 'D', br: 'I', phase: 4,
-  },
-  crusadePrep: {
-    n: '圣战备战', d: '战旗、口粮、誓词——三样齐备了，山谷也就齐备了。',
-    p: [{ r: 'lore', a: 1500 }, { r: 'holyFlame', a: 30 }, { r: 'piety', a: 250 }],
-    e: {},
-    uq: { u: { crusadeLore: 1 }, b: { cathedral: 2 } }, sb: 'D', br: 'I', phase: 4,
-  },
-  expeditionTheology: {
-    n: '远征神学', d: '走出山谷的祷告，跟在山谷里念的，不是一回事。',
-    p: [{ r: 'lore', a: 1700 }, { r: 'piety', a: 300 }, { r: 'holyRelic', a: 1 }],
-    e: {},
-    uq: { u: { crusadePrep: 1 } }, sb: 'D', br: 'I', phase: 4,
-  },
   holyLandReclaim: {
     n: '圣地夺还', d: '原来那里曾经是的——这是一句研究的开始，也是一切的尽头。',
-    p: [{ r: 'lore', a: 2000 }, { r: 'holyRelic', a: 2 }, { r: 'holyScripture', a: 2 }, { r: 'piety', a: 400 }],
+    p: [{ r: 'lore', a: 3700 }, { r: 'holyRelic', a: 3 }, { r: 'holyScripture', a: 2 }, { r: 'piety', a: 700 }],
     e: {},
-    uq: { u: { expeditionTheology: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { crusadeLore: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
 
   // ===== 神启副线 B-秘仪（灵修+神启） =====
@@ -2268,14 +2238,14 @@ const CD = {
     n: '圣战军粮', d: '圣火+野莓 → 远行奖励永久+5%',
     inp: [{ r: 'holyFlame', a: 10 }, { r: 'berry', a: 200 }],
     out: [{ r: '_expRewardBonus', a: .05 }],
-    uq: { u: { crusadePrep: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { crusadeLore: 1 } }, sb: 'D', br: 'I', phase: 4,
     perm: true,
   },
   craftGraceWater: {
     n: '恩典之水', d: '圣骸+圣油 → 神恩上限永久+2%',
     inp: [{ r: 'holyRelic', a: 1 }, { r: 'holyOil', a: 3 }],
     out: [{ r: '_graceCapBonus', a: .02 }],
-    uq: { u: { relicTreatise: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { relicLore: 1 } }, sb: 'D', br: 'I', phase: 4,
     perm: true,
   },
 
@@ -4125,13 +4095,13 @@ const UPGD = {
     n: '教令宗师', d: '教令冷却 -1 季。',
     p: [{ r: 'hymn', a: 5 }, { r: 'holyFlame', a: 15 }],
     e: {},
-    uq: { u: { grandEdictLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { doctrineSystem: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   edictPower: {
     n: '教令强化', d: '基础教令效果 +10%。',
     p: [{ r: 'holyScripture', a: 3 }, { r: 'piety', a: 200 }],
     e: {},
-    uq: { u: { grandEdictLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { doctrineSystem: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   crusadeEdictUp: {
     n: '圣战令强化', d: '圣战令效果 +15%。',
@@ -4143,13 +4113,13 @@ const UPGD = {
     n: '教令增席·高', d: '教令同时在朝上限 +1。',
     p: [{ r: 'hymn', a: 8 }, { r: 'holyScripture', a: 2 }],
     e: {},
-    uq: { u: { grandEdictLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { doctrineSystem: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   pilgrimEdictUp: {
     n: '朝圣令强化', d: '朝圣令效果 +15%。',
     p: [{ r: 'hymn', a: 5 }, { r: 'piety', a: 150 }],
     e: {},
-    uq: { u: { pilgrimageLore: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { templeStudy: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   // 圣战与远征 #49-53
   crusadeCampUp: {
@@ -4162,13 +4132,13 @@ const UPGD = {
     n: '神圣远征', d: '远行奖励 +10%（永久，与研究叠加）。',
     p: [{ r: 'holyRelic', a: 3 }, { r: 'holyFlame', a: 15 }],
     e: { _expRewardBonus: 0.10 },
-    uq: { u: { expeditionTheology: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { holyLandReclaim: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   crusadeLogistics: {
     n: '圣战后勤', d: '圣战军粮效果加成（5.5 实装）。',
     p: [{ r: 'holyIron', a: 8 }, { r: 'piety', a: 150 }],
     e: {},
-    uq: { u: { crusadePrep: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { crusadeLore: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   faithCaravan: {
     n: '信仰商队', d: '商队到达率 +10%。',
@@ -4242,7 +4212,7 @@ const UPGD = {
     n: '圣骸恩典', d: '每个圣骸库存 +0.5% 虔诚产出（5.5 实装）。',
     p: [{ r: 'holyRelic', a: 5 }, { r: 'piety', a: 250 }],
     e: {},
-    uq: { u: { relicTreatise: 1 } }, sb: 'D', br: 'I', phase: 4,
+    uq: { u: { relicLore: 1 } }, sb: 'D', br: 'I', phase: 4,
   },
   scriptureGrace: {
     n: '圣典恩典', d: '每个圣典库存 +1% 学识产出（5.5 实装）。',
