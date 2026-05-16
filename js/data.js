@@ -609,7 +609,7 @@ const BD = {
     n: '净辉林', t: 'b', d: '辉芒浸润了每一棵树——连风也变得安静了。', br: 'M', phase: 4,
     p: [{ r: 'crystalSilk', b: 3, k: 1.15 }, { r: 'elixir', b: 2, k: 1.15 }, { r: 'spectrum', b: 5, k: 1.15 }],
     e: { unrestP: -.08 },
-    uq: { u: { pureRadiance: 1 } },
+    uq: { u: { radiantVision: 1 } },
    tip: ['林子里光在跑。']},
   chartHall: {
     n: '灵图阁', t: 'b', d: '灵图是灵脉的地图——画得越多，看得越远。', br: 'M', phase: 4,
@@ -907,7 +907,7 @@ const JD = {
 
   // ===== 灵修分支 D阶段职业（v0.20 §八 5.2d） =====
   silenceAdept:    { n: '深寂士', d: '元念专精', desc: '元念产出+0.002/s（需至少1座寂石窟存在）', e: { primordialP: .004 }, br: 'M', phase: 4, uq: { b: { silenceCave: 1 } } , tip: ['起身时，苔藓从肩上簌簌地落。']},
-  pactChanneler:   { n: '契灵使', d: '灵契沟通', desc: '当前活跃灵契产出+5%/人，灵契祭坛效果+3%/人', e: {}, br: 'M', phase: 4, uq: { u: { spiritPactLore: 1 } } , tip: ['空房间里，它对着空气点头。']},
+  pactChanneler:   { n: '契灵使', d: '灵契沟通', desc: '当前活跃灵契产出+5%/人，灵契祭坛效果+3%/人', e: {}, br: 'M', phase: 4, uq: { u: { spiritDrive: 1 } } , tip: ['空房间里，它对着空气点头。']},
 
   // ===== 神启副线 A阶段 =====
   priest: { n: '祭司', d: '诵经积虔', desc: '虔诚+0.04/s（需经阁）', e: { pietyP: .04 }, uq: { b: { scriptureHall: 1 } }, sb: 'D' , tip: ['它的祷词，比它先到了天上。']},
@@ -1429,47 +1429,23 @@ const UD = {
     e: { spiritChartU: 1 },
     uq: { u: { sageWay: 1 }, b: { oracleHall: 2 } },
   },
-  spiritGrid: {
-    n: '念阵', d: '把灵核排成阵——它们就会自己干活了。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 800 }, { r: 'spiritCore', a: 8 }, { r: 'spectrum', a: 12 }],
-    e: {},
-    uq: { u: { chartDraw: 1, coreCraft: 1 } },
-  },
-  deepReson: {
-    n: '深共鸣', d: '共振不只是物理——深处的那一波，连灵魂都会跟着抖。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 700 }, { r: 'resonance', a: 25 }, { r: 'crystalSilk', a: 5 }],
-    e: {},
-    uq: { u: { resonArt: 1 }, b: { resonTower: 3 } },
-  },
   cosmicSpec: {
-    n: '万物谱', d: '谱石记录的不是颜色——是万物共振的频率。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 900 }, { r: 'spectrum', a: 15 }, { r: 'insight', a: 12 }],
+    n: '万物谱', d: '共振深处那一波连灵魂都抖——谱石记录万物共振的频率。',
+    p: [{ r: 'lore', a: 1600 }, { r: 'spectrum', a: 15 }, { r: 'insight', a: 12 }, { r: 'resonance', a: 25 }, { r: 'crystalSilk', a: 5 }],
     e: {},
-    uq: { u: { deepReson: 1, radiant: 1 } },
-  },
-  pureRadiance: {
-    n: '净辉', d: '辉芒浸透了林子——连躁念都不好意思留下来了。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 550 }, { r: 'crystalSilk', a: 3 }, { r: 'elixir', a: 2 }],
-    e: {},
-    uq: { b: { shapeHall: 2 } },
+    uq: { u: { resonArt: 1, radiant: 1 }, b: { resonTower: 1 } }, br: 'M', phase: 4,
   },
   coreFusion: {
-    n: '融灵核', d: '五颗灵核靠在一起——就会变成一颗更大的。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 850 }, { r: 'spiritCore', a: 5 }, { r: 'radiance', a: 8 }],
+    n: '融灵核', d: '灵核相融——晶丝、共振子、灵核与念阵尽汇于此。',
+    p: [{ r: 'lore', a: 2400 }, { r: 'spiritCore', a: 18 }, { r: 'radiance', a: 8 }, { r: 'spectrum', a: 12 }, { r: 'formSoul', a: 3 }, { r: 'spiritChart', a: 30 }],
     e: {},
-    uq: { u: { coreCraft: 1 } },
+    uq: { u: { chartDraw: 1, coreCraft: 1 }, b: { chartHall: 1 } }, br: 'M', phase: 4,
   },
   radiantVision: {
-    n: '辉视', d: '看远不靠眼睛——靠辉芒在脑袋里画的那张图。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 700 }, { r: 'radiance', a: 5 }, { r: 'insight', a: 8 }],
+    n: '辉视', d: '辉芒浸透林子——看远不靠眼睛，靠辉芒在脑袋里画的那张图。',
+    p: [{ r: 'lore', a: 1250 }, { r: 'radiance', a: 5 }, { r: 'insight', a: 8 }, { r: 'crystalSilk', a: 3 }, { r: 'elixir', a: 2 }],
     e: {},
-    uq: { u: { radiant: 1 }, b: { oracleHall: 3 } },
-  },
-  starSense: {
-    n: '星感', d: '灵图画到够多的时候——你会开始听见星星在说话。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 750 }, { r: 'formSoul', a: 3 }, { r: 'spiritChart', a: 30 }],
-    e: {},
-    uq: { u: { chartDraw: 1 }, b: { chartHall: 3 } },
+    uq: { u: { radiant: 1 }, b: { oracleHall: 1, shapeHall: 1 } }, br: 'M', phase: 4,
   },
 
   // ===== 灵修分支 D阶段：深寂研究链（v0.20 §八 5.2c, 18 项） =====
@@ -1503,18 +1479,6 @@ const UD = {
     e: {},
     uq: { u: { hyperSense: 1 }, b: { coreForge: 2 } },
   },
-  voidLore: {
-    n: '幽理', d: '看不见的那一面也有规则——只是规则从不出声。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 1400 }, { r: 'primordial', a: 10 }, { r: 'spectrum', a: 20 }],
-    e: {},
-    uq: { u: { primordialism: 1, cosmicSpec: 1 } },
-  },
-  primordialDrive: {
-    n: '元驱', d: '元念可以推着东西走——前提是没有狐狸眨眼。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 1600 }, { r: 'spiritCore', a: 18 }, { r: 'primordial', a: 15 }],
-    e: {},
-    uq: { u: { coreFusion: 1, primordialism: 1 } },
-  },
   silenceResonance: {
     n: '寂弦', d: '寂石之间会响——但只有寂石听得见。', br: 'M', phase: 4,
     p: [{ r: 'lore', a: 1800 }, { r: 'silenceStone', a: 10 }, { r: 'crystalSilk', a: 30 }],
@@ -1522,16 +1486,16 @@ const UD = {
     uq: { u: { silenceCryst: 1 } },
   },
   deepLeyline: {
-    n: '渊脉', d: '灵脉之下还有灵脉——更深的那条不流，但通往任何地方。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2000 }, { r: 'silenceStone', a: 15 }, { r: 'primordial', a: 20 }],
+    n: '渊脉', d: '灵脉之下还有灵脉，幽典续写不止——更深处不流，却通往任何地方。',
+    p: [{ r: 'lore', a: 4200 }, { r: 'silenceStone', a: 15 }, { r: 'primordial', a: 20 }, { r: 'voidCodex', a: 5 }, { r: 'insight', a: 25 }],
     e: {},
-    uq: { u: { silenceResonance: 1 } },
+    uq: { u: { silenceResonance: 1, voidCodexLore: 1, spiritWeb: 1 } }, br: 'M', phase: 4,
   },
   mirrorForging: {
-    n: '镜锻', d: '把灵核倒进镜里——出来的东西能在两边同时存在。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 1500 }, { r: 'spiritCore', a: 12 }, { r: 'primordial', a: 10 }],
+    n: '镜锻', d: '灵核倒进镜里——驱动元念，亦藏幽冥之理；规则从不出声。',
+    p: [{ r: 'lore', a: 4500 }, { r: 'spiritCore', a: 30 }, { r: 'primordial', a: 35 }, { r: 'spectrum', a: 20 }],
     e: {},
-    uq: { u: { coreFusion: 1, primordialism: 1 } },
+    uq: { u: { primordialism: 1, cosmicSpec: 1, coreFusion: 1 } }, br: 'M', phase: 4,
   },
   voidCodexLore: {
     n: '幽典', d: '把所有幽理写下来——空白处的字最重。', br: 'M', phase: 4,
@@ -1540,46 +1504,16 @@ const UD = {
     uq: { u: { cosmicSpec: 1, primordialism: 1 } },
   },
   spiritDrive: {
-    n: '灵驱', d: '念阵转起来——不需要燃料，只需要一只狐狸坐着想事情。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2000 }, { r: 'spiritCore', a: 20 }, { r: 'silenceStone', a: 8 }],
+    n: '灵驱', d: '念阵转起，寂界辟开，与冥立契——一念之中，万象俱动。',
+    p: [{ r: 'lore', a: 6200 }, { r: 'spiritCore', a: 38 }, { r: 'silenceStone', a: 31 }, { r: 'mirrorSpirit', a: 5 }, { r: 'primordial', a: 15 }],
     e: {},
-    uq: { u: { spiritGrid: 1, primordialism: 1 } },
-  },
-  silenceField: {
-    n: '寂界', d: '推开一扇看不见的门——门后没有时间。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2200 }, { r: 'silenceStone', a: 15 }, { r: 'mirrorSpirit', a: 5 }],
-    e: {},
-    uq: { u: { silenceResonance: 1, mirrorForging: 1 } },
-  },
-  spiritPactLore: {
-    n: '灵契', d: '跟看不见的东西签字——签完了，它就一直在你身后。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2000 }, { r: 'spiritCore', a: 18 }, { r: 'primordial', a: 15 }, { r: 'voidCodex', a: 3 }],
-    e: {},
-    uq: { u: { spiritWeb: 1, voidCodexLore: 1 } },
-  },
-  silentPurity: {
-    n: '净寂', d: '灵液里加一颗元念——能让一整片林子忘记躁动。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 1600 }, { r: 'primordial', a: 12 }, { r: 'elixir', a: 8 }],
-    e: {},
-    uq: { u: { voidLore: 1, pureRadiance: 1 } },
+    uq: { u: { coreFusion: 1, primordialism: 1, silenceResonance: 1, mirrorForging: 1, spiritWeb: 1, voidCodexLore: 1 } }, br: 'M', phase: 4,
   },
   primordialForging: {
-    n: '炼念', d: '把元念塞进炉子——出来的不再是念，是会发烫的真。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 1800 }, { r: 'primordial', a: 18 }, { r: 'spiritCore', a: 15 }, { r: 'silenceStone', a: 8 }],
+    n: '炼念', d: '三镜聚念，归于澄寂——元念入炉，出来不再是念，是发烫的真。',
+    p: [{ r: 'lore', a: 5400 }, { r: 'primordial', a: 45 }, { r: 'spiritCore', a: 15 }, { r: 'mirrorSpirit', a: 5 }, { r: 'silenceStone', a: 12 }, { r: 'elixir', a: 8 }],
     e: {},
-    uq: { u: { primordialDrive: 1 }, b: { primordialPool: 3 } },
-  },
-  mirrorSpiritFocus: {
-    n: '叠镜', d: '一面镜灵不够——三面对着一处，照出的不再是当下。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2000 }, { r: 'mirrorSpirit', a: 5 }, { r: 'silenceStone', a: 12 }, { r: 'radiance', a: 10 }],
-    e: {},
-    uq: { u: { mirrorForging: 1, hyperSense: 1 } },
-  },
-  voidCodexCompile: {
-    n: '续典', d: '一本幽典写到第二本——记忆开始向外渗。', br: 'M', phase: 4,
-    p: [{ r: 'lore', a: 2200 }, { r: 'voidCodex', a: 5 }, { r: 'insight', a: 25 }, { r: 'primordial', a: 20 }],
-    e: {},
-    uq: { u: { voidCodexLore: 1, spiritWeb: 1 } },
+    uq: { u: { mirrorForging: 1, mirrorForging: 1, hyperSense: 1, mirrorForging: 1, radiantVision: 1 }, b: { primordialPool: 1 } }, br: 'M', phase: 4,
   },
 
   // ===== 神启副线 A阶段：初悟 =====
@@ -2090,7 +2024,7 @@ const CD = {
     n: '灵图（精）', d: '灵墨+悟片+辉芒 → 灵图',
     inp: [{ r: 'spiritInk', a: 5 }, { r: 'insight', a: 2 }, { r: 'radiance', a: 1 }],
     out: [{ r: 'spiritChart', a: 3 }],
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
     br: 'M',
   },
   shapeForm: {
@@ -2135,7 +2069,7 @@ const CD = {
     n: '寂石（淬）', d: '寂石+镜灵+幽典 → 浓缩寂石+灵液',
     inp: [{ r: 'silenceStone', a: 3 }, { r: 'mirrorSpirit', a: 1 }, { r: 'voidCodex', a: 1 }],
     out: [{ r: 'silenceStone', a: 2 }, { r: 'elixir', a: 1 }],
-    uq: { u: { spiritPactLore: 1 } },
+    uq: { u: { spiritDrive: 1 } },
     br: 'M', phase: 4,
   },
 
@@ -3391,13 +3325,13 @@ const UPGD = {
     n: '晶丝韧化', d: '晶丝配方消耗-20%', br: 'M',
     p: [{ r: 'crystalSilk', a: 8 }, { r: 'resonance', a: 20 }],
     e: { _craftReduce: { weaveCrystal: 0.2 } },
-    uq: { u: { deepReson: 1 } },
+    uq: { u: { cosmicSpec: 1 } },
   },
   coreDouble: {
     n: '灵核双产', d: '灵核配方有20%概率双产', br: 'M',
     p: [{ r: 'spiritCore', a: 8 }, { r: 'radiance', a: 5 }],
     e: { _craftDouble: { forgeCore: 0.2 } },
-    uq: { u: { deepReson: 1 } },
+    uq: { u: { cosmicSpec: 1 } },
   },
   cosmicProd: {
     n: '万物谱感', d: '所有灵修建筑产出+8%', br: 'M',
@@ -3409,13 +3343,13 @@ const UPGD = {
     n: '辉映远照', d: '辉映台效果影响范围扩大', br: 'M',
     p: [{ r: 'radiance', a: 8 }, { r: 'crystalSilk', a: 12 }],
     e: { _radiantExpand: 1 },
-    uq: { u: { deepReson: 1 } },
+    uq: { u: { cosmicSpec: 1 } },
   },
   deepResonWave: {
     n: '深共鸣波', d: '共振波灵术效果65%→80%', br: 'M',
     p: [{ r: 'resonance', a: 30 }, { r: 'spiritCore', a: 5 }],
     e: { _spellBoost: { resonWave: 0.15 } },
-    uq: { u: { deepReson: 1 } },
+    uq: { u: { cosmicSpec: 1 } },
   },
   cosmicRead: {
     n: '万物谱读', d: '研究花费-10%（全局永久）', br: 'M',
@@ -3439,25 +3373,25 @@ const UPGD = {
     n: '晶丝仓', d: '晶丝上限+100', br: 'M',
     p: [{ r: 'crystalSilk', a: 15 }, { r: 'spectrum', a: 10 }],
     e: { _flatMx: { crystalSilk: 100 } },
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   radianceBottle: {
     n: '辉芒瓶', d: '辉芒上限+50', br: 'M',
     p: [{ r: 'radiance', a: 8 }, { r: 'crystalSilk', a: 10 }],
     e: { _flatMx: { radiance: 50 } },
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   coreBox: {
     n: '灵核匣', d: '灵核上限+30', br: 'M',
     p: [{ r: 'spiritCore', a: 8 }, { r: 'formSoul', a: 3 }],
     e: { _flatMx: { spiritCore: 30 } },
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   chartBook: {
     n: '灵图册', d: '灵图上限+200', br: 'M',
     p: [{ r: 'spiritChart', a: 40 }, { r: 'insight', a: 10 }],
     e: { _flatMx: { spiritChart: 200 } },
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   caveSave: {
     n: '结晶窟减耗', d: '结晶窟命丝消耗-25%', br: 'M',
@@ -3481,19 +3415,19 @@ const UPGD = {
     n: '净辉林深根', d: '净辉林躁念消除+50%', br: 'M',
     p: [{ r: 'crystalSilk', a: 5 }, { r: 'elixir', a: 3 }],
     e: { _unrestReduce: { radiantGrove: -0.5 } },
-    uq: { u: { pureRadiance: 1 } },
+    uq: { u: { radiantVision: 1 } },
   },
   weaveExpert: {
     n: '灵织精通', d: '灵织灵术期间配方产出+30%', br: 'M',
     p: [{ r: 'spiritCore', a: 5 }, { r: 'crystalSilk', a: 10 }],
     e: { _spellBoost: { spiritWeave: 0.3 } },
-    uq: { u: { spiritGrid: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   weaveSeason: {
     n: '灵织双季', d: '灵织灵术持续+1季', br: 'M',
     p: [{ r: 'spiritCore', a: 8 }, { r: 'insight', a: 15 }],
     e: { _spellDuration: { spiritWeave: 1 } },
-    uq: { u: { spiritGrid: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   voidWalkSave: {
     n: '虚行免耗', d: '虚行灵术辉芒消耗-1（3→2）', br: 'M',
@@ -3505,13 +3439,13 @@ const UPGD = {
     n: '星感增幅', d: '星感灵术效果×3→×5', br: 'M',
     p: [{ r: 'formSoul', a: 3 }, { r: 'spiritChart', a: 30 }],
     e: { _spellBoost: { starSenseSpell: 0.67 } },
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
   },
   autoChart: {
     n: '自动灵图', d: '灵图阁每季初自动施放一次基础编灵图', br: 'M',
     p: [{ r: 'spiritChart', a: 50 }, { r: 'spiritCore', a: 5 }],
     e: { _autoChart: 1 },
-    uq: { u: { chartDraw: 1, spiritGrid: 1 } },
+    uq: { u: { chartDraw: 1, coreFusion: 1 } },
   },
   shapeMasterView: {
     n: '化形师远望', d: '化形师被动：灵图产出+20%', br: 'M',
@@ -3535,7 +3469,7 @@ const UPGD = {
     n: '辉芒灯', d: '所有建筑躁念-10%（全局）', br: 'M',
     p: [{ r: 'radiance', a: 10 }, { r: 'spiritCore', a: 5 }],
     e: { _globalUnrestReduce: 0.10 },
-    uq: { u: { radiant: 1, pureRadiance: 1 } },
+    uq: { u: { radiant: 1, radiantVision: 1 } },
   },
 
   // ===== 灵修分支 D阶段升级 #79-120（v0.20 §八 5.2e, 42 个） =====
@@ -3615,19 +3549,19 @@ const UPGD = {
     n: '元念仓', d: '元念上限+50', br: 'M', phase: 4,
     p: [{ r: 'primordial', a: 10 }, { r: 'crystalSilk', a: 25 }],
     e: { _flatMx: { primordial: 50 } },
-    uq: { u: { voidLore: 1 } },
+    uq: { u: { mirrorForging: 1 } },
   },
   silenceShelf: {
     n: '寂石柜', d: '寂石上限+30', br: 'M', phase: 4,
     p: [{ r: 'silenceStone', a: 8 }, { r: 'primordial', a: 15 }],
     e: { _flatMx: { silenceStone: 30 } },
-    uq: { u: { voidLore: 1 } },
+    uq: { u: { mirrorForging: 1 } },
   },
   codexShelf: {
     n: '幽典架', d: '幽典上限+10', br: 'M', phase: 4,
     p: [{ r: 'voidCodex', a: 3 }, { r: 'insight', a: 20 }],
     e: { _flatMx: { voidCodex: 10 } },
-    uq: { u: { voidLore: 1 } },
+    uq: { u: { mirrorForging: 1 } },
   },
   silenceCondense: {
     n: '寂石凝缩', d: '寂石配方原料-20%', br: 'M', phase: 4,
@@ -3711,31 +3645,31 @@ const UPGD = {
     n: '镜灵台聚光', d: '镜灵台产出+50%。', br: 'M', phase: 4,
     p: [{ r: 'mirrorSpirit', a: 5 }, { r: 'primordial', a: 15 }],
     e: {},
-    uq: { u: { mirrorSpiritFocus: 1 } },
+    uq: { u: { primordialForging: 1 } },
   },
   mirrorDaisCalm: {
     n: '镜灵台宁静', d: '镜灵台灵脉消耗-1（5.2f）', br: 'M', phase: 4,
     p: [{ r: 'mirrorSpirit', a: 3 }, { r: 'silenceStone', a: 8 }],
     e: {},
-    uq: { u: { mirrorSpiritFocus: 1 } },
+    uq: { u: { primordialForging: 1 } },
   },
   mirrorDaisCool: {
     n: '镜灵台冷却', d: '镜灵台灵术冷却加成升至 5%/座（5.2f）', br: 'M', phase: 4,
     p: [{ r: 'mirrorSpirit', a: 8 }, { r: 'voidCodex', a: 2 }],
     e: {},
-    uq: { u: { mirrorSpiritFocus: 1 } },
+    uq: { u: { primordialForging: 1 } },
   },
   codexHallStudy: {
     n: '幽典阁专修', d: '幽典阁产出+60%，升级折扣升至 3.5%/座（5.2f）', br: 'M', phase: 4,
     p: [{ r: 'voidCodex', a: 5 }, { r: 'insight', a: 25 }],
     e: {},
-    uq: { u: { voidCodexCompile: 1 } },
+    uq: { u: { deepLeyline: 1 } },
   },
   codexHallSilence: {
     n: '幽典阁藏', d: '幽典阁躁念-30%（5.2f）', br: 'M', phase: 4,
     p: [{ r: 'voidCodex', a: 3 }, { r: 'primordial', a: 12 }],
     e: {},
-    uq: { u: { voidCodexCompile: 1 } },
+    uq: { u: { deepLeyline: 1 } },
   },
   primordialForgeBoost: {
     n: '元念炉增效', d: '元念炉乘法加成 ×1.5→×2。', br: 'M', phase: 4,
@@ -3753,13 +3687,13 @@ const UPGD = {
     n: '灵契祭坛共鸣', d: '灵契祭坛产出加成升至 25%/座。', br: 'M', phase: 4,
     p: [{ r: 'spiritCore', a: 20 }, { r: 'voidCodex', a: 3 }],
     e: {},
-    uq: { u: { spiritPactLore: 1 } },
+    uq: { u: { spiritDrive: 1 } },
   },
   deepMeditation: {
     n: '深寂冥想', d: '寂石冥想跳跃天数+50%（5.2f 寂石冥想）', br: 'M', phase: 4,
     p: [{ r: 'silenceStone', a: 12 }, { r: 'primordial', a: 15 }, { r: 'mirrorSpirit', a: 3 }],
     e: {},
-    uq: { u: { silenceField: 1 } },
+    uq: { u: { spiritDrive: 1 } },
   },
   meditationFinesse: {
     n: '寂石冥想精修', d: '寂石冥想消耗-30%（5.2f）', br: 'M', phase: 4,
@@ -3783,13 +3717,13 @@ const UPGD = {
     n: '净寂殿深静', d: '净寂殿躁念消除+50%。', br: 'M', phase: 4,
     p: [{ r: 'silenceStone', a: 10 }, { r: 'primordial', a: 15 }, { r: 'elixir', a: 8 }],
     e: {},
-    uq: { u: { silentPurity: 1 } },
+    uq: { u: { primordialForging: 1 } },
   },
   pactChannelerArt: {
     n: '契灵使心法', d: '契灵使产出+40%。', br: 'M', phase: 4,
     p: [{ r: 'spiritCore', a: 15 }, { r: 'voidCodex', a: 3 }, { r: 'silenceStone', a: 10 }],
     e: { jobM: { pactChanneler: 0.4 } },
-    uq: { u: { spiritPactLore: 1 } },
+    uq: { u: { spiritDrive: 1 } },
   },
 
   // ===== 神启副线 A阶段：升级 #1-10 =====
@@ -4760,7 +4694,7 @@ const SD = {
     cost: [{ r: 'crystalSilk', a: 2 }, { r: 'spiritCore', a: 1 }],
     cooldown: 600, // 120s
     br: 'M',
-    uq: { u: { spiritGrid: 1 } },
+    uq: { u: { coreFusion: 1 } },
    tip: ['影子，替我干活。']},
   voidWalk: {
     n: '虚行', d: '立即完成当前一次远行',
@@ -4774,7 +4708,7 @@ const SD = {
     cost: [{ r: 'formSoul', a: 1 }, { r: 'spirit', a: 20 }],
     cooldown: 450, // 90s
     br: 'M',
-    uq: { u: { starSense: 1 } },
+    uq: { u: { coreFusion: 1 } },
    tip: ['星星是碎糖，往下掉！']},
 
   // ===== 灵修 D 阶段灵术（v0.20 §八 5.2f, 5 个） =====
@@ -4783,7 +4717,7 @@ const SD = {
     cost: [{ r: 'primordial', a: 5 }, { r: 'silenceStone', a: 1 }],
     cooldown: 750, // 150s
     br: 'M', phase: 4,
-    uq: { u: { primordialDrive: 1 } },
+    uq: { u: { mirrorForging: 1 } },
    tip: ['屋脊全在冒火光！']},
   mirrorViewSpell: {
     n: '镜观', d: '在灵图水面上窥见远方未明之事——立即获得学识 +1000。',
@@ -4804,25 +4738,25 @@ const SD = {
     cost: [{ r: 'silenceStone', a: 5 }, { r: 'primordial', a: 10 }],
     cooldown: 4500, // 900s
     br: 'M', phase: 4,
-    uq: { u: { silenceField: 1 } },
+    uq: { u: { spiritDrive: 1 } },
    tip: ['呼吸与石同步。']},
   pactPrayerSpell: {
     n: '灵契祈愿', d: '在五位灵契之间转换祈愿对象。',
     cost: [{ r: 'spiritCore', a: 5 }, { r: 'voidCodex', a: 1 }],
     cooldown: 1500, // 300s
     br: 'M', phase: 4,
-    uq: { u: { spiritPactLore: 1 } },
+    uq: { u: { spiritDrive: 1 } },
    tip: ['五位灵契，今天拜哪个呢？']},
 };
 
 // ===== 灵契系统定义（灵修 D 独占，v0.20 §八 5.2f） =====
 // 5 选 1，激活时通过 pactPrayerSpell 切换。每套灵契提供独占被动。
 const PACT_DEF = {
-  earthPact: { n: '大地契', d: '土性灵契：野莓/圆木/碎石产出 +20%。',       e: { _baseResM: 0.20 },                       br: 'M', uq: { u: { spiritPactLore: 1 } } },
-  waterPact: { n: '流水契', d: '水性灵契：商队概率 +15%、远行奖励 +20%。', e: { _caravanProb: 0.15, _expRewardM: 0.20 }, br: 'M', uq: { u: { spiritPactLore: 1 } } },
-  woodPact:  { n: '林木契', d: '木性灵契：建筑造价 -15%。',                 e: { buildCostM: -0.15 },                     br: 'M', uq: { u: { spiritPactLore: 1 } } },
-  firePact:  { n: '烈焰契', d: '火性灵契：配方产出 +20%。',                 e: { _craftAllM: 0.20 },                      br: 'M', uq: { u: { spiritPactLore: 1 } } },
-  metalPact: { n: '玄金契', d: '金性灵契：学识产出 +15%、研究花费 -10%。', e: { loreM: 0.15, _researchCostM: -0.10 },    br: 'M', uq: { u: { spiritPactLore: 1 } } },
+  earthPact: { n: '大地契', d: '土性灵契：野莓/圆木/碎石产出 +20%。',       e: { _baseResM: 0.20 },                       br: 'M', uq: { u: { spiritDrive: 1 } } },
+  waterPact: { n: '流水契', d: '水性灵契：商队概率 +15%、远行奖励 +20%。', e: { _caravanProb: 0.15, _expRewardM: 0.20 }, br: 'M', uq: { u: { spiritDrive: 1 } } },
+  woodPact:  { n: '林木契', d: '木性灵契：建筑造价 -15%。',                 e: { buildCostM: -0.15 },                     br: 'M', uq: { u: { spiritDrive: 1 } } },
+  firePact:  { n: '烈焰契', d: '火性灵契：配方产出 +20%。',                 e: { _craftAllM: 0.20 },                      br: 'M', uq: { u: { spiritDrive: 1 } } },
+  metalPact: { n: '玄金契', d: '金性灵契：学识产出 +15%、研究花费 -10%。', e: { loreM: 0.15, _researchCostM: -0.10 },    br: 'M', uq: { u: { spiritDrive: 1 } } },
 };
 
 // ===== 教令系统定义（教团独占） =====
