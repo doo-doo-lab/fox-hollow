@@ -1,0 +1,52 @@
+# 研究合并"禁止消失"白名单 — 步骤 0 产出
+# 这 36 个研究 id 被 js 代码硬编码引用，只能作"代表 id"吃掉别人，绝不能被吃掉/删除。
+# 脚本全局 grep 五个 js 文件得出（G.upg.<id> / UD.<id> / engine-actions 里 ===  '<id>'）。
+#
+# 分类：
+#   (a) research() 里 id==='xxx' 雷区（phase推进/资源解锁/选路框）：
+#       folkLore calendar engraving councilLore branchLore oilExtract inscription calcination crystalize
+#   (b) 功能标志研究（effect 靠 G.upg.<id> 硬编码消费）：
+#       craftMastery ancestorEye spiritShelter longJourney beyondValley
+#   (c) migrate() 资源解锁补丁 + 散落的 G.upg.<id>/UD.<id>：
+#       carpentry masonry refining systematics stargazing precFab heavyBuild radiant coreCraft
+#       formStudy chartDraw artistryLore allianceInit deepAlliancePrelude divineLore edictLore
+#       graceLore mysteryInit policyLore polityLore reputeLore ascensionLore
+#
+# 注：unlock:{u:[数组]} 格式 10 处全部引用 folkLore/calendar/engraving（均在白名单、不消失），安全。
+
+allianceInit
+ancestorEye
+artistryLore
+ascensionLore
+beyondValley
+branchLore
+calcination
+calendar
+carpentry
+chartDraw
+coreCraft
+councilLore
+craftMastery
+crystalize
+deepAlliancePrelude
+divineLore
+edictLore
+engraving
+folkLore
+formStudy
+graceLore
+heavyBuild
+inscription
+longJourney
+masonry
+mysteryInit
+oilExtract
+policyLore
+polityLore
+precFab
+radiant
+refining
+reputeLore
+spiritShelter
+stargazing
+systematics

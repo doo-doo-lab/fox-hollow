@@ -1825,40 +1825,22 @@ const UD = {
   },
   // Tier 2：被动加成 / 配方解锁
   divineInkRefining: {
-    n: '神墨精炼', d: '同样一滴墨，研开之后的墨色比研开之前深得多。',
-    p: [{ r: 'lore', a: 1200 }, { r: 'divineInk', a: 5 }, { r: 'gnosis', a: 80 }],
+    n: '墨道', d: '研开的墨更深，写下的字不褪。',
+    p: [{ r: 'lore', a: 2300 }, { r: 'divineInk', a: 8 }, { r: 'gnosis', a: 80 }, { r: 'scroll', a: 60 }],
     e: { divineInkM: 0.5 },
     uq: { u: { divineInkArt: 1 }, b: { divinityForge: 2 } }, sb: 'D', br: 'M', phase: 4,
   },
-  inkScripture: {
-    n: '墨经', d: '神墨写下的字不褪——这门学问就是怎么让它们不褪。',
-    p: [{ r: 'lore', a: 1100 }, { r: 'divineInk', a: 3 }, { r: 'scroll', a: 60 }],
-    e: {},
-    uq: { u: { divineInkArt: 1 } }, sb: 'D', br: 'M', phase: 4,
-  },
-  omenLore: {
-    n: '卜兆', d: '兆头本身没有意义；意义在看见兆头的那只眼睛里。',
-    p: [{ r: 'lore', a: 1200 }, { r: 'gnosis', a: 80 }, { r: 'ambrosia', a: 20 }],
-    e: { gnosisM: 0.2 },
-    uq: { u: { prophecyArt: 1 }, b: { prophecyHall: 1 } }, sb: 'D', br: 'M', phase: 4,
-  },
   futureSight: {
-    n: '远见', d: '远处看得见的不是更多的事，是同一件事更早的样子。',
-    p: [{ r: 'lore', a: 1300 }, { r: 'gnosis', a: 100 }, { r: 'ambrosia', a: 30 }],
-    e: { loreM: 0.15 },
+    n: '先见', d: '兆头与远景，看见的都是同一件事更早的样子。',
+    p: [{ r: 'lore', a: 2500 }, { r: 'gnosis', a: 180 }, { r: 'ambrosia', a: 50 }],
+    e: { gnosisM: 0.2, loreM: 0.15 },
     uq: { u: { prophecyArt: 1 }, b: { prophecyHall: 2 } }, sb: 'D', br: 'M', phase: 4,
   },
-  voidTouch: {
-    n: '触虚', d: '把爪子伸进门缝里——回来的爪子会觉得自己缺了一块。',
-    p: [{ r: 'lore', a: 1200 }, { r: 'apotheosisStone', a: 2 }, { r: 'gnosis', a: 80 }],
-    e: {},
-    uq: { u: { etherealLore: 1 }, b: { etherealGate: 1 } }, sb: 'D', br: 'M', phase: 4,
-  },
   ascensionTransform: {
-    n: '羽化', d: '走到这一步的狐狸，再回头看自己原来的形状，已经认不全了。',
-    p: [{ r: 'lore', a: 1400 }, { r: 'gnosis', a: 120 }, { r: 'ambrosia', a: 30 }],
+    n: '形蜕', d: '爪子探进门缝，回来时已认不全自己。',
+    p: [{ r: 'lore', a: 2600 }, { r: 'apotheosisStone', a: 2 }, { r: 'gnosis', a: 200 }, { r: 'ambrosia', a: 30 }],
     e: { ambrosiaM: 0.3 },
-    uq: { u: { apotheosisRite: 1 }, b: { apotheosisAltar: 2 } }, sb: 'D', br: 'M', phase: 4,
+    uq: { u: { etherealLore: 1, apotheosisRite: 1 }, b: { etherealGate: 1, apotheosisAltar: 2 } }, sb: 'D', br: 'M', phase: 4,
   },
 
   // ===== 通达副线 Phase A：初交（3 项研究） =====
@@ -2323,13 +2305,13 @@ const CD = {
     n: '神墨凝魂', d: '秘知+卷轴 → 神墨',
     inp: [{ r: 'gnosis', a: 40 }, { r: 'scroll', a: 30 }],
     out: [{ r: 'divineInk', a: 1 }],
-    uq: { u: { inkScripture: 1 } }, sb: 'D', br: 'M', phase: 4,
+    uq: { u: { divineInkRefining: 1 } }, sb: 'D', br: 'M', phase: 4,
   },
   apotheosisStoneCraft: {
     n: '化神石锻', d: '秘知+神墨+晶丝 → 化神石',
     inp: [{ r: 'gnosis', a: 80 }, { r: 'divineInk', a: 3 }, { r: 'crystalSilk', a: 10 }],
     out: [{ r: 'apotheosisStone', a: 1 }],
-    uq: { u: { voidTouch: 1 } }, sb: 'D', br: 'M', phase: 4,
+    uq: { u: { ascensionTransform: 1 } }, sb: 'D', br: 'M', phase: 4,
   },
   forbiddenCodexBind: {
     n: '禁典装订', d: '秘知+神墨+卷轴 → 禁典',

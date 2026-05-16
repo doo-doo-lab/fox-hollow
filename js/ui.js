@@ -58,7 +58,7 @@ const RESEARCH_GROUPS = [
   { n: '灵修', ids: ['spiritSense','leylineLore','silkWeave','inscription','pureMind','beadCraft','resonArt','specAnalysis','elixirBrew','shapeBasic','sageWay','oracleArt','calmMind','leyExpand','crystalize','radiant','coreCraft','formStudy','chartDraw','spiritGrid','deepReson','cosmicSpec','pureRadiance','coreFusion','radiantVision','starSense','primordialism','silenceCryst','mirrorArt','hyperSense','spiritWeb','voidLore','primordialDrive','silenceResonance','deepLeyline','mirrorForging','voidCodexLore','spiritDrive','silenceField','spiritPactLore','silentPurity','primordialForging','mirrorSpiritFocus','voidCodexCompile'] },
   { n: '神启·初悟', ids: ['divineLore','ritualBasic','scriptureLore','graceLore'] },
   { n: '神启·教团', ids: ['holyFlameLore','edictLore','holyWorkLore','judgmentLore','holyIronLore','churchArchLore','hymnArt','templeStudy','pilgrimageLore','crusadeLore','relicLore','relicTreatise','scriptureCompile','doctrineSystem','grandEdictLore','crusadePrep','expeditionTheology','holyLandReclaim'] },
-  { n: '神启·秘仪', ids: ['mysteryInit','groveLore','apotheosisLore','forbiddenLore','ascensionLore','pureMindLore','divineInkArt','prophecyArt','etherealLore','apotheosisRite','forbiddenCompile','divineInkRefining','inkScripture','omenLore','futureSight','voidTouch','ascensionTransform'] },
+  { n: '神启·秘仪', ids: ['mysteryInit','groveLore','apotheosisLore','forbiddenLore','ascensionLore','pureMindLore','divineInkArt','prophecyArt','etherealLore','apotheosisRite','forbiddenCompile','divineInkRefining','futureSight','ascensionTransform'] },
   { n: '通达', ids: ['envoyBasic','credentialLore','reputeLore','allianceInit','exoticLore','guestLore','allianceLore','deepAlliancePrelude'] },
 ];
 
