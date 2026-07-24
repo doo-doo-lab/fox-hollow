@@ -359,11 +359,11 @@ function simulateOffline(seconds) {
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 检测后台切回或浏览器标签页限速：如果距上次 tick 超过 0.5 秒，补算中间的时间
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
-  if (gap > 5) {
+  if (gap > 0.5) {
     simulateOffline(gap - TMS / 1000);
     rAll();
     return;
@@ -475,7 +475,8 @@ function tryEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  var hasRemnant = picked.e && picked.e.remnant;
+  log(msg, hasRemnant ? 'remnant' : 'event');
 }
 
 function tryRewardEvent() {
@@ -502,7 +503,8 @@ function tryRewardEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  var hasRemnant = picked.e && picked.e.remnant;
+  log(msg, hasRemnant ? 'remnant' : 'event');
 }
 
 function tryWorldEcho() {
@@ -521,8 +523,8 @@ function tryRemnant() {
   if (s.mx > 0 && s.v >= s.mx) return;
   s.v += 1;
   if (!s.on) s.on = true;
-  var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)] + '（遗光 +1）';
+  log(msg, 'remnant');
 }
 
 // ===== 玩家操作 =====
@@ -848,7 +850,10 @@ function resolveExpedition(idx, silent) {
   var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
   if (!silent) {
     log(returnLog, 'event');
-    if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
+    if (rewards.length) {
+      var hasRemnant = rewards.some(function(r) { return r.indexOf('遗光') !== -1; });
+      log('带回了：' + rewards.join('，'), hasRemnant ? 'remnant' : 'important');
+    }
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();

@@ -91,6 +91,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.important{color:#333;}
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
+.log.remnant{color:#9a7b4f;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
 
 /* HOVER PANEL */
