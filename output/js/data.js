@@ -587,3 +587,63 @@ const CHOICE_EVENTS = [
     { label: '让他在这里住下', desc: '人口+1，下次旧墟遗民商队价格减半' },
   ]},
 ];
+
+// ===== 拍卖会商品数据 =====
+const AUCTION_ITEMS = {
+  bld_berryPatch: {
+    n: '莓果园专精 -「肥沃腐殖」',
+    d: '改善莓果园土壤。莓果园基础产量提高 50%（0.15/s → 0.225/s）。',
+    startPrice: 15,
+    type: 'bld',
+    target: 'berryPatch'
+  },
+  bld_lumberYard: {
+    n: '伐木场专精 -「双刃重斧」',
+    d: '配备高级伐木斧。伐木场基础产量提高 50%（0.03/s → 0.045/s）。',
+    startPrice: 20,
+    type: 'bld',
+    target: 'lumberYard'
+  },
+  bld_quarry: {
+    n: '采石坑专精 -「斜向坑道」',
+    d: '优化采石挖掘结构。采石坑基础产量提高 50%（0.02/s → 0.03/s）。',
+    startPrice: 25,
+    type: 'bld',
+    target: 'quarry'
+  },
+  bld_library: {
+    n: '藏书阁专精 -「石雕书架」',
+    d: '更换牢固的石质书架。藏书阁学识上限+50，学识产量提高 30%（0.015/s → 0.0195/s）。',
+    startPrice: 35,
+    type: 'bld',
+    target: 'library'
+  },
+  job_gatherer: {
+    n: '采集者进阶 -「百草辨识」',
+    d: '采集者可辨识灵草。每个采集者额外产出 +0.002 符咒/s（受满意度和授业加成）。',
+    startPrice: 30,
+    type: 'job',
+    target: 'gatherer'
+  },
+  job_woodcutter: {
+    n: '伐木工进阶 -「树节雕刻」',
+    d: '伐木工利用树节做精细雕刻。每个伐木工额外产出 +0.005 木板/s（受满意度和授业加成，忽略上限）。',
+    startPrice: 40,
+    type: 'job',
+    target: 'woodcutter'
+  },
+  job_scholar: {
+    n: '学者进阶 -「星象考证」',
+    d: '学者专注于研究星象。学者学识产量+50%（0.04/s → 0.12/s），但不再被动抄录卷轴。',
+    startPrice: 45,
+    type: 'job',
+    target: 'scholar'
+  },
+  job_scout: {
+    n: '斥候进阶 -「向导直觉」',
+    d: '斥候敏锐的直觉帮助队伍选择最优路线。所有远行路程时间缩短 10%（该进阶名为暂定名，后续需要另外起名）。',
+    startPrice: 50,
+    type: 'job',
+    target: 'scout'
+  }
+};

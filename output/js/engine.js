@@ -107,11 +107,12 @@ function activeWatchtowers() {
   return wt;
 }
 
-// 远行时间乘数（瞭望塔每座 ×0.85 + 抉择永久加成）
+// 远行时间乘数（瞭望塔每座 ×0.85 + 抉择永久加成 + 斥候专精）
 function expTimeMul() {
   var wt = activeWatchtowers();
   var mul = Math.pow(0.85, wt);
   if (G.choiceBuffs && G.choiceBuffs.permTimeMul) mul *= G.choiceBuffs.permTimeMul;
+  if (G.jobSpec && G.jobSpec.scout) mul *= 0.90;
   return mul;
 }
 
@@ -124,15 +125,30 @@ function calcR() {
   for (const [id, s] of Object.entries(G.bld)) {
     if (!s.c) continue;
     const e = BD[id].e; if (!e) continue;
+    var specMul = 1.0;
+    if (G.bldSpec && G.bldSpec[id]) {
+      if (id === 'berryPatch' || id === 'lumberYard' || id === 'quarry') specMul = 1.5;
+      if (id === 'library') specMul = 1.3;
+    }
     for (const [k, v] of Object.entries(e))
-      if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c;
+      if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c * specMul;
   }
 
   // 职业产出（含培训加成 × 满意度）
   for (const [id, s] of Object.entries(G.job)) {
     if (!s.c) continue;
     var trainBonus = 1 + (G.train[id] || 0) * 0.1;
-    for (const [k, v] of Object.entries(JD[id].e))
+    var baseE = JD[id].e;
+    if (id === 'gatherer' && G.jobSpec && G.jobSpec.gatherer) {
+      baseE = Object.assign({}, baseE, { charmP: 0.002 });
+    }
+    if (id === 'woodcutter' && G.jobSpec && G.jobSpec.woodcutter) {
+      baseE = Object.assign({}, baseE, { plankP: 0.005 });
+    }
+    if (id === 'scholar' && G.jobSpec && G.jobSpec.scholar) {
+      baseE = Object.assign({}, baseE, { loreP: 0.12, scrollP: 0 });
+    }
+    for (const [k, v] of Object.entries(baseE))
       if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c * trainBonus * G.happy;
   }
 
@@ -141,7 +157,17 @@ function calcR() {
     for (const [id, s] of Object.entries(G.job)) {
       if (!s.c) continue;
       var trainBonus = 1 + (G.train[id] || 0) * 0.1;
-      for (const [k, v] of Object.entries(JD[id].e))
+      var baseE = JD[id].e;
+      if (id === 'gatherer' && G.jobSpec && G.jobSpec.gatherer) {
+        baseE = Object.assign({}, baseE, { charmP: 0.002 });
+      }
+      if (id === 'woodcutter' && G.jobSpec && G.jobSpec.woodcutter) {
+        baseE = Object.assign({}, baseE, { plankP: 0.005 });
+      }
+      if (id === 'scholar' && G.jobSpec && G.jobSpec.scholar) {
+        baseE = Object.assign({}, baseE, { loreP: 0.12, scrollP: 0 });
+      }
+      for (const [k, v] of Object.entries(baseE))
         if (k.endsWith('P')) r[k.slice(0, -1)] = (r[k.slice(0, -1)] || 0) + v * s.c * trainBonus * G.happy * 0.5;
     }
   }
@@ -251,6 +277,9 @@ function calcMx() {
       const e = BD[id].e; if (!e) continue;
       if (e[k + 'Mx']) mx += e[k + 'Mx'] * s.c;
     }
+    if (k === 'lore' && G.bldSpec && G.bldSpec.library && G.bld.library?.c) {
+      mx += 50 * G.bld.library.c;
+    }
     G.res[k].mx = mx;
   }
   let mf = 0;
@@ -309,7 +338,7 @@ function simulateOffline(seconds) {
       G.season++;
       if (G.season >= 4) { G.season = 0; G.year++; }
       // 商队离开
-      if (G.caravan) { G.caravan = null; G.caravanTimer = 0; }
+      if (G.caravan) { G.caravan = null; G.caravanTimer = 0; G.auction = null; }
       // 商队到访
       if (!G.caravan && G.upg.beyondValley?.done) {
         G.caravanTimer = (G.caravanTimer || 0) + 1;
@@ -359,11 +388,11 @@ function simulateOffline(seconds) {
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回或浏览器标签页限速：如果距上次 tick 超过 0.5 秒，补算中间的时间
+  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
-  if (gap > 0.5) {
+  if (gap > 5) {
     simulateOffline(gap - TMS / 1000);
     rAll();
     return;
@@ -386,6 +415,7 @@ function tick() {
       log(cv ? cv.leaveLog : '商队离开了。', 'event');
       G.caravan = null;
       G.caravanTimer = 0;
+      G.auction = null;
     }
     // 商队到访检查
     if (!G.caravan && G.upg.beyondValley?.done) {
@@ -476,7 +506,7 @@ function tryEvent() {
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
   var hasRemnant = picked.e && picked.e.remnant;
-  log(msg, hasRemnant ? 'remnant' : 'event');
+  log(msg, hasRemnant ? 'echo' : 'event');
 }
 
 function tryRewardEvent() {
@@ -504,7 +534,7 @@ function tryRewardEvent() {
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
   var hasRemnant = picked.e && picked.e.remnant;
-  log(msg, hasRemnant ? 'remnant' : 'event');
+  log(msg, hasRemnant ? 'echo' : 'event');
 }
 
 function tryWorldEcho() {
@@ -523,8 +553,8 @@ function tryRemnant() {
   if (s.mx > 0 && s.v >= s.mx) return;
   s.v += 1;
   if (!s.on) s.on = true;
-  var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)] + '（遗光 +1）';
-  log(msg, 'remnant');
+  var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
+  log(msg + '（遗光 +1）', 'echo');
 }
 
 // ===== 玩家操作 =====
@@ -850,10 +880,7 @@ function resolveExpedition(idx, silent) {
   var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
   if (!silent) {
     log(returnLog, 'event');
-    if (rewards.length) {
-      var hasRemnant = rewards.some(function(r) { return r.indexOf('遗光') !== -1; });
-      log('带回了：' + rewards.join('，'), hasRemnant ? 'remnant' : 'important');
-    }
+    if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();
@@ -979,6 +1006,7 @@ function trySpawnCaravan(silent) {
   if (!silent) {
     log(CVD[picked].arriveLog, 'event');
   }
+  trySpawnAuction(silent);
 }
 
 function caravanCostMul() {
@@ -1059,6 +1087,9 @@ function resetG() {
   G.feastSeason = -1; G.tradeWindYear = -1;
   G.caravan = null; G.caravanTimer = 0;
   G.pendingChoice = null; G.choicesDone = []; G.choiceBuffs = {};
+  G.bldSpec = { berryPatch: false, lumberYard: false, quarry: false, library: false };
+  G.jobSpec = { gatherer: false, woodcutter: false, scholar: false, scout: false };
+  G.auction = null;
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -1103,6 +1134,11 @@ function migrate() {
   G.pendingChoice = G.pendingChoice || null;
   G.choicesDone = G.choicesDone || [];
   G.choiceBuffs = G.choiceBuffs || {};
+
+  // 拍卖会与专精
+  G.bldSpec = G.bldSpec || { berryPatch: false, lumberYard: false, quarry: false, library: false };
+  G.jobSpec = G.jobSpec || { gatherer: false, woodcutter: false, scholar: false, scout: false };
+  G.auction = G.auction || null;
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };
@@ -1206,4 +1242,112 @@ function applyCode() {
     document.getElementById('import-msg').textContent = '存档码无效，请检查。';
     log('存档码导入失败：格式错误。', 'warn');
   }
+}
+
+// ===== 拍卖会系统 =====
+function trySpawnAuction(silent) {
+  if (!G.caravan) { G.auction = null; return; }
+  
+  // Find all unowned specializations and choices
+  var pool = [];
+  
+  // Building specs: check if the building is built
+  if (!G.bldSpec.berryPatch) pool.push('bld_berryPatch');
+  if (!G.bldSpec.lumberYard && G.bld.lumberYard && G.bld.lumberYard.c > 0) pool.push('bld_lumberYard');
+  if (!G.bldSpec.quarry && G.bld.quarry && G.bld.quarry.c > 0) pool.push('bld_quarry');
+  if (!G.bldSpec.library && G.bld.library && G.bld.library.c > 0) pool.push('bld_library');
+
+  // Job specs: check if there are people assigned or if the job is unlocked
+  if (!G.jobSpec.gatherer && G.job.gatherer && G.job.gatherer.c > 0) pool.push('job_gatherer');
+  if (!G.jobSpec.woodcutter && G.job.woodcutter && G.job.woodcutter.c > 0) pool.push('job_woodcutter');
+  if (!G.jobSpec.scholar && G.job.scholar && G.job.scholar.c > 0) pool.push('job_scholar');
+  if (!G.jobSpec.scout && G.job.scout && G.job.scout.c > 0) pool.push('job_scout');
+
+  if (!pool.length) {
+    G.auction = null;
+    return;
+  }
+
+  // Pick one random item
+  var itemId = pool[Math.floor(Math.random() * pool.length)];
+  var details = AUCTION_ITEMS[itemId];
+  
+  var npcNames = ['山猫富商', '河獭阔绰买家', '白鹤信徒', '深山老狐', '驿道过客'];
+  var npcName = npcNames[Math.floor(Math.random() * npcNames.length)];
+  
+  var startPrice = details.startPrice;
+  var npcMaxBudget = Math.floor(startPrice * (1.5 + Math.random() * 1.0));
+
+  G.auction = {
+    id: itemId,
+    n: details.n,
+    d: details.d,
+    startPrice: startPrice,
+    currPrice: startPrice,
+    highestBidder: 'npc',
+    npcMaxBudget: npcMaxBudget,
+    npcName: npcName,
+    status: 'active'
+  };
+  
+  if (!silent) {
+    log('【拍卖】随着' + CVD[G.caravan.id].n + '的到来，一场『流浪拍卖会』被激活了！今日上架：' + details.n, 'important');
+    log('【拍卖】' + npcName + '出价 ' + startPrice + ' 铜钱！', 'event');
+  }
+}
+
+function canBidInAuction() {
+  if (!G.auction || G.auction.status !== 'active') return false;
+  var bidCost = G.auction.currPrice + 3;
+  if (G.res.coin.v < bidCost) return false;
+  if (G.auction.highestBidder === 'player') return false;
+  return true;
+}
+
+function bidInAuction() {
+  if (!canBidInAuction()) return;
+  var nextBid = G.auction.currPrice + 3;
+  
+  if (nextBid < G.auction.npcMaxBudget) {
+    // Player bids nextBid, but NPC immediately counter-bids!
+    var npcCounter = nextBid + Math.floor(1 + Math.random() * 3);
+    G.auction.currPrice = npcCounter;
+    G.auction.highestBidder = 'npc';
+    log('【拍卖】你出价 ' + nextBid + ' 铜钱。紧接着，' + G.auction.npcName + '加价到了 ' + npcCounter + ' 铜钱！', 'event');
+  } else {
+    // Player bids nextBid, NPC folds!
+    G.auction.currPrice = nextBid;
+    G.auction.highestBidder = 'player';
+    log('【拍卖】你出价到了 ' + nextBid + ' 铜钱！', 'important');
+    log('【拍卖】' + G.auction.npcName + '摇了摇头，放弃了继续加价。', 'event');
+  }
+  
+  rAll();
+}
+
+function settleAuction() {
+  if (!G.auction || G.auction.highestBidder !== 'player') return;
+  var finalPrice = G.auction.currPrice;
+  if (G.res.coin.v < finalPrice) {
+    log('铜钱不足，无法敲定！', 'warn');
+    return;
+  }
+  
+  // Deduct money
+  G.res.coin.v -= finalPrice;
+  
+  var details = AUCTION_ITEMS[G.auction.id];
+  if (details.type === 'bld') {
+    G.bldSpec[details.target] = true;
+  } else if (details.type === 'job') {
+    G.jobSpec[details.target] = true;
+  }
+  
+  log('【拍卖】一槌定音！你成功以 ' + finalPrice + ' 铜钱拍下了 『' + G.auction.n + '』！', 'important');
+  G.auction = null;
+  
+  calcMx();
+  calcH();
+  calcR();
+  rAll();
 }

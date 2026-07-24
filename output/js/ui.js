@@ -9,6 +9,13 @@ const logs = [];
 const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
+const collapsed = { res: false, tc: false, log: false };
+
+function toggleCollapse(key) {
+  collapsed[key] = !collapsed[key];
+  try { localStorage.setItem('fhCollapsed', JSON.stringify(collapsed)); } catch(e) {}
+  rAll();
+}
 
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
@@ -271,6 +278,17 @@ function rExpStatus() {
 
 // ===== 渲染：资源面板 =====
 function rRes() {
+  document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res);
+  var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'res\')">'
+    + (collapsed.res ? '▶ 资源' : '▼ 资源') + '</div>';
+  if (collapsed.res) {
+    document.getElementById('res-list').innerHTML = toggle;
+    document.getElementById('fox-info').innerHTML =
+      '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
+      (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
+      (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
+    return;
+  }
   var panel = document.getElementById('res-list');
   var h = '', lc = '';
   for (var k in RD) {
@@ -294,7 +312,7 @@ function rRes() {
       '<span class="' + rvCls + '">' + fmt(s.v) +
       (s.mx > 0 ? '/' + fmt(s.mx) : '') + rr + '</span></div>';
   }
-  document.getElementById('res-list').innerHTML = h;
+  document.getElementById('res-list').innerHTML = toggle + h;
   document.getElementById('fox-info').innerHTML =
     '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
     (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
@@ -303,6 +321,15 @@ function rRes() {
 
 // ===== 渲染：Tab内容 =====
 function rTC() {
+  document.getElementById('center-panel').classList.toggle('collapsed', collapsed.tc);
+  var curTabName = '';
+  for (var ti = 0; ti < TABS.length; ti++) { if (TABS[ti].id === curTab) { curTabName = TABS[ti].n; break; } }
+  var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'tc\')">'
+    + (collapsed.tc ? '▶ ' + curTabName : '▼ ' + curTabName) + '</div>';
+  if (collapsed.tc) {
+    document.getElementById('tc').innerHTML = toggle;
+    return;
+  }
   var h = '';
 
   if (curTab === 'b') {
@@ -344,7 +371,7 @@ function rTC() {
         tip: pickTip('bld_' + id, d.tip)
       };
       var nameHtml = hpWrap(
-        '<span class="bld-name">' + d.n + '</span>',
+        '<span class="bld-name">' + d.n + (G.bldSpec && G.bldSpec[id] ? ' <span style="color:#008000;font-size:11px;">★专精</span>' : '') + '</span>',
         sec,
         { onclick: "toggleDetail('" + id + "')" }
       );
@@ -430,7 +457,7 @@ function rTC() {
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
-      var nameHtml = hpWrap('<span class="jn">' + d.n + '</span>', sec);
+      var nameHtml = hpWrap('<span class="jn">' + d.n + (G.jobSpec && G.jobSpec[id] ? ' <span style="color:#008000;font-size:10px;font-weight:normal;">★进阶</span>' : '') + '</span>', sec);
       var tCost = trainCost(id);
       var tOk = canTrain(id);
       var trainSec = {
@@ -647,6 +674,42 @@ function rTC() {
       h += '<div style="color:#aaa;font-size:13px;">暂无商队到访。</div>';
     }
 
+    // --- 拍卖会面板 ---
+    h += '<div class="res-cat" style="margin-top:10px;">流浪拍卖会</div>';
+    if (G.auction) {
+      h += '<div class="auction-box" style="border:1px solid #ddd;padding:8px;margin-bottom:10px;background:#fdfdfd;">';
+      h += '<div style="font-weight:bold;font-size:14px;margin-bottom:4px;color:#333;">' + G.auction.n + '</div>';
+      h += '<div style="font-size:12px;color:#555;margin-bottom:8px;line-height:1.4;">' + G.auction.d + '</div>';
+      h += '<div style="font-size:13px;margin-bottom:6px;">';
+      h += '起拍价：' + G.auction.startPrice + ' 铜钱 | ';
+      h += '当前出价：<span style="font-weight:bold;color:#b00;font-size:14px;">' + G.auction.currPrice + '</span> 铜钱';
+      h += '</div>';
+      h += '<div style="font-size:12px;color:#666;margin-bottom:8px;">';
+      if (G.auction.highestBidder === 'player') {
+        h += '当前出价方：<span style="color:#008000;font-weight:bold;">你</span>';
+      } else {
+        h += '当前出价方：<span style="color:#b8860b;font-weight:bold;">' + G.auction.npcName + '</span>';
+      }
+      h += '</div>';
+      
+      h += '<div class="auction-actions">';
+      var bidCost = G.auction.currPrice + 3;
+      var canBid = G.res.coin.v >= bidCost && G.auction.highestBidder !== 'player' && G.auction.status === 'active';
+      var npcFolded = G.auction.highestBidder === 'player';
+      
+      if (npcFolded) {
+        var canSettle = G.res.coin.v >= G.auction.currPrice;
+        h += '<button class="bld-btn" onclick="settleAuction()" ' + (canSettle ? '' : 'disabled') + ' style="font-weight:bold;background:#e6ffe6;border-color:#5c5;">落槌敲定 (' + G.auction.currPrice + ' 铜钱)</button>';
+      } else {
+        var coinStr = G.res.coin.v < bidCost ? ' <span style="color:#b00;">（铜钱不足 ' + bidCost + '）</span>' : '';
+        h += '<button class="bld-btn" onclick="bidInAuction()" ' + (canBid ? '' : 'disabled') + '>出价加到 ' + bidCost + ' 铜钱</button>' + coinStr;
+      }
+      h += '</div>';
+      h += '</div>';
+    } else {
+      h += '<div style="color:#aaa;font-size:13px;margin-bottom:10px;">暂无拍卖。' + (G.caravan ? '' : '（商队到访时拍卖会才会激活）') + '</div>';
+    }
+
     // --- 叙事碎片 ---
     var hasNarr = false;
     for (var nk in NARR) {
@@ -677,15 +740,21 @@ function rTC() {
     }
   }
 
-  document.getElementById('tc').innerHTML = h;
+  document.getElementById('tc').innerHTML = toggle + h;
 }
 
 // ===== 渲染：日志 =====
 function rLog() {
-  document.getElementById('log-list').innerHTML =
-    logs.slice(0, 30).map(function(e) {
+  document.getElementById('log-panel').classList.toggle('collapsed', collapsed.log);
+  var toggle = collapsed.log ? '▶' : '▼';
+  var h = '<h3 class="collapse-toggle" onclick="toggleCollapse(\'log\')">'
+    + toggle + ' 谷中见闻</h3>';
+  if (!collapsed.log) {
+    h += '<div id="log-list">' + logs.slice(0, 30).map(function(e) {
       return '<div class="log ' + (e.c || '') + '">' + e.m + '</div>';
-    }).join('');
+    }).join('') + '</div>';
+  }
+  document.getElementById('log-panel').innerHTML = h;
 }
 
 // ===== 渲染：季节 =====
@@ -694,7 +763,6 @@ function rSeason() {
     SN[G.season] + ' · 第' + G.year + '年 · 第' + (Math.floor(G.day) + 1) + '天';
 }
 
-// ===== 全量渲染 =====
 // ===== 全量渲染 =====
 var _blockTC = 0;
 function rAll() {
@@ -728,6 +796,11 @@ function showChoiceModal(idx) {
 
 // ===== 启动 =====
 function startGame() {
+  // 恢复折叠偏好
+  try {
+    var saved = JSON.parse(localStorage.getItem('fhCollapsed'));
+    if (saved) Object.assign(collapsed, saved);
+  } catch(e) {}
   initState();
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');

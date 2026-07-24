@@ -191,7 +191,7 @@
 - **文件结构**：
   ```
   fox-hollow/
-  ├── .git/               # Git 仓库配置文件目录
+  ├── .git/               # Git 版本控制
   ├── index.html          # 入口页面
   ├── README.md           # 项目说明
   ├── css/
@@ -204,7 +204,7 @@
   │   ├── RULES.md        # 协作规则
   │   ├── design.md       # 本策划文档
   │   └── changelog.md    # 变更日志
-  └── reference/          # 参考资料（仅本地，不纳入版本控制）
+  └── reference/          # 猫国建设者（Kittens Game）中文 Wiki 参考资料
       ├── _navigation.md  # Wiki 导航目录
       ├── 首页.md          # Wiki 首页
       ├── 000-猫国萌新指导/  # 新手指导（萌新入门、政策解析、中期指导等）

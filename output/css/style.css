@@ -86,12 +86,10 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* LOG */
 #log-panel{width:230px;border-left:1px solid #ddd;padding:8px;overflow-y:auto;flex-shrink:0;}
-#log-panel h3{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
 .log{font-size:12px;color:#999;padding:1px 0;border-bottom:1px solid #f8f8f8;line-height:1.4;}
 .log.important{color:#333;}
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
-.log.remnant{color:#9a7b4f;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
 
 /* HOVER PANEL */
@@ -137,8 +135,16 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .narr-unlocked{color:#556;font-style:italic;}
 .narr-locked{color:#ccc;}
 
+/* COLLAPSE TOGGLES */
+.collapse-toggle{cursor:pointer;user-select:none;font-size:12px;color:#888;padding:2px 0;margin-bottom:4px;}
+.collapse-toggle:hover{color:#333;}
+#log-panel .collapse-toggle{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;}
+#log-panel .collapse-toggle:hover{color:#333;}
+
 @media(max-width:860px){
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  #left-panel.collapsed,#log-panel.collapsed{max-height:none;height:auto;overflow:hidden;}
+  #center-panel.collapsed{flex:0 0 auto;}
   .job-row .jd{display:none;}
 }
