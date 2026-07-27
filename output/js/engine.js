@@ -27,6 +27,10 @@ const G = {
   pendingChoice: null,  // { idx: number } 当前待选择的事件
   choicesDone: [],       // 已触发过的事件索引
   choiceBuffs: {},       // 一次性/永久 buff 追踪
+  // 拍卖会与专精
+  bldSpec: { berryPatch: false, lumberYard: false, quarry: false, library: false },
+  jobSpec: { gatherer: false, woodcutter: false, scholar: false, scout: false },
+  auction: null,
 };
 
 let lastRealTime = Date.now();
@@ -1257,11 +1261,11 @@ function trySpawnAuction(silent) {
   if (!G.bldSpec.quarry && G.bld.quarry && G.bld.quarry.c > 0) pool.push('bld_quarry');
   if (!G.bldSpec.library && G.bld.library && G.bld.library.c > 0) pool.push('bld_library');
 
-  // Job specs: check if there are people assigned or if the job is unlocked
-  if (!G.jobSpec.gatherer && G.job.gatherer && G.job.gatherer.c > 0) pool.push('job_gatherer');
-  if (!G.jobSpec.woodcutter && G.job.woodcutter && G.job.woodcutter.c > 0) pool.push('job_woodcutter');
-  if (!G.jobSpec.scholar && G.job.scholar && G.job.scholar.c > 0) pool.push('job_scholar');
-  if (!G.jobSpec.scout && G.job.scout && G.job.scout.c > 0) pool.push('job_scout');
+  // Job specs: check if the job is unlocked
+  if (!G.jobSpec.gatherer && G.job.gatherer && G.job.gatherer.on) pool.push('job_gatherer');
+  if (!G.jobSpec.woodcutter && G.job.woodcutter && G.job.woodcutter.on) pool.push('job_woodcutter');
+  if (!G.jobSpec.scholar && G.job.scholar && G.job.scholar.on) pool.push('job_scholar');
+  if (!G.jobSpec.scout && G.job.scout && G.job.scout.on) pool.push('job_scout');
 
   if (!pool.length) {
     G.auction = null;
