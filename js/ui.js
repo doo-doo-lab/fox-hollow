@@ -10,6 +10,54 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板折叠 =====
+// fold.res / fold.log：左右栏折叠；fold.tab[id]：各页签内容折叠
+// 状态存 localStorage（与游戏存档独立，不影响存档码/兼容）
+var fold = { res: false, log: false, tab: {} };
+try {
+  var _fs = JSON.parse(localStorage.getItem('fhFold') || 'null');
+  if (_fs && typeof _fs === 'object') {
+    fold.res = !!_fs.res;
+    fold.log = !!_fs.log;
+    if (_fs.tab && typeof _fs.tab === 'object') fold.tab = _fs.tab;
+  }
+} catch (e) { }
+
+function saveFold() {
+  try { localStorage.setItem('fhFold', JSON.stringify(fold)); } catch (e) { }
+}
+
+// 应用左/右栏折叠状态（页签内容由 rTC 处理）
+function applyFold() {
+  var lb = document.getElementById('left-body');
+  if (lb) lb.style.display = fold.res ? 'none' : '';
+  var ll = document.getElementById('log-list');
+  if (ll) ll.style.display = fold.log ? 'none' : '';
+  var mr = document.getElementById('fold-mark-res');
+  if (mr) mr.textContent = fold.res ? '▸' : '▾';
+  var ml = document.getElementById('fold-mark-log');
+  if (ml) ml.textContent = fold.log ? '▸' : '▾';
+}
+
+function toggleFold(which) {
+  fold[which] = !fold[which];
+  saveFold();
+  applyFold();
+}
+
+// 页签点击：点当前页签 = 折叠/展开内容；点其他页签 = 切换并自动展开
+function tabClick(id) {
+  if (id === curTab) {
+    fold.tab[id] = !fold.tab[id];
+  } else {
+    curTab = id;
+    fold.tab[id] = false;
+  }
+  saveFold();
+  rTabs();
+  rTC();
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -241,8 +289,10 @@ function rTabs() {
   document.getElementById('tabs').innerHTML = TABS.filter(function(t) {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
+    var mark = t.id === curTab ?
+      '<span class="fold-mark">' + (fold.tab[t.id] ? '▸' : '▾') + '</span>' : '';
     return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
+      '" onclick="tabClick(\'' + t.id + '\')">' + t.n + mark + '</div>';
   }).join('');
 }
 
@@ -280,6 +330,10 @@ function rRes() {
 
 // ===== 渲染：Tab内容 =====
 function rTC() {
+  var tcEl = document.getElementById('tc');
+  // 当前页签已折叠：隐藏内容并跳过重建
+  if (fold.tab[curTab]) { tcEl.style.display = 'none'; return; }
+  tcEl.style.display = '';
   var h = '';
 
   if (curTab === 'b') {
@@ -727,6 +781,7 @@ function startGame() {
   initState();
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
+  applyFold();
   rAll();
   var _renderAcc = 0;
   setInterval(function () {

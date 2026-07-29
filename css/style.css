@@ -12,6 +12,12 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* LEFT PANEL */
 #left-panel{width:200px;border-right:1px solid #ddd;padding:8px;overflow-y:auto;overflow-x:visible;flex-shrink:0;font-size:13px;position:relative;z-index:10;}
+
+/* PANEL FOLD */
+.panel-hdr{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.panel-hdr:hover{color:#333;}
+#log-panel h3.panel-hdr:hover{color:#333;}
+.fold-mark{margin-left:4px;font-size:10px;color:#aaa;}
 .res-cat{font-size:11px;color:#aaa;letter-spacing:1px;margin:6px 0 2px;text-transform:uppercase;}
 .res-row{display:flex;justify-content:space-between;padding:1px 0;}
 .res-row .rn{color:#666;}
@@ -92,6 +98,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
+.log.remnant{color:#9a7b4f;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #f0e8da;}
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}
@@ -139,5 +146,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 @media(max-width:860px){
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  /* 手机纵向堆叠：中栏按内容自然高度，折叠后下方内容自动上顶 */
+  #center-panel{flex:0 0 auto;}
   .job-row .jd{display:none;}
 }

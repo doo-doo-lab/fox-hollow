@@ -509,7 +509,8 @@ function tryEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  // 获得遗光的事件统一使用遗光专属样式
+  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
 }
 
 function tryRewardEvent() {
@@ -536,7 +537,7 @@ function tryRewardEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
 }
 
 function tryWorldEcho() {
@@ -556,7 +557,7 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  log(msg + '（遗光 +1）', 'remnant');
 }
 
 // ===== 玩家操作 =====

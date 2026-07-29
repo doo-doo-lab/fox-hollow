@@ -19,15 +19,18 @@
 </div>
 <div id="game">
   <div id="left-panel">
-    <div id="fox-info"></div>
-    <div id="res-list"></div>
+    <div class="panel-hdr" onclick="toggleFold('res')">资源<span class="fold-mark" id="fold-mark-res">▾</span></div>
+    <div id="left-body">
+      <div id="fox-info"></div>
+      <div id="res-list"></div>
+    </div>
   </div>
   <div id="center-panel">
     <div id="tabs"></div>
     <div id="tc"></div>
   </div>
   <div id="log-panel">
-    <h3>谷中见闻</h3>
+    <h3 class="panel-hdr" onclick="toggleFold('log')">谷中见闻<span class="fold-mark" id="fold-mark-log">▾</span></h3>
     <div id="log-list"></div>
   </div>
 </div>
