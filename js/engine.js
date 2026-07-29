@@ -30,6 +30,8 @@ const G = {
 };
 
 let lastRealTime = Date.now();
+let tickDebt = 0;      // 后台降频时的 tick 欠账（按真实时间补跑）
+let offlineAccum = 0;  // 后台期间累计的离线补算秒数（回前台后统一提示）
 
 // 初始化状态
 function initState() {
@@ -340,16 +342,26 @@ function simulateOffline(seconds) {
     if (G.upg.craftMastery?.done && G.tick % 50 === 0) runAutoCraft();
     // 商队季节到期在季节更替中处理
   }
-  // 显示补算结果（离开不足 30 秒不提示）
-  if (seconds < 30) return;
-  var mins = Math.floor(seconds / 60);
-  var hrs = Math.floor(mins / 60);
-  var msg;
-  if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
-  else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
-  else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
-  log(msg + '，资源已自动补算。', 'important');
-  // 显示离线期间返回的远行
+  // 页面仍在后台时先不提示，累计到回前台后统一提示，避免长时间后台每分钟刷一条补算日志
+  offlineAccum += seconds;
+  if (typeof document !== 'undefined' && document.hidden) return;
+  var total = offlineAccum;
+  offlineAccum = 0;
+  announceReturn(total);
+}
+
+// 回到前台时的补算提示 + 暂存叙事展示
+function announceReturn(seconds) {
+  if (seconds >= 30) {
+    var mins = Math.floor(seconds / 60);
+    var hrs = Math.floor(mins / 60);
+    var msg;
+    if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
+    else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
+    else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
+    log(msg + '，资源已自动补算。', 'important');
+  }
+  // 显示离线/后台期间返回的远行与叙事
   if (G.pendingNarr && G.pendingNarr.length) {
     for (var i = 0; i < G.pendingNarr.length; i++)
       log(G.pendingNarr[i], 'echo');
@@ -364,11 +376,33 @@ function tick() {
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
   if (gap > 5) {
+    tickDebt = 0;
     simulateOffline(gap - TMS / 1000);
     rAll();
     return;
   }
 
+  // 后台节流补偿：浏览器把定时器降频时（如后台页签约 1 次/秒），
+  // 按真实经过时间累积应跑的 tick 数一次性补跑，
+  // 保证远行倒计时、资源产出与现实时间同步
+  tickDebt += gap * 1000 / TMS;
+  var n = Math.floor(tickDebt);
+  if (n < 1) return;
+  if (n > 30) n = 30; // 单次回调补跑上限，更长的间隔由离线补算处理
+  tickDebt -= n;
+  for (var i = 0; i < n; i++) tickOnce();
+
+  // 回到前台：展示后台期间累计的补算提示与暂存叙事
+  if ((offlineAccum > 0 || (G.pendingNarr && G.pendingNarr.length)) &&
+      !(typeof document !== 'undefined' && document.hidden)) {
+    var totalAcc = offlineAccum;
+    offlineAccum = 0;
+    announceReturn(totalAcc);
+  }
+}
+
+// 单个游戏 tick（原 tick 主体逻辑）
+function tickOnce() {
   G.tick++;
   G.day += 1 / TPD;
 

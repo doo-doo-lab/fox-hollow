@@ -728,7 +728,14 @@ function startGame() {
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
-  setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
+  var _renderAcc = 0;
+  setInterval(function () {
+    var t0 = G.tick;
+    tick();
+    // 按实际推进的 tick 数控制渲染节奏（后台补跑多个 tick 时也能及时刷新）
+    _renderAcc += G.tick - t0;
+    if (_renderAcc >= 5) { _renderAcc = 0; rAll(); }
+  }, TMS);
   setInterval(save, 30000);
 
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)
