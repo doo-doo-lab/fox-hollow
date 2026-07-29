@@ -548,7 +548,7 @@ function rTC() {
       var d = JD[id];
       if (!G.job[id].on) continue; any = 1;
       var trainLv = G.train[id] || 0;
-      var eff = jobEffects(id, d.e);
+      var eff = jobEffects(id, d.e).filter(function(t) { return t !== d.d; }); // 与描述相同的效果行去重（如斥候的 desc 字段）
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
       var sec = {
         desc: d.d,

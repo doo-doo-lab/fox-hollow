@@ -133,8 +133,18 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事目的地的返回日志按叙事进度顺序播放（第一趟必为第一条，压轴一条落在最终碎片那一趟）；
+  // 叙事完结后在前几条中随机重放（不再出现压轴条）；非叙事目的地保持随机抽取
+  var returnLog;
+  if (d.narrative && NARR[exp.dest] && NARR[exp.dest].length) {
+    var seq = G.expDone[exp.dest] - 1; // 本次是第几趟（0 起，expDone 已在上方 +1）
+    var narrTotal = NARR[exp.dest].length;
+    returnLog = seq < narrTotal
+      ? d.logs[Math.min(Math.floor(seq * d.logs.length / narrTotal), d.logs.length - 1)]
+      : d.logs[Math.floor(Math.random() * Math.max(d.logs.length - 1, 1))];
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
