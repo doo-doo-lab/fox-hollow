@@ -21,7 +21,8 @@
         ├── RULES.md
         ├── design.md
         ├── changelog.md
-        └── panel-collapse-plan.md
+        ├── panel-collapse-plan.md
+        └── validation.md
 ```
 
 此工作区的 `.git/config` 设置 `core.worktree=../output`，其余配置保留。提交路径相对于 `output/`，因此远端和 GitHub Pages 的入口仍为仓库根部 `index.html`；不能把本地目录包装误当作线上路径迁移。普通克隆仍使用 Git 默认目录结构。

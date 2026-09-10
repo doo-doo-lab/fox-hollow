@@ -368,12 +368,52 @@ function announceReturn(seconds) {
     else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
     log(msg + '，资源已自动补算。', 'important');
   }
-  // 显示离线/后台期间返回的远行与叙事
-  if (G.pendingNarr && G.pendingNarr.length) {
-    for (var i = 0; i < G.pendingNarr.length; i++)
-      log(G.pendingNarr[i], 'echo');
-    G.pendingNarr = [];
+  // 保留暂存日志类别；同时兼容旧存档的纯字符串队列。
+  var pending = normalizePendingNarr(G.pendingNarr);
+  G.pendingNarr = [];
+  for (var i = 0; i < pending.length; i++) log(pending[i].m, pending[i].c);
+}
+
+// 只负责呈现已经结算的奖励，绝不在日志生成/回放时再次发放资源。
+function logRewards(message, rewards, fallbackClass, silent) {
+  var totals = Object.create(null);
+  for (var i = 0; i < rewards.length; i++) {
+    var reward = rewards[i];
+    if (!RD[reward.r] || !Number.isFinite(reward.a)) continue;
+    totals[reward.r] = (totals[reward.r] || 0) + reward.a;
   }
+  var ids = Object.keys(totals).filter(function(id) { return totals[id] !== 0 && id !== 'remnant'; });
+  if (totals.remnant) ids.push('remnant');
+  var summary = ids.map(function(id) {
+    return RD[id].n + ' ' + (totals[id] > 0 ? '+' : '') + totals[id];
+  }).join('，');
+  var entry = {
+    m: message + (summary ? '（' + summary + '）' : ''),
+    c: totals.remnant > 0 ? 'remnant' : (fallbackClass || 'event')
+  };
+  if (silent) {
+    if (!Array.isArray(G.pendingNarr)) G.pendingNarr = [];
+    G.pendingNarr.push(entry);
+  } else {
+    log(entry.m, entry.c);
+  }
+}
+
+function normalizePendingNarr(entries) {
+  if (!Array.isArray(entries)) return [];
+  var normalized = [];
+  var classes = ['echo', 'event', 'important', 'warn', 'remnant', ''];
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    if (typeof entry === 'string') {
+      // 旧队列没有类别，只识别奖励清单中的「遗光 +N」，不匹配普通叙事。
+      var award = entry.match(/(?:[（，：]|^)\s*遗光\s*\+\s*(\d+(?:\.\d+)?)\s*(?=[，）]|$)/);
+      normalized.push({ m: entry, c: award && Number(award[1]) > 0 ? 'remnant' : 'echo' });
+    } else if (entry && typeof entry.m === 'string') {
+      normalized.push({ m: entry.m, c: classes.indexOf(entry.c) >= 0 ? entry.c : 'echo' });
+    }
+  }
+  return normalized;
 }
 
 // ===== 主循环 =====
@@ -504,15 +544,11 @@ function tryEvent() {
         G.res[k].v += picked.e[k];
         if (!G.res[k].on) G.res[k].on = true;
         if (G.res[k].mx > 0) G.res[k].v = Math.min(G.res[k].v, G.res[k].mx);
-        var sign = picked.e[k] >= 0 ? '+' : '';
-        rewards.push(RD[k].n + ' ' + sign + picked.e[k]);
+        rewards.push({ r: k, a: picked.e[k] });
       }
     }
   }
-  var msg = picked.t;
-  if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  // 获得遗光的事件统一使用遗光专属样式
-  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
+  logRewards(picked.t, rewards, 'event');
 }
 
 function tryRewardEvent() {
@@ -533,13 +569,10 @@ function tryRewardEvent() {
       G.res[k].v += picked.e[k];
       if (!G.res[k].on) G.res[k].on = true;
       if (G.res[k].mx > 0) G.res[k].v = Math.min(G.res[k].v, G.res[k].mx);
-      var sign = picked.e[k] >= 0 ? '+' : '';
-      rewards.push(RD[k].n + ' ' + sign + picked.e[k]);
+      rewards.push({ r: k, a: picked.e[k] });
     }
   }
-  var msg = picked.t;
-  if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
+  logRewards(picked.t, rewards, 'event');
 }
 
 function tryWorldEcho() {
@@ -559,7 +592,7 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg + '（遗光 +1）', 'remnant');
+  logRewards(msg, [{ r: 'remnant', a: 1 }], 'remnant');
 }
 
 // ===== 玩家操作 =====
@@ -844,7 +877,7 @@ function resolveExpedition(idx, silent) {
       G.res[rw.r].v += amt;
       if (!G.res[rw.r].on) G.res[rw.r].on = true;
       if (G.res[rw.r].mx > 0) G.res[rw.r].v = Math.min(G.res[rw.r].v, G.res[rw.r].mx);
-      rewards.push(RD[rw.r].n + ' +' + amt);
+      rewards.push({ r: rw.r, a: amt });
     }
     pool.splice(ri, 1);
   }
@@ -857,8 +890,7 @@ function resolveExpedition(idx, silent) {
         G.res[b.r].v += b.a;
         if (!G.res[b.r].on) G.res[b.r].on = true;
         if (G.res[b.r].mx > 0) G.res[b.r].v = Math.min(G.res[b.r].v, G.res[b.r].mx);
-        if (b.a > 0) rewards.push(RD[b.r].n + ' +' + b.a);
-        else rewards.push(RD[b.r].n + ' ' + b.a);
+        rewards.push({ r: b.r, a: b.a });
       }
     }
     delete cb.nextReturn[exp.dest];
@@ -875,7 +907,7 @@ function resolveExpedition(idx, silent) {
         log(NARR[exp.dest][nextIdx], 'echo');
       } else {
         if (!G.pendingNarr) G.pendingNarr = [];
-        G.pendingNarr.push(NARR[exp.dest][nextIdx]);
+        G.pendingNarr.push({ m: NARR[exp.dest][nextIdx], c: 'echo' });
       }
     }
   }
@@ -885,14 +917,13 @@ function resolveExpedition(idx, silent) {
   var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
   if (!silent) {
     log(returnLog, 'event');
-    if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
+    if (rewards.length) logRewards('带回了物资。', rewards, 'important');
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();
     }
   } else {
-    if (!G.pendingNarr) G.pendingNarr = [];
-    G.pendingNarr.push('离开期间，远行队伍从' + d.n + '返回了。（' + rewards.join('，') + '）');
+    logRewards('离开期间，远行队伍从' + d.n + '返回了。', rewards, 'echo', true);
   }
   // 移除
   G.expeditions.splice(idx, 1);
@@ -1125,7 +1156,7 @@ function migrate() {
   G.foxAway = G.foxAway || 0;
   G.expDone = G.expDone || {};
   G.expeditions = G.expeditions || [];
-  G.pendingNarr = G.pendingNarr || [];
+  G.pendingNarr = normalizePendingNarr(G.pendingNarr);
   G.narratives = G.narratives || { oldRuin: [], cloudRidge: [] };
   G.feastSeason = G.feastSeason ?? -1;
   G.tradeWindYear = G.tradeWindYear ?? -1;

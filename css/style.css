@@ -1,12 +1,14 @@
 *{margin:0;padding:0;box-sizing:border-box;}
+[hidden]{display:none !important;}
 body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#fff;color:#333;font-size:14px;line-height:1.5;}
+button{font-family:inherit;touch-action:manipulation;}
 
 #header{padding:4px 14px;border-bottom:1px solid #ccc;display:flex;justify-content:space-between;align-items:center;background:#fafafa;}
-#header h1{font-size:1.05em;font-weight:bold;color:#333;}
-#header-right{display:flex;align-items:center;gap:10px;}
+#header h1{font-size:1.05em;font-weight:bold;color:#333;flex-shrink:0;}
+#header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
 #header-right a{font-size:12px;color:#555;cursor:pointer;text-decoration:none;border-bottom:1px dashed #aaa;}
 #header-right a:hover{color:#000;border-bottom-color:#000;}
-#season-display{font-size:0.85em;color:#888;}
+#season-display{font-size:0.85em;color:#888;white-space:nowrap;}
 
 #game{display:flex;min-height:calc(100vh - 32px);}
 
@@ -14,10 +16,11 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 #left-panel{width:200px;border-right:1px solid #ddd;padding:8px;overflow-y:auto;overflow-x:visible;flex-shrink:0;font-size:13px;position:relative;z-index:10;}
 
 /* PANEL FOLD */
-.panel-hdr{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.panel-title{font-size:12px;font-weight:normal;}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:28px;padding:2px 0 4px;margin-bottom:4px;border:0;background:transparent;text-align:left;font-size:12px;color:#777;letter-spacing:1px;cursor:pointer;user-select:none;-webkit-user-select:none;}
 .panel-hdr:hover{color:#333;}
-#log-panel h3.panel-hdr:hover{color:#333;}
-.fold-mark{margin-left:4px;font-size:10px;color:#aaa;}
+.panel-hdr:focus-visible,.tab:focus-visible{outline:2px solid #666;outline-offset:-2px;}
+.fold-mark{margin-left:6px;font-size:10px;font-weight:normal;color:#888;letter-spacing:0;white-space:nowrap;}
 .res-cat{font-size:11px;color:#aaa;letter-spacing:1px;margin:6px 0 2px;text-transform:uppercase;}
 .res-row{display:flex;justify-content:space-between;padding:1px 0;}
 .res-row .rn{color:#666;}
@@ -31,11 +34,11 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 #fox-info b{color:#333;}
 
 /* CENTER */
-#center-panel{flex:1;padding:8px 14px;overflow-y:auto;}
+#center-panel{flex:1;min-width:0;padding:8px 14px;overflow-y:auto;}
 
 /* TABS */
-#tabs{display:flex;border-bottom:1px solid #ccc;margin-bottom:8px;}
-.tab{padding:4px 12px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent;}
+#tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid #ccc;margin-bottom:8px;}
+.tab{display:flex;align-items:center;flex-shrink:0;padding:4px 12px;cursor:pointer;font-size:13px;line-height:1.5;color:#888;background:transparent;border:0;border-bottom:2px solid transparent;}
 .tab:hover{color:#333;}
 .tab.on{color:#333;font-weight:bold;border-bottom-color:#333;}
 
@@ -47,11 +50,11 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* BUILDING ROWS */
 .bld-row{padding:4px 0;border-bottom:1px solid #f0f0f0;}
-.bld-top{display:flex;align-items:baseline;gap:6px;}
+.bld-top{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
 .bld-name{font-weight:bold;color:#333;cursor:pointer;}
 .bld-name:hover{text-decoration:underline;}
 .bld-cnt{color:#888;font-size:12px;}
-.bld-btn{padding:1px 8px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:12px;color:#333;margin-left:4px;}
+.bld-btn{padding:1px 8px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:12px;color:#333;margin-left:4px;flex-shrink:0;white-space:nowrap;}
 .bld-btn:hover:not(:disabled){background:#eef;border-color:#88b;}
 .bld-btn:disabled{opacity:0.3;cursor:default;}
 .sell-btn{color:#888;border-color:#ccc;}
@@ -78,9 +81,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* CRAFT / RESEARCH ROWS */
 .cr-row{padding:4px 0;border-bottom:1px solid #f0f0f0;}
-.cr-top{display:flex;align-items:baseline;gap:6px;}
+.cr-top{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
 .cr-name{font-weight:bold;color:#333;}
-.cr-btn{padding:1px 8px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:12px;margin-left:auto;}
+.cr-btn{padding:1px 8px;background:#fff;border:1px solid #bbb;cursor:pointer;font-size:12px;margin-left:auto;flex-shrink:0;white-space:nowrap;}
 .cr-btn:hover:not(:disabled){background:#eef;border-color:#88b;}
 .cr-btn:disabled{opacity:0.3;cursor:default;}
 .auto-btn{margin-left:4px;color:#888;border-color:#ccc;}
@@ -89,10 +92,11 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .cr-desc{font-size:12px;color:#999;}
 .cr-cost{font-size:12px;color:#888;}
 .cr-done{font-size:12px;color:#aaa;padding:2px 0;}
+.bld-top>.hp-wrap,.cr-top>.hp-wrap{flex-shrink:0;}
+.bld-cost,.cr-cost{min-width:0;overflow-wrap:anywhere;}
 
 /* LOG */
 #log-panel{width:230px;border-left:1px solid #ddd;padding:8px;overflow-y:auto;flex-shrink:0;}
-#log-panel h3{font-size:12px;color:#999;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
 .log{font-size:12px;color:#999;padding:1px 0;border-bottom:1px solid #f8f8f8;line-height:1.4;}
 .log.important{color:#333;}
 .log.event{color:#b8860b;}
@@ -102,7 +106,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}
-.hp{display:none;position:fixed;z-index:200;background:#fff;border:1px solid #ccc;padding:8px 10px;width:260px;font-size:12px;line-height:1.6;color:#333;box-shadow:1px 2px 6px rgba(0,0,0,.1);pointer-events:none;}
+.hp{display:none;position:fixed;z-index:200;background:#fff;border:1px solid #ccc;padding:8px 10px;width:260px;max-width:calc(100vw - 12px);font-size:12px;line-height:1.6;color:#333;box-shadow:1px 2px 6px rgba(0,0,0,.1);pointer-events:none;}
 .hp-wrap:hover .hp{display:block;}
 .hp .hp-desc{color:#555;margin-bottom:4px;}
 .hp .hp-eff{color:#070;margin-bottom:4px;}
@@ -113,7 +117,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* EXPEDITION - Active */
 .exp-active{padding:6px 0;border-bottom:1px solid #f0f0f0;}
-.exp-active-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+.exp-active-hdr{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
 .exp-dest-name{font-weight:bold;color:#333;}
 .exp-info{font-size:11px;color:#888;}
 .exp-spirit-used{font-size:10px;color:#9a7b4f;margin-left:4px;}
@@ -144,9 +148,17 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .narr-locked{color:#ccc;}
 
 @media(max-width:860px){
-  #game{flex-direction:column;}
-  #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
-  /* 手机纵向堆叠：中栏按内容自然高度，折叠后下方内容自动上顶 */
-  #center-panel{flex:0 0 auto;}
+  #header{flex-wrap:wrap;gap:4px;padding:6px 12px;}
+  #header-right{gap:8px;}
+  #game{flex-direction:column;min-height:0;}
+  #left-panel,#log-panel{width:100%;max-height:none;overflow:visible;border:none;border-bottom:1px solid #ddd;padding:8px 12px;}
+  /* 自然文档流：移除内部滚动和占位高度，折叠后见闻直接上移。 */
+  #center-panel{flex:0 0 auto;overflow:visible;padding:8px 12px;}
+  .panel-hdr{min-height:44px;margin-bottom:0;}
+  .tab{min-height:44px;padding:6px 8px;}
   .job-row .jd{display:none;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .exp-bar-fill{transition:none;}
 }

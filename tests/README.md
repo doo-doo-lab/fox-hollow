@@ -20,8 +20,11 @@ python -m pip install -r tests/requirements.txt
 # 系统已有 Chromium 时无需安装浏览器；否则：
 python -m playwright install chromium
 python tests/browser_test.py
+python tests/capture_ui.py
 ```
 
 默认优先使用 PATH 中的 `chromium`，也可用 `CHROMIUM_PATH=/path/to/chromium` 指定；找不到系统浏览器时使用 Playwright 安装的 Chromium。
 
-测试临时启动仅监听 `127.0.0.1` 的静态服务器，使用隔离浏览器上下文和虚拟时钟；不访问玩家存档、不调用远端写接口。浏览器错误和资源加载失败会使测试失败。所有本地结果放 `test-results/`（已忽略），不提交缓存和浏览器产物。
+测试临时启动仅监听 `127.0.0.1` 的静态服务器，使用隔离浏览器上下文和虚拟时钟；不访问玩家存档、不调用远端写接口。浏览器错误和资源加载失败会使测试失败。界面测试覆盖 320 / 390 / 768 / 860 / 861 / 1280 / 1440px。
+
+`capture_ui.py` 以一次性测试村落生成桌面/手机展开与折叠截图，以及 `layout-metrics.json`；这些是测试夹具，不是玩家存档。所有本地结果放 `test-results/`（已忽略），不提交缓存和浏览器产物。

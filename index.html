@@ -19,14 +19,14 @@
 </div>
 <div id="game">
   <div id="left-panel">
-    <div class="panel-hdr" onclick="toggleFold('res')">资源<span class="fold-mark" id="fold-mark-res">▾</span></div>
+    <h2 class="panel-title"><button type="button" class="panel-hdr" id="fold-res" aria-expanded="true" aria-controls="left-body" onclick="toggleFold('res')">资源<span class="fold-mark" id="fold-mark-res" aria-hidden="true">收起</span></button></h2>
     <div id="left-body">
       <div id="fox-info"></div>
       <div id="res-list"></div>
     </div>
   </div>
   <div id="center-panel">
-    <div id="tabs"></div>
+    <nav id="tabs" aria-label="游戏页签"></nav>
     <div id="center-body">
       <section id="expeditions-panel" aria-label="进行中的远行" hidden>
         <div class="res-cat">进行中的远行</div>
@@ -36,7 +36,7 @@
     </div>
   </div>
   <div id="log-panel">
-    <h3 class="panel-hdr" onclick="toggleFold('log')">谷中见闻<span class="fold-mark" id="fold-mark-log">▾</span></h3>
+    <h2 class="panel-title"><button type="button" class="panel-hdr" id="fold-log" aria-expanded="true" aria-controls="log-list" onclick="toggleFold('log')">谷中见闻<span class="fold-mark" id="fold-mark-log" aria-hidden="true">收起</span></button></h2>
     <div id="log-list"></div>
   </div>
 </div>

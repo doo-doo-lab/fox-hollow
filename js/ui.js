@@ -16,10 +16,14 @@ const _expFoxSel = {};
 var fold = { res: false, log: false, tab: {} };
 try {
   var _fs = JSON.parse(localStorage.getItem('fhFold') || 'null');
-  if (_fs && typeof _fs === 'object') {
-    fold.res = !!_fs.res;
-    fold.log = !!_fs.log;
-    if (_fs.tab && typeof _fs.tab === 'object') fold.tab = _fs.tab;
+  if (_fs && typeof _fs === 'object' && !Array.isArray(_fs)) {
+    fold.res = _fs.res === true;
+    fold.log = _fs.log === true;
+    if (_fs.tab && typeof _fs.tab === 'object' && !Array.isArray(_fs.tab)) {
+      TABS.forEach(function(tab) {
+        if (typeof _fs.tab[tab.id] === 'boolean') fold.tab[tab.id] = _fs.tab[tab.id];
+      });
+    }
   }
 } catch (e) { }
 
@@ -27,31 +31,38 @@ function saveFold() {
   try { localStorage.setItem('fhFold', JSON.stringify(fold)); } catch (e) { }
 }
 
-// 应用左/右栏折叠状态（页签内容由 rTC 处理）
+// 控件始终留在被隐藏内容之外。hidden 消除占高，同时隐藏可聚焦子项。
 function applyFold() {
-  var lb = document.getElementById('left-body');
-  if (lb) lb.style.display = fold.res ? 'none' : '';
-  var ll = document.getElementById('log-list');
-  if (ll) ll.style.display = fold.log ? 'none' : '';
-  var mr = document.getElementById('fold-mark-res');
-  if (mr) mr.textContent = fold.res ? '▸' : '▾';
-  var ml = document.getElementById('fold-mark-log');
-  if (ml) ml.textContent = fold.log ? '▸' : '▾';
+  ['res', 'log'].forEach(function(id) {
+    var button = document.getElementById('fold-' + id);
+    var body = document.getElementById(id === 'res' ? 'left-body' : 'log-list');
+    body.hidden = fold[id];
+    button.setAttribute('aria-expanded', String(!fold[id]));
+    button.setAttribute('aria-label', (fold[id] ? '展开' : '收起') + (id === 'res' ? '资源面板' : '谷中见闻'));
+    document.getElementById('fold-mark-' + id).textContent = fold[id] ? '展开' : '收起';
+  });
+  document.getElementById('center-body').hidden = !!fold.tab[curTab];
 }
 
 function toggleFold(which) {
+  if (which !== 'res' && which !== 'log') return;
   fold[which] = !fold[which];
   saveFold();
   applyFold();
+  if (!fold[which]) {
+    if (which === 'res') rRes();
+    else rLog();
+  }
 }
 
-// 页签点击：点当前页签 = 折叠/展开内容；点其他页签 = 切换并自动展开
+// 每个页签独立记忆折叠偏好；切页签不擅自展开之前收起的内容。
 function tabClick(id) {
+  var tab = TABS.find(function(t) { return t.id === id; });
+  if (!tab || (tab.uq && !chk(tab.uq))) return;
   if (id === curTab) {
     fold.tab[id] = !fold.tab[id];
   } else {
     curTab = id;
-    fold.tab[id] = false;
   }
   saveFold();
   rTabs();
@@ -287,14 +298,37 @@ function resBreakdown(k) {
 
 // ===== 渲染：Tab栏 =====
 function rTabs() {
-  document.getElementById('tabs').innerHTML = TABS.filter(function(t) {
+  var container = document.getElementById('tabs');
+  var visible = TABS.filter(function(t) {
     return !t.uq || chk(t.uq);
-  }).map(function(t) {
-    var mark = t.id === curTab ?
-      '<span class="fold-mark">' + (fold.tab[t.id] ? '▸' : '▾') + '</span>' : '';
-    return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="tabClick(\'' + t.id + '\')">' + t.n + mark + '</div>';
-  }).join('');
+  });
+  if (!visible.some(function(t) { return t.id === curTab; })) curTab = visible[0].id;
+  Array.from(container.children).forEach(function(button) {
+    if (!visible.some(function(t) { return t.id === button.dataset.tab; })) button.remove();
+  });
+  visible.forEach(function(t) {
+    var button = document.getElementById('tab-' + t.id);
+    if (!button) {
+      button = document.createElement('button');
+      button.id = 'tab-' + t.id;
+      button.type = 'button';
+      button.dataset.tab = t.id;
+      button.setAttribute('aria-controls', 'center-body');
+      button.innerHTML = '<span class="tab-name"></span><span class="fold-mark" aria-hidden="true"></span>';
+      button.querySelector('.tab-name').textContent = t.n;
+      button.addEventListener('click', function() { tabClick(this.dataset.tab); });
+      container.appendChild(button);
+    }
+    var active = t.id === curTab;
+    var collapsed = !!fold.tab[t.id];
+    button.className = 'tab' + (active ? ' on' : '');
+    button.setAttribute('aria-pressed', String(active));
+    button.setAttribute('aria-expanded', String(active && !collapsed));
+    button.setAttribute('aria-label', active ? t.n + '，' + (collapsed ? '展开' : '收起') + '内容' : '切换到' + t.n + (collapsed ? '，内容已折叠' : ''));
+    var mark = button.querySelector('.fold-mark');
+    mark.textContent = collapsed ? '展开' : '收起';
+    mark.hidden = !active;
+  });
 }
 
 // ===== 渲染：资源面板 =====
@@ -750,10 +784,13 @@ function rTC() {
 
 // ===== 渲染：日志 =====
 function rLog() {
-  document.getElementById('log-list').innerHTML =
-    logs.slice(0, 30).map(function(e) {
-      return '<div class="log ' + (e.c || '') + '">' + e.m + '</div>';
-    }).join('');
+  var entries = logs.slice(0, 30).map(function(e) {
+    var row = document.createElement('div');
+    row.className = 'log ' + (e.c || '');
+    row.textContent = e.m;
+    return row;
+  });
+  document.getElementById('log-list').replaceChildren(...entries);
 }
 
 // ===== 渲染：季节 =====
