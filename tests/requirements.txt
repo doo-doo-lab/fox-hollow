@@ -1,0 +1,2 @@
+# Test-only dependency; the game has no runtime dependencies or build step.
+playwright==1.58.0

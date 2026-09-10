@@ -67,6 +67,7 @@
     │   ├── data.js              # 数据定义
     │   ├── engine.js            # 游戏引擎
     │   └── ui.js                # 界面渲染
+    ├── tests/                   # 引擎与浏览器回归（开发时使用）
     └── docs/
         ├── design.md           # 架构与策划
         ├── changelog.md        # 变更记录
@@ -74,6 +75,8 @@
 ```
 
 本地 Git 使用 `core.worktree=../output`。远端仍以 `index.html` / `css/` / `js/` 为仓库根路径，因此不改变已有 GitHub Pages 地址。完整目录边界见 [design.md](docs/design.md#四技术实现与项目架构)。
+
+开发检查：`node --test tests/*.test.cjs`；浏览器测试方法见 [tests/README.md](tests/README.md)。运行游戏本身不需要安装测试依赖。
 
 ## 开始游戏
 

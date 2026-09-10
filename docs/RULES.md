@@ -16,6 +16,7 @@
     │   ├── data.js     # 数据定义
     │   ├── engine.js   # 游戏引擎
     │   └── ui.js       # 界面渲染
+    ├── tests/          # 回归测试（不参与游戏加载）
     └── docs/
         ├── RULES.md
         ├── design.md

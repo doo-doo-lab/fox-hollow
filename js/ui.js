@@ -55,6 +55,7 @@ function tabClick(id) {
   }
   saveFold();
   rTabs();
+  rExpeditions();
   rTC();
 }
 
@@ -328,12 +329,48 @@ function rRes() {
     (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
 }
 
+// ===== 渲染：公共远行进度（所有页签共用，不自行计时） =====
+function rExpeditions() {
+  var panel = document.getElementById('expeditions-panel');
+  var list = document.getElementById('expedition-list');
+  var expeditions = G.expeditions || [];
+  panel.hidden = !expeditions.length;
+  while (list.children.length > expeditions.length) list.lastElementChild.remove();
+  for (var i = 0; i < expeditions.length; i++) {
+    var exp = expeditions[i];
+    var row = list.children[i];
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'exp-active';
+      row.innerHTML = '<div class="exp-active-hdr">' +
+        '<span class="exp-dest-name"></span><span class="exp-info"></span>' +
+        '<span class="exp-spirit-used">灵路已用</span></div>' +
+        '<div class="exp-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100">' +
+        '<div class="exp-bar-fill"></div></div>';
+      list.appendChild(row);
+    }
+    var total = Math.max(1, exp.totalTicks || exp.ticksLeft || 1);
+    var pct = Math.max(0, Math.min(100, (total - exp.ticksLeft) / total * 100));
+    var daysLeft = Math.max(0, Math.ceil(exp.ticksLeft / TPD));
+    var name = EXD[exp.dest].n;
+    row.querySelector('.exp-dest-name').textContent = name;
+    row.querySelector('.exp-info').textContent = exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天';
+    row.querySelector('.exp-spirit-used').hidden = !exp.usedSpiritPath;
+    var bar = row.querySelector('.exp-bar-bg');
+    bar.setAttribute('aria-label', '前往' + name + '的远行进度');
+    bar.setAttribute('aria-valuenow', pct.toFixed(1));
+    bar.setAttribute('aria-valuetext', '剩余' + daysLeft + '天');
+    // 复用进度条节点；切页签不销毁它，也不重启进度动画。
+    row.querySelector('.exp-bar-fill').style.width = pct.toFixed(1) + '%';
+  }
+}
+
 // ===== 渲染：Tab内容 =====
 function rTC() {
   var tcEl = document.getElementById('tc');
-  // 当前页签已折叠：隐藏内容并跳过重建
-  if (fold.tab[curTab]) { tcEl.style.display = 'none'; return; }
-  tcEl.style.display = '';
+  // 当前页签折叠包含公共远行区域；引擎和进度数据仍持续推进。
+  document.getElementById('center-body').hidden = !!fold.tab[curTab];
+  if (fold.tab[curTab]) return;
   var h = '';
 
   if (curTab === 'b') {
@@ -577,25 +614,6 @@ function rTC() {
   else if (curTab === 'w') {
     // ===== 山外 Tab =====
 
-    // --- 进行中的远行 ---
-    if (G.expeditions && G.expeditions.length) {
-      h += '<div class="res-cat">进行中的远行</div>';
-      for (var ei = 0; ei < G.expeditions.length; ei++) {
-        var exp = G.expeditions[ei];
-        var ed = EXD[exp.dest];
-        var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
-        var daysLeft = Math.ceil(exp.ticksLeft / TPD);
-        h += '<div class="exp-active">';
-        h += '<div class="exp-active-hdr">';
-        h += '<span class="exp-dest-name">' + ed.n + '</span>';
-        h += '<span class="exp-info">' + exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天</span>';
-        if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
-        h += '</div>';
-        h += '<div class="exp-bar-bg"><div class="exp-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
-        h += '</div>';
-      }
-    }
-
     // --- 派遣远行 ---
     var maxExp = maxExpeditions();
     var curExp = G.expeditions ? G.expeditions.length : 0;
@@ -727,7 +745,7 @@ function rTC() {
     }
   }
 
-  document.getElementById('tc').innerHTML = h;
+  tcEl.innerHTML = h;
 }
 
 // ===== 渲染：日志 =====
@@ -745,10 +763,9 @@ function rSeason() {
 }
 
 // ===== 全量渲染 =====
-// ===== 全量渲染 =====
 var _blockTC = 0;
 function rAll() {
-  rRes(); rTabs();
+  rRes(); rTabs(); rExpeditions();
   // select 交互期间跳过 rTC 重建
   if (_blockTC > 0) { _blockTC--; }
   else { rTC(); }
@@ -789,9 +806,17 @@ function startGame() {
     tick();
     // 按实际推进的 tick 数控制渲染节奏（后台补跑多个 tick 时也能及时刷新）
     _renderAcc += G.tick - t0;
-    if (_renderAcc >= 5) { _renderAcc = 0; rAll(); }
+    if (_renderAcc >= 5) { _renderAcc %= 5; rAll(); }
   }, TMS);
   setInterval(save, 30000);
+
+  // 浏览器恢复前台时立即同步；同一时刻的定时器回调不会重复结算。
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) return;
+    tick();
+    _renderAcc = 0;
+    rAll();
+  });
 
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)
   var _hpCur = null;

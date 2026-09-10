@@ -30,8 +30,14 @@ const G = {
 };
 
 let lastRealTime = Date.now();
-let tickDebt = 0;      // 后台降频时的 tick 欠账（按真实时间补跑）
+let tickDebt = 0;      // 未满一个 tick 的毫秒余数（跨前后台和长间隔保留）
 let offlineAccum = 0;  // 后台期间累计的离线补算秒数（回前台后统一提示）
+
+function resetClock() {
+  lastRealTime = Date.now();
+  tickDebt = 0;
+  offlineAccum = 0;
+}
 
 // 初始化状态
 function initState() {
@@ -299,6 +305,7 @@ function rmFox() {
 
 // ===== 离线/后台进度补算 =====
 function simulateOffline(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return;
   // 限制最大补算时间为 24 小时
   seconds = Math.min(seconds, 86400);
   var ticksToRun = Math.floor(seconds * 1000 / TMS);
@@ -371,26 +378,21 @@ function announceReturn(seconds) {
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 唯一的时间入口：游戏页签/折叠状态只影响 UI，不参与游戏推进。
   var now = Date.now();
-  var gap = (now - lastRealTime) / 1000;
+  var elapsedMs = Math.max(0, now - lastRealTime);
   lastRealTime = now;
-  if (gap > 5) {
-    tickDebt = 0;
-    simulateOffline(gap - TMS / 1000);
-    rAll();
-    return;
-  }
+  tickDebt += elapsedMs;
+  var ticksToRun = Math.floor(tickDebt / TMS);
+  tickDebt -= ticksToRun * TMS;
 
-  // 后台节流补偿：浏览器把定时器降频时（如后台页签约 1 次/秒），
-  // 按真实经过时间累积应跑的 tick 数一次性补跑，
-  // 保证远行倒计时、资源产出与现实时间同步
-  tickDebt += gap * 1000 / TMS;
-  var n = Math.floor(tickDebt);
-  if (n < 1) return;
-  if (n > 30) n = 30; // 单次回调补跑上限，更长的间隔由离线补算处理
-  tickDebt -= n;
-  for (var i = 0; i < n; i++) tickOnce();
+  if (ticksToRun > 5000 / TMS) {
+    // 长间隔按完整 tick 补算；不额外减去一个 tick，也不丢弃毫秒余数。
+    // simulateOffline 内仍保留单次最多 24 小时的既有限制。
+    simulateOffline(ticksToRun * TMS / 1000);
+  } else {
+    for (var i = 0; i < ticksToRun; i++) tickOnce();
+  }
 
   // 回到前台：展示后台期间累计的补算提示与暂存叙事
   if ((offlineAccum > 0 || (G.pendingNarr && G.pendingNarr.length)) &&
@@ -1168,7 +1170,7 @@ function load() {
       log('读取了存档。');
     }
   } catch (e) { }
-  lastRealTime = Date.now();
+  resetClock();
 }
 
 function manualSave() {
@@ -1227,6 +1229,7 @@ function applyCode() {
     resetG();
     Object.assign(G, data);
     migrate();
+    resetClock();
     log('存档码导入成功！', 'important');
     document.getElementById('import-msg').style.color = '#070';
     document.getElementById('import-msg').textContent = '恢复成功！';
