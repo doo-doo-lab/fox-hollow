@@ -3,25 +3,34 @@
 ## 仓库结构
 
 ```
-fox-hollow/
-├── index.html          # 入口页面
-├── css/
-│   └── style.css       # 样式
-├── js/
-│   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件）
-│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发）
-│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板）
-├── docs/
-│   ├── RULES.md        # 本文件
-│   └── design.md       # 策划文档
-└── reference/          # 参考资料（仅本地，不纳入版本控制）
+/workspace/
+├── .git/               # Git 元数据（根目录）
+├── reference/          # 参考资料（仅本地，不纳入版本控制）
+├── uploads/            # 原始上传文件（不纳入版本控制）
+└── output/             # Git 工作树 / 项目交付目录
+    ├── index.html      # 入口页面
+    ├── README.md
+    ├── .gitignore
+    ├── css/style.css
+    ├── js/
+    │   ├── data.js     # 数据定义
+    │   ├── engine.js   # 游戏引擎
+    │   └── ui.js       # 界面渲染
+    └── docs/
+        ├── RULES.md
+        ├── design.md
+        ├── changelog.md
+        └── panel-collapse-plan.md
 ```
+
+此工作区的 `.git/config` 设置 `core.worktree=../output`，其余配置保留。提交路径相对于 `output/`，因此远端和 GitHub Pages 的入口仍为仓库根部 `index.html`；不能把本地目录包装误当作线上路径迁移。普通克隆仍使用 Git 默认目录结构。
 
 ## 不推送的内容
 
 以下目录/文件仅保留在本地，**不得推送到远程仓库**：
 
 - `reference/` — 猫国建设者中文 wiki 参考资料，体积大且为第三方内容，仅供开发时查阅。已写入 `.gitignore`。
+- `uploads/`、本地测试临时产物和 `.git/config` 中的身份/凭据 — 不属于交付内容。
 
 ## 快捷指令
 
