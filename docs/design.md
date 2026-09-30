@@ -535,7 +535,7 @@ G.choiceBuffs = G.choiceBuffs || {}
 
 | 文件 | 改动 |
 |------|------|
-| `data.js` | 新增 3 种资源 RD；2 座建筑 BD（驿道、瞭望塔）；1 种职业 JD（斥候）；2 项研究 UD；3 个灵术 SD（灵路、商风、山谷宴席）；远行目的地数据 EXD（含每目的地 6 条返回日志）；叙事碎片 NARR（旧墟 10 段、云岭 8 段）；商队数据 CVD（4 种商队含到访/离开日志）；抉择事件 CHOICE_EVENTS（5 个）；TABS 增加山外 |
+| `data.js` | 新增 3 种资源 RD；2 座建筑 BD（驿道、瞭望塔）；1 种职业 JD（斥候）；2 项研究 UD；3 个灵术 SD（灵路、商风、山谷宴席）；远行目的地数据 EXD（含每目的地 6 条返回日志；旧墟/云岭附 logGate 叙事门控）；叙事碎片 NARR（旧墟 10 段、云岭 8 段）；商队数据 CVD（4 种商队含到访/离开日志）；抉择事件 CHOICE_EVENTS（5 个）；TABS 增加山外 |
 | `engine.js` | `G` 新增 foxAway/expDone/expeditions/pendingNarr/narratives/feastSeason/tradeWindYear/caravan/caravanTimer/pendingChoice/choicesDone/choiceBuffs 等状态；新增 `activeWatchtowers()`/`expTimeMul()` 辅助函数；`calcR()` 野莓消耗用 foxes-foxAway；`calcMx()` 增加驿道/瞭望塔的新资源上限；`calcH()` 增加宴席/抉择掌印墙加成；`chk()` 增加 exp 条件类型；`tick()` 增加远行倒计时/商队到期/商队随机到访（含 caravanTimer 逻辑）；新增 sendExpedition()/resolveExpedition()/buyFromCaravan()/sellToCaravan()/castSpell 扩展灵路商风宴席；新增 tryTriggerChoice()/applyChoice() 抉择事件系统（含 5 种事件的具体效果实现）；`rmFox()` 排除外出狐狸；`simulateOffline()` 覆盖远行/商队；`migrate()` 补齐新状态 |
 | `ui.js` | `rTC()` 新增山外 Tab 渲染（远行面板含进度条 + 商队面板 + 叙事碎片列表）；营火 Tab 灵术区新增灵路/商风/宴席；新增 showChoiceModal() 抉择事件弹窗；斥候数量选择改为按钮组 |
 | `style.css` | 山外 Tab 相关样式（远行进度条、商队商品行、叙事碎片区域） |
@@ -546,7 +546,7 @@ G.choiceBuffs = G.choiceBuffs || {}
 
 | 类型 | 数量 | 说明 |
 |------|------|------|
-| 远行返回日志 | 每目的地 6 条 | 通用返回叙事，随机抽取 |
+| 远行返回日志 | 每目的地 6 条 | 通用返回叙事；荒丘/密林随机抽取；旧墟/云岭按 `logGate` 与已收集叙事碎片数门控，收尾日志仅在碎片全部收集完后出现 |
 | 旧墟叙事碎片 | 10 条 | 按顺序推进，拼出旧墟故事线（从陶片发现到南方新城） |
 | 云岭叙事碎片 | 8 条 | 按顺序推进，拼出云岭故事线（从掌印到跨代际望孔） |
 | 抉择事件 | 5 个 | 每个含 2 选项 + 各自后果，有资源/buff 实际效果 |

@@ -86,11 +86,8 @@ function bldUnlockNotes(d) {
 // 职业效果描述
 function jobEffects(id, e) {
   var r = [];
-  // 斥候等无产出职业用 desc 字段
-  if (JD[id] && JD[id].desc) {
-    r.push(JD[id].desc);
-    return r;
-  }
+  // 斥候等无产出职业：描述文本已由悬浮面板 desc 行（d.d）展示，
+  // 此处不再重复返回，避免面板中同一句话显示两遍
   for (var k in e) {
     var v = e[k];
     if (k.endsWith('P')) r.push('每只狐狸产出：' + (RD[k.slice(0, -1)]?.n || k) + ' +' + (v * 0.5) + '/s');

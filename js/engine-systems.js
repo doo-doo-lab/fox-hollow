@@ -116,11 +116,13 @@ function resolveExpedition(idx, silent) {
     delete cb.nextReturn[exp.dest];
   }
   // 叙事碎片
+  var gotNarr = false;
   if (d.narrative && NARR[exp.dest]) {
     if (!G.narratives) G.narratives = { oldRuin: [], cloudRidge: [] };
     var narrList = G.narratives[exp.dest] || [];
     var nextIdx = narrList.length;
     if (nextIdx < NARR[exp.dest].length) {
+      gotNarr = true;
       narrList.push(nextIdx);
       G.narratives[exp.dest] = narrList;
       if (!silent) {
@@ -133,8 +135,28 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事目的地（旧墟/云岭）不再完全随机——
+  // 每条日志通过 logGate 声明「需已收集叙事碎片数」，只从已解锁的日志中随机，
+  // 避免第一次远行就出现引用后期剧情的文本；
+  // 收尾日志（logs 最后一条）只在叙事碎片全部收集完、本次未带回新碎片时出现；
+  // 非叙事目的地（荒丘/密林）保持随机
+  var returnLog;
+  if (d.narrative && NARR[exp.dest]) {
+    var lastIdx = d.logs.length - 1;
+    if (gotNarr) {
+      var nDone = G.narratives[exp.dest].length;
+      var logPool = [];
+      for (var li = 0; li < lastIdx; li++) {
+        if (!d.logGate || nDone >= d.logGate[li]) logPool.push(li);
+      }
+      if (!logPool.length) logPool = [0];
+      returnLog = d.logs[logPool[Math.floor(Math.random() * logPool.length)]];
+    } else {
+      returnLog = d.logs[lastIdx];
+    }
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
