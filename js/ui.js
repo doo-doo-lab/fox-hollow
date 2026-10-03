@@ -549,6 +549,9 @@ function rTC() {
       if (!G.job[id].on) continue; any = 1;
       var trainLv = G.train[id] || 0;
       var eff = jobEffects(id, d.e);
+      // desc 型职业（如斥候）的悬浮面板已用 hp-desc 展示 d.d，
+      // 过滤掉 jobEffects 返回的同文，避免同一句话在面板里重复出现
+      eff = eff.filter(function(x) { return x !== d.d; });
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
       var sec = {
         desc: d.d,

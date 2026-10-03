@@ -134,7 +134,25 @@ function resolveExpedition(idx, silent) {
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
   // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 带 finalLog 标记的叙事目的地：收尾日志（如旧墟「最后一趟从旧墟回来…」）
+  // 仅在全部叙事碎片收集完之后出现；首次返回固定用 logs[0]（与碎片 1 内容呼应），
+  // 中途从前几条中随机——避免第一次远行就错误显示收尾文本（内容与顺序不匹配）
+  var returnLog;
+  if (d.narrative && NARR[exp.dest] && d.finalLog != null) {
+    var collected = (G.narratives && G.narratives[exp.dest]) ? G.narratives[exp.dest].length : 0;
+    if (collected >= NARR[exp.dest].length) {
+      returnLog = d.logs[d.finalLog];            // 碎片已集齐，用收尾日志
+    } else if (G.expDone[exp.dest] === 1) {
+      returnLog = d.logs[0];                     // 首次返回固定第一条
+    } else {
+      var normalLogs = [];
+      for (var li = 0; li < d.logs.length; li++)
+        if (li !== d.finalLog) normalLogs.push(d.logs[li]);
+      returnLog = normalLogs[Math.floor(Math.random() * normalLogs.length)];
+    }
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
