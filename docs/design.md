@@ -9,7 +9,7 @@
 - **灵感来源**：Kittens Game（猫国建设者），玩法机制相似，但所有文案、命名、主题完全原创
 - **主题**：玩家经营一个狐狸山谷村落，从采集野莓开始，逐步建造设施、吸引村民、发展科技
 - **风格**：白底黑字纯文字界面，紧凑单行排版
-- **线上地址**：https://2d9lpj7e.mule.page/
+- **线上地址**：https://doo-doo-lab.github.io/fox-hollow/ （GitHub Pages，main 分支）
 
 ---
 
