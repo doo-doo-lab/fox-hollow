@@ -48,7 +48,7 @@ fox-hollow/
 ## 快捷指令
 
 - **用户说「git push」时**：立即执行 `git add` + `git commit` + `git push origin main`，将当前所有改动推送到远程仓库。不需要额外确认。
-- **线上地址**：https://akira17189-create.github.io/fox-hollow/ （GitHub Pages，推送后自动更新）
+- **线上地址**：https://doo-doo-lab.github.io/fox-hollow/ （GitHub Pages，main 分支，推送后自动更新）
 - **GitHub PAT**：（已移除，请勿提交到仓库）
 
 ## 开发约定
