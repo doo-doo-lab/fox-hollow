@@ -11,6 +11,12 @@ function gather(type) {
   // 轻手天赋：手动采集量 +50%
   if (type === 'berry' && G.jobTalent.gatherer === 'B')
     amt *= SPEC_JD.gatherer.B.gatherMul;
+  // v0.16 政体：谷无主手动采集 +30%
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.gatherM) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    var gm = POLITY[G.polity].e.gatherM;
+    amt *= (1 + (gm > 0 ? gm * polityBoost : gm));
+  }
   const s = G.res[type];
   s.v = Math.min(s.v + amt, s.mx);
   if (!s.on) s.on = true;
@@ -73,7 +79,18 @@ function aJob(id, d) {
 }
 
 function trainCost(id) {
-  return (G.train[id] || 0) + 2;
+  var base = (G.train[id] || 0) + 2;
+  // v0.16 政策：教育政策对授业费用的乘数
+  var mul = 1;
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.trainCostM) mul += pe.trainCostM;
+    }
+  }
+  return Math.max(1, Math.ceil(base * mul));
 }
 
 function canTrain(id) {
@@ -100,6 +117,9 @@ function sell(id) {
   // 重算容量，超出的狐狸保留为闲置
   calcMx();
   G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce((s, j) => s + j.c, 0);
+  // v0.15.1 建筑维持状态重置
+  if (id === 'moonStage' && G.bld.moonStage.c <= 0) G.moonStageActive = false;
+  if (id === 'artistry' && G.bld.artistry.c <= 0) G.artistryActive = false;
   log('出售了' + BD[id].n + '（剩余' + G.bld[id].c + '座）');
   rAll();
 }
@@ -370,5 +390,79 @@ function saveRiteDefault() {
   var sel = _readRiteCheckboxes();
   G.lastSeasonRites = sel;
   log('节令默认已保存：将在下季按此应用。', 'echo');
+  rAll();
+}
+
+// ===== v0.16 政体操作 =====
+function choosePolity(id) {
+  if (!POLITY[id]) return;
+  if (G.polity) return; // 已有政体，用 changePolity
+  if (!G.upg.polityLore?.done) return;
+  G.polity = id;
+  log('谷中定下政体：' + POLITY[id].n + '。', 'important');
+  rAll();
+}
+
+function changePolity(id) {
+  if (!POLITY[id]) return;
+  if (id === G.polity) return;
+  // 费用：300 议事录 + 100 古币
+  if (!G.res.council || G.res.council.v < 300) { log('议事录不足，无法变更政体。', 'warn'); return; }
+  if (!G.res.ancCoin || G.res.ancCoin.v < 100) { log('古币不足，无法变更政体。', 'warn'); return; }
+  G.res.council.v -= 300;
+  G.res.ancCoin.v -= 100;
+  var oldName = G.polity ? POLITY[G.polity].n : '无';
+  G.polity = id;
+  G.polityChanges++;
+  G.polityPenaltySeason = G.season;
+  G.polityPenaltyYear = G.year;
+  log('政体从「' + oldName + '」变为「' + POLITY[id].n + '」，满意度暂时下降。', 'important');
+  rAll();
+}
+
+// 政策切换费用（含公议会 -30%）
+function policySwitchCost(domain) {
+  var base = POLICY[domain]?.cost || 10;
+  var mul = 1;
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.policyCostMul) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    mul = POLITY[G.polity].e.policyCostMul; // 公议会 = 0.70
+    // policyCostMul 是已经乘好的比率，不需要 polityBoost
+    // 但"正面效果受政堂加成"，这里 -30% 是正面，实际= 1 - (1-0.70)*polityBoost
+    mul = 1 - (1 - mul) * polityBoost; // e.g. 1 - 0.3 * 1.15 = 0.655
+  }
+  return Math.max(1, Math.ceil(base * mul));
+}
+
+function setPolicy(domain, option) {
+  if (!POLICY[domain] || !POLICY[domain].opts[option]) return;
+  if (!G.upg.policyLore?.done) return;
+  // 冷却检查
+  if (G.policyCooldowns[domain] > 0) {
+    log('政策「' + POLICY[domain].n + '」仍在冷却中（剩余 ' + G.policyCooldowns[domain] + ' 年）。', 'warn');
+    return;
+  }
+  // 如果已经是当前选项
+  if (G.policies[domain] === option) return;
+  // 费用
+  var cost = policySwitchCost(domain);
+  // 首次选择免费
+  var isFirst = !G.policies[domain];
+  if (!isFirst) {
+    if (!G.res.council || G.res.council.v < cost) {
+      log('议事录不足（需 ' + cost + '），无法切换政策。', 'warn');
+      return;
+    }
+    G.res.council.v -= cost;
+    // 设置冷却
+    G.policyCooldowns[domain] = POLICY[domain].cooldown || 2;
+  }
+  G.policies[domain] = option;
+  var optName = POLICY[domain].opts[option].n;
+  if (isFirst) {
+    log('政策「' + POLICY[domain].n + '」首次确立：' + optName, 'important');
+  } else {
+    log('政策「' + POLICY[domain].n + '」切换为：' + optName + '（议事录 -' + cost + '）', 'important');
+  }
   rAll();
 }

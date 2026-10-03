@@ -43,7 +43,29 @@ const RD = {
   dye:  { n: '染丝', c: '加工', mx: 0, lock: 1, tip: ['颜色是偷来的，花还不知道。'] },
   wine: { n: '果酒', c: '加工', mx: 0, lock: 1, tip: ['时间对野莓做的事，说出来不太体面。'] },
   ink:  { n: '墨锭', c: '加工', mx: 0, lock: 1, tip: ['除了黑什么都不会。'] },
+
+  // v0.16 政体资源
+  council: { n: '「占位：议事录」', c: '知识', mx: 0, lock: 1, tip: ['把争吵的结果装订成册，就叫共识。'] },
 };
+
+// ===== v0.15.1 猎手林间采风日志 =====
+const HUNTER_SPICE_LOGS = [
+  '猎手在溪谷背阴处发现了一丛野香草，小心翼翼地连根拔起。',
+  '追猎物的路上踩到了什么，低头一看是长满了的香料苗。',
+  '一只猎手说山坡上有股味道不对劲——是好的那种不对劲。',
+];
+
+// ===== v0.15.1 商贩路边生意日志 =====
+const MERCHANT_SPICE_LOGS = [
+  '一个路过的旅狐用一小包香料抵了欠款，商贩欣然收下。',
+  '集市角落换到了一撮来路不明的香料——闻着是正宗的。',
+  '商贩说今天做了笔好买卖，顺手掏出一包带味儿的东西。',
+];
+
+const MERCHANT_SPICE_FAIL_LOGS = [
+  '路过的旅狐看了看商贩手里的物件，摇头走了。',
+  '本来要换香料的旅客临时改了主意。',
+];
 
 // ===== 遗光发现日志 =====
 const REMNANT_LOGS = [
@@ -101,9 +123,9 @@ const BD = {
     tip: ['富足的第一个形状，是堆起来的。']
   },
   library: {
-    n: '藏书阁', t: 'b', d: '积累学识、研读古籍。',
+    n: '藏书阁', t: 'b', d: '积累学识、研读古籍。学识储备越深，商队带来的图纸越易被认出。',
     p: [{ r: 'wood', b: 30, k: 1.12 }, { r: 'stone', b: 15, k: 1.12 }],
-    e: { loreMx: 50, scrollMx: 25, loreP: .03 },
+    e: { loreMx: 50, scrollMx: 25, loreP: .03, blueprintProb: .02 },
     uq: { b: { warehouse: 1 } },
     ur: ['lore', 'scroll'],
     tip: ['狐狸坐下来发呆的地方，但发的是高级的呆。']
@@ -206,9 +228,9 @@ const BD = {
     tip: ['慢工出细活，慢到快要忘了出什么活。']
   },
   assembly: {
-    n: '共聚堂', t: 'b', d: '议事、节庆、聚会的大堂。',
+    n: '共聚堂', t: 'b', d: '议事、节庆、聚会的大堂。热闹的村庄更易吸引商队来访。',
     p: [{ r: 'plank', b: 12, k: 1.12 }, { r: 'brick', b: 8, k: 1.12 }, { r: 'wood', b: 40, k: 1.12 }],
-    e: { hapB: .03 },
+    e: { hapB: .03, caravanProb: .02 },
     uq: { b: { moonStage: 1 }, u: { customsDeep: 1 } },
     tip: ['一只狐狸清嗓子，所有耳朵同时转向。']
   },
@@ -218,6 +240,23 @@ const BD = {
     e: { charmP: .016 },
     uq: { b: { shrine: 3 }, u: { ancestry: 1 } },
     tip: ['供果被看不见的牙齿细细地啃着。']
+  },
+
+  // ===== v0.16 政体建筑 =====
+  councilHall: {
+    n: '「占位：议事堂」', t: 'b', d: '谷中议事之所，每座提供议事录被动产出。',
+    p: [{ r: 'plank', b: 15, k: 1.12 }, { r: 'brick', b: 10, k: 1.12 }, { r: 'wood', b: 50, k: 1.12 }, { r: 'coin', b: 20, k: 1.12 }],
+    e: { councilP: .0005 },
+    uq: { u: { councilLore: 1 } },
+    ur: ['council'],
+    tip: ['七嘴八舌的地方，意外地能解决问题。']
+  },
+  polityHall: {
+    n: '「占位：政堂」', t: 'b', d: '政体的权力中心，强化当前政体正面效果。',
+    p: [{ r: 'plank', b: 25, k: 1.12 }, { r: 'brick', b: 20, k: 1.12 }, { r: 'iron', b: 10, k: 1.12 }, { r: 'coin', b: 30, k: 1.12 }],
+    e: { polityBonus: .05 },
+    uq: { polity: true },
+    tip: ['权力本身没有形状，直到你给它盖了间屋子。']
   },
 };
 
@@ -366,6 +405,29 @@ const UD = {
     uq: { u: { engraving: 1 }, custom: 5 },
     tip: ['全谷的声音放在一起，会听见一种从前听不到的话。', '当所有喉咙的震动找到了同一个频率。']
   },
+
+  // ===== v0.16 政体研究 =====
+  councilLore: {
+    n: '「占位：共谷议事」', d: '解锁议政 Tab、议事堂与议事录资源。',
+    p: [{ r: 'lore', a: 300 }, { r: 'scroll', a: 20 }],
+    e: {},
+    uq: { u: { valleyVoice: 1 }, custom: 5 },
+    tip: ['坐下来说的第一句话不是决定，是"你先说"。']
+  },
+  polityLore: {
+    n: '「占位：法度通论」', d: '解锁政体选择（6 选 1）。',
+    p: [{ r: 'lore', a: 400 }, { r: 'council', a: 30 }],
+    e: {},
+    uq: { u: { councilLore: 1 }, b: { councilHall: 1 } },
+    tip: ['规矩不是笼子，是大家同意走的那条路。']
+  },
+  policyLore: {
+    n: '「占位：集议传统」', d: '解锁政策系统（4 域）与政堂建筑。',
+    p: [{ r: 'lore', a: 350 }, { r: 'council', a: 20 }, { r: 'coin', a: 50 }],
+    e: {},
+    uq: { u: { councilLore: 1 } },
+    tip: ['众狐议事，各有各的尾巴翘法。']
+  },
 };
 
 // ===== 工坊定义 =====
@@ -500,6 +562,70 @@ const SEASON_RITES = {
 };
 // 三全礼 = 三者全选生效 → 满意度 +5% + 全产出 +3%（allM 加法）
 
+// ===== v0.16 政体定义 =====
+const POLITY = {
+  elder: {
+    n: '「占位：长老议会」', d: '稳扎稳打，学识与满意度优先。',
+    e: { hapM: .08, loreM: .10, councilYear: 5, caravanProb: -.05 },
+  },
+  public: {
+    n: '「占位：公议会」', d: '频繁调整政策，全面均衡发展。',
+    e: { hapM: .12, allM: .03, policyCostMul: .70, buildCostM: .05 },
+  },
+  trade: {
+    n: '「占位：商道议会」', d: '贸易为先，铜钱与图纸是第一生产力。',
+    e: { coinM: .20, caravanProb: .08, bpChance: .08, hapM: -.05 },
+  },
+  anarchy: {
+    n: '「占位：谷无主」', d: '早中期过渡，手动采集强力但建筑疲软。',
+    e: { gatherM: .30, jobM: .08, bldProdM: -.10, councilYear: -10 },
+  },
+  hermit: {
+    n: '「占位：隐居宗」', d: '灵性路线，符咒与学识充沛。',
+    e: { charmM: .15, loreM: .10, coinM: -.10, caravanProb: -.05 },
+  },
+  martial: {
+    n: '「占位：武德同」', d: '远行与基础资源强化。',
+    e: { expReward: .15, baseProdM: .10, scoutM: .10, hapM: -.08 },
+  },
+};
+
+// ===== v0.16 政策定义 =====
+const POLICY = {
+  land: {
+    n: '「占位：土地」', cost: 10, cooldown: 2,
+    opts: {
+      public:  { n: '「占位：公有」',   e: { berryM: .08, woodM: .05, stoneM: .05, hapM: -.03 } },
+      private: { n: '「占位：私有」',   e: { berryM: -.05, coinM: .15, buildCostM: -.05 } },
+      commune: { n: '「占位：共耕」',   e: { berryM: .15, hapM: .05, coinM: -.05 } },
+    },
+  },
+  edu: {
+    n: '「占位：教育」', cost: 15, cooldown: 2,
+    opts: {
+      mentor:  { n: '「占位：师徒」',   e: { trainCostM: -.30, loreM: -.05 } },
+      academy: { n: '「占位：书院」',   e: { loreM: .15, scrollM: .10, trainCostM: .20 } },
+      self:    { n: '「占位：自学」',   e: { loreM: .05, scrollM: .05, gatherExpM: .20 } },
+    },
+  },
+  trade: {
+    n: '「占位：通商」', cost: 15, cooldown: 3,
+    opts: {
+      open:    { n: '「占位：开放通商」', e: { caravanProb: .10, bpChance: .05, coinM: .05, hapM: -.03 } },
+      control: { n: '「占位：管控」',     e: { coinM: .10, caravanProb: -.05, tradePriceM: -.10 } },
+      closed:  { n: '「占位：封闭」',     e: { hapM: .05, baseProdM: .05, caravanProb: -.15, coinM: -.10 } },
+    },
+  },
+  class: {
+    n: '「占位：阶层」', cost: 10, cooldown: 2,
+    opts: {
+      equal:   { n: '「占位：平等」',     e: { hapM: .08, jobM: -.03 } },
+      elder:   { n: '「占位：长幼有序」', e: { hapM: -.03, trainFlat: .5 } },
+      merit:   { n: '「占位：才能至上」', e: { jobM: .05, hapM: -.05, coinM: .05 } },
+    },
+  },
+};
+
 // ===== TAB定义 =====
 const TABS = [
   { id: 'b', n: '营火' },
@@ -508,6 +634,7 @@ const TABS = [
   { id: 'r', n: '研究' },
   { id: 'w', n: '山外', uq: { u: { beyondValley: 1 } } },
   { id: 'k', n: '风俗', uq: { u: { folkLore: 1 } } },
+  { id: 'g', n: '「占位：议政」', uq: { u: { councilLore: 1 } } },
 ];
 
 // ===== 山谷见闻事件 =====
@@ -803,7 +930,7 @@ const SPEC_BD = {
 // ===== 职业天赋定义 =====
 const SPEC_JD = {
   gatherer: {
-    A: { n: '边吃边摘', d: '产量 +30%，每人多消耗野莓 0.05/s', prodMul: 1.3, extraEat: 0.05,
+    A: { n: '边吃边摘', d: '产量 +30%，每只狐狸多消耗野莓 0.05/s', prodMul: 1.3, extraEat: 0.05,
       tip: ['摘一颗吃两颗，摘两颗吃三颗。'] },
     B: { n: '摸鱼高手', d: '产量 +15%，手动采集量 +50%', prodMul: 1.15, gatherMul: 1.5,
       tip: ['摸鱼是一种信仰，篮子满了是神迹。'] },

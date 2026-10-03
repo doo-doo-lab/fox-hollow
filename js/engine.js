@@ -65,6 +65,23 @@ function bp(id, i) {
   var cost = Math.ceil(p.b * Math.pow(p.k, G.bld[id].c));
   if (G.harvestSeason === G.season) cost = Math.ceil(cost * 0.7);
   cost = Math.ceil(cost * specCostMul(id, p.r));
+  // v0.16 政体/政策建筑造价乘数
+  var buildMul = 0;
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.buildCostM) {
+    var pe = POLITY[G.polity].e;
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    // buildCostM > 0 是惩罚（造价升高），不受政堂加成；< 0 是正面（造价降低），受政堂加成
+    buildMul += (pe.buildCostM < 0 ? pe.buildCostM * polityBoost : pe.buildCostM);
+  }
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.buildCostM) buildMul += pe.buildCostM;
+    }
+  }
+  if (buildMul !== 0) cost = Math.ceil(cost * (1 + buildMul));
   return cost;
 }
 
@@ -121,6 +138,8 @@ function chk(q) {
     if ((G.expDone[k] || 0) < n) return false;
   // v0.14 已激活习俗数门槛
   if (q.custom !== undefined && activeCustomCount() < q.custom) return false;
+  // v0.16 政体已选
+  if (q.polity && !G.polity) return false;
   return true;
 }
 
@@ -193,6 +212,8 @@ function calcR() {
       }
       // v0.14 习俗：老火传承 - 锻造炉矿铁产出 +10%（乘法叠加）
       if (id === 'smithy' && resKey === 'iron' && G.customs && G.customs.oldFire) val *= 1.1;
+      // v0.15.1 月歌台维持半效：断供时符咒产出 ×0.25
+      if (id === 'moonStage' && resKey === 'charm' && !G.moonStageActive) val *= 0.25;
       r[resKey] = (r[resKey] || 0) + val * s.c;
     }
     // 建筑专精额外产出
@@ -207,10 +228,43 @@ function calcR() {
     }
   }
 
+  // v0.16 谷无主建筑产出惩罚（仅 *P 被动产出，负面不受政堂加成）
+  if (G.polity === 'anarchy' && POLITY.anarchy.e.bldProdM) {
+    var bldPenalty = 1 + POLITY.anarchy.e.bldProdM; // 0.9
+    for (const k of Object.keys(r)) {
+      if (r[k] > 0) r[k] *= bldPenalty;
+    }
+  }
+
   // 职业产出（含培训加成 × 满意度 × 天赋加成）
+  // v0.16 政体/政策对职业产出的总乘数
+  var polityJobMul = 1;
+  if (G.polity && POLITY[G.polity]) {
+    var pe = POLITY[G.polity].e;
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    if (pe.jobM) polityJobMul += (pe.jobM > 0 ? pe.jobM * polityBoost : pe.jobM);
+  }
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.jobM) polityJobMul += pe.jobM;
+    }
+  }
+  // v0.16 政策 trainFlat: 授业加成扁平加算
+  var policyTrainFlat = 0;
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.trainFlat) policyTrainFlat += pe.trainFlat;
+    }
+  }
   for (const [id, s] of Object.entries(G.job)) {
     if (!s.c) continue;
-    var trainBonus = 1 + (G.train[id] || 0) * 0.1;
+    var trainBonus = 1 + (G.train[id] || 0) * 0.1 + policyTrainFlat;
     var talentData = G.jobTalent[id] && SPEC_JD[id] ? SPEC_JD[id][G.jobTalent[id]] : null;
     for (const [k, v] of Object.entries(JD[id].e)) {
       if (!k.endsWith('P')) continue;
@@ -223,12 +277,12 @@ function calcR() {
       }
       // v0.14 习俗：共狩日 - 猎手兽皮 +15%
       if (id === 'hunter' && resKey === 'leather' && G.customs && G.customs.shareHunt) val *= 1.15;
-      r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy;
+      r[resKey] = (r[resKey] || 0) + val * s.c * trainBonus * G.happy * polityJobMul;
     }
     // 天赋额外产出
     if (talentData && talentData.extraP) {
       for (var ek in talentData.extraP)
-        r[ek] = (r[ek] || 0) + talentData.extraP[ek] * s.c * TPD * trainBonus * G.happy;
+        r[ek] = (r[ek] || 0) + talentData.extraP[ek] * s.c * TPD * trainBonus * G.happy * polityJobMul;
     }
   }
 
@@ -314,6 +368,60 @@ function calcR() {
   // v0.15 三全礼：全产出 +3%（加法叠加 allM）
   if (G.seasonRites.all) {
     for (const k of Object.keys(r)) m[k] = (m[k] || 1) + 0.03;
+  }
+
+  // v0.16 政体效果
+  if (G.polity && POLITY[G.polity]) {
+    var pe = POLITY[G.polity].e;
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    // allM (全资源加成)
+    if (pe.allM) {
+      var val = pe.allM > 0 ? pe.allM * polityBoost : pe.allM;
+      for (const k of Object.keys(r)) m[k] = (m[k] || 1) + val;
+    }
+    // 单资源乘数
+    var polityResMap = { loreM: 'lore', coinM: 'coin', charmM: 'charm' };
+    for (var pk in polityResMap) {
+      if (pe[pk]) {
+        var val = pe[pk] > 0 ? pe[pk] * polityBoost : pe[pk];
+        m[polityResMap[pk]] = (m[polityResMap[pk]] || 1) + val;
+      }
+    }
+    // baseProdM: 莓/木/石 +%
+    if (pe.baseProdM) {
+      var val = pe.baseProdM > 0 ? pe.baseProdM * polityBoost : pe.baseProdM;
+      m.berry = (m.berry || 1) + val;
+      m.wood = (m.wood || 1) + val;
+      m.stone = (m.stone || 1) + val;
+    }
+    // bldProdM: 建筑产出惩罚（仅负面，不受政堂加成）
+    // 在应用乘数后处理建筑产出部分——这里先标记
+  }
+
+  // v0.16 政策效果
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (!pe) continue;
+      // allM
+      if (pe.allM) { for (const k of Object.keys(r)) m[k] = (m[k] || 1) + pe.allM; }
+      // 单资源
+      if (pe.berryM) m.berry = (m.berry || 1) + pe.berryM;
+      if (pe.woodM) m.wood = (m.wood || 1) + pe.woodM;
+      if (pe.stoneM) m.stone = (m.stone || 1) + pe.stoneM;
+      if (pe.coinM) m.coin = (m.coin || 1) + pe.coinM;
+      if (pe.loreM) m.lore = (m.lore || 1) + pe.loreM;
+      if (pe.scrollM) m.scroll = (m.scroll || 1) + pe.scrollM;
+      if (pe.charmM) m.charm = (m.charm || 1) + pe.charmM;
+      // baseProdM
+      if (pe.baseProdM) {
+        m.berry = (m.berry || 1) + pe.baseProdM;
+        m.wood = (m.wood || 1) + pe.baseProdM;
+        m.stone = (m.stone || 1) + pe.baseProdM;
+      }
+    }
   }
 
   // 应用乘数
@@ -405,8 +513,10 @@ function calcR() {
       // v0.15 双工：本季所有工坊产出 +50%（加法叠加在 craftMul 上）
       if (G.doubleCraftSeason === G.season) craftMul += 0.5;
       if (id === 'dye' || id === 'wine' || id === 'ink') {
-        if (G.bld.artistry?.c && BD.artistry?.e?.craftCultureMul)
-          craftMul += BD.artistry.e.craftCultureMul * G.bld.artistry.c;
+        if (G.bld.artistry?.c && BD.artistry?.e?.craftCultureMul) {
+          var artMul = G.artistryActive ? 1 : 0.5;  // v0.15.1 半效模式
+          craftMul += BD.artistry.e.craftCultureMul * G.bld.artistry.c * artMul;
+        }
         if (G.upg.artistryLore?.done) craftMul += 0.2;
       }
       G._acRates[id] = acRate * craftMul;
@@ -475,7 +585,98 @@ function calcH() {
   if (G.customs && G.customs.newClothes) h += 0.05;
   if (G.bonfireSeason === G.season) h += 0.03;
   if (G.silentSeason === G.season) h -= 0.03;
+  // v0.15 三全礼满意度 +5%
+  if (G.seasonRites && G.seasonRites.all) h += 0.05;
+  // v0.16 政体满意度效果
+  if (G.polity && POLITY[G.polity]) {
+    var pe = POLITY[G.polity].e;
+    if (pe.hapM) {
+      var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+      h += (pe.hapM > 0 ? pe.hapM * polityBoost : pe.hapM);
+    }
+  }
+  // v0.16 政策满意度效果
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.hapM) h += pe.hapM;
+    }
+  }
+  // v0.16 政体变更惩罚（-20% 满意度持续 1 季）
+  if (G.polityPenaltySeason === G.season && G.polityPenaltyYear === G.year) h -= 0.20;
   G.happy = Math.max(0.1, Math.min(2, h));
+}
+
+// ===== v0.16 议事录年度发放 + 政策冷却递减 =====
+function councilYearlyHook(silent) {
+  if (G.season !== 0) return; // 仅年初（春季第一天）
+  // 检查是否解锁了议事录
+  if (!G.upg.councilLore?.done) return;
+  // 年度发放 +20（含政体加成）
+  var base = 20;
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.councilYear) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    var bonus = POLITY[G.polity].e.councilYear;
+    base += (bonus > 0 ? Math.floor(bonus * polityBoost) : bonus);
+  }
+  base = Math.max(0, base);
+  if (base > 0 && G.res.council) {
+    G.res.council.v += base;
+    if (!G.res.council.on) G.res.council.on = true;
+    if (!silent) log('新年伊始，议事录增补。（议事录 +' + base + '）', 'event');
+  }
+  // 政策冷却递减
+  if (G.policyCooldowns) {
+    for (var dom in G.policyCooldowns) {
+      if (G.policyCooldowns[dom] > 0) G.policyCooldowns[dom]--;
+    }
+  }
+}
+
+// ===== v0.15.1 建筑维持钩子（季节切换时调用）=====
+function buildingMaintenanceHook(silent) {
+  // 月歌台：每年春季(season===0)扣果酒，1 果酒/座/年
+  if (G.season === 0 && G.bld.moonStage && G.bld.moonStage.c > 0) {
+    var need = G.bld.moonStage.c;
+    if (G.res.wine && G.res.wine.v >= need) {
+      G.res.wine.v -= need;
+      G.moonStageActive = true;
+    } else {
+      G.moonStageActive = false;
+      if (!silent) log('月歌台的果酒用完了，歌声渐渐安静下来……符咒产出降至 1/4。', 'warn');
+    }
+  }
+  // 艺工坊：每季扣染丝，1 染丝/座/季
+  if (G.bld.artistry && G.bld.artistry.c > 0) {
+    var need = G.bld.artistry.c;
+    if (G.res.dye && G.res.dye.v >= need) {
+      G.res.dye.v -= need;
+      G.artistryActive = true;
+    } else {
+      G.artistryActive = false;
+      if (!silent) log('艺工坊的染丝不足，作坊减产……文化配方加成减半。', 'warn');
+    }
+  }
+}
+
+// ===== v0.15.1 猎手林间采风（季节切换时判定）=====
+function hunterSpiceHook(silent) {
+  var hunterCount = G.job.hunter?.c || 0;
+  if (hunterCount <= 0) return;
+  if (!G.res.spice || G.res.spice.mx <= 0) return;
+  if (G.res.spice.v >= G.res.spice.mx) return;
+  var trainLevel = G.train.hunter || 0;
+  var prob = Math.min(0.5, 0.12 * hunterCount + 0.03 * trainLevel);
+  if (Math.random() < prob) {
+    G.res.spice.v = Math.min(G.res.spice.v + 1, G.res.spice.mx);
+    if (!G.res.spice.on) G.res.spice.on = true;
+    if (!silent) {
+      var logLine = HUNTER_SPICE_LOGS[Math.floor(Math.random() * HUNTER_SPICE_LOGS.length)];
+      log(logLine + '（香料 +1）', 'event');
+    }
+  }
 }
 
 // v0.14 习俗：季节切换钩子（被 tick 和 simulateOffline 调用）
@@ -576,10 +777,16 @@ function simulateOffline(seconds) {
       // 商队到访
       if (!G.caravan && G.upg.beyondValley?.done) {
         G.caravanTimer = (G.caravanTimer || 0) + 1;
-        if (G.caravanTimer >= 2 && Math.random() < 0.5) trySpawnCaravan(true);
+        if (G.caravanTimer >= 2 && Math.random() < caravanArrivalProb()) trySpawnCaravan(true);
       }
       // v0.14 习俗季节切换钩子（静默）
       customSeasonHook(true);
+      // v0.16 议事录年度发放 + 冷却递减（静默）
+      councilYearlyHook(true);
+      // v0.15.1 建筑维持钩子（静默）
+      buildingMaintenanceHook(true);
+      // v0.15.1 猎手林间采风（静默）
+      hunterSpiceHook(true);
       // v0.15 节令季节切换钩子（静默，离线时强制 auto 应用）
       seasonRiteHook(true);
     }
@@ -605,6 +812,24 @@ function simulateOffline(seconds) {
     tickExpeditions(true);
     // 工坊自动制作：连续速率在 calcR() 中处理（v0.13.2 移除了 runAutoCraft 离散批次）
     // 商队季节到期在季节更替中处理
+    // v0.15.1 商贩路边生意（离线累积，静默）
+    if ((G.job.merchant?.c || 0) > 0 && G.bld.tradePost?.c > 0) {
+      var trainB = 1 + (G.train.merchant || 0) * 0.1;
+      var talentMul = 1;
+      if (G.jobTalent.merchant && SPEC_JD.merchant && SPEC_JD.merchant[G.jobTalent.merchant]) {
+        var td = SPEC_JD.merchant[G.jobTalent.merchant];
+        if (td.prodMul) talentMul = td.prodMul;
+      }
+      var coinRate = JD.merchant.e.coinP * G.job.merchant.c * trainB * G.happy * talentMul;
+      G.merchantSpiceAcc += coinRate / TPD;
+      if (G.merchantSpiceAcc >= 15) {
+        G.merchantSpiceAcc -= 15;
+        if (G.res.spice && G.res.spice.mx > 0 && G.res.spice.v < G.res.spice.mx && Math.random() < 0.35) {
+          G.res.spice.v = Math.min(G.res.spice.v + 1, G.res.spice.mx);
+          if (!G.res.spice.on) G.res.spice.on = true;
+        }
+      }
+    }
   }
   // 显示补算结果（离开不足 30 秒不提示）
   if (seconds < 30) return;
@@ -681,12 +906,18 @@ function tick() {
     // 商队到访检查
     if (!G.caravan && G.upg.beyondValley?.done) {
       G.caravanTimer = (G.caravanTimer || 0) + 1;
-      if (G.caravanTimer >= 2 && Math.random() < 0.5) {
+      if (G.caravanTimer >= 2 && Math.random() < caravanArrivalProb()) {
         trySpawnCaravan();
       }
     }
     // v0.14 习俗季节切换钩子
     customSeasonHook(false);
+    // v0.16 议事录年度发放 + 冷却递减
+    councilYearlyHook(false);
+    // v0.15.1 建筑维持钩子
+    buildingMaintenanceHook(false);
+    // v0.15.1 猎手林间采风
+    hunterSpiceHook(false);
     // v0.15 节令季节切换钩子
     seasonRiteHook(false);
   }
@@ -732,6 +963,31 @@ function tick() {
 
   // 遗光被动掉落（极低概率，约每 55 分钟一次）
   if (Math.random() < 0.00006) tryRemnant();
+
+  // v0.15.1 商贩路边生意：累积铜钱产率 → 阈值触发 → 35% 概率获香料
+  if ((G.job.merchant?.c || 0) > 0 && G.bld.tradePost?.c > 0) {
+    // 实际铜钱产率（含授业、满意度）
+    var trainB = 1 + (G.train.merchant || 0) * 0.1;
+    var talentMul = 1;
+    if (G.jobTalent.merchant && SPEC_JD.merchant && SPEC_JD.merchant[G.jobTalent.merchant]) {
+      var td = SPEC_JD.merchant[G.jobTalent.merchant];
+      if (td.prodMul) talentMul = td.prodMul;
+    }
+    var coinRate = JD.merchant.e.coinP * G.job.merchant.c * trainB * G.happy * talentMul;
+    G.merchantSpiceAcc += coinRate / TPD;
+    if (G.merchantSpiceAcc >= 15) {
+      G.merchantSpiceAcc -= 15;
+      if (G.res.spice && G.res.spice.mx > 0 && G.res.spice.v < G.res.spice.mx && Math.random() < 0.35) {
+        G.res.spice.v = Math.min(G.res.spice.v + 1, G.res.spice.mx);
+        if (!G.res.spice.on) G.res.spice.on = true;
+        var slog = MERCHANT_SPICE_LOGS[Math.floor(Math.random() * MERCHANT_SPICE_LOGS.length)];
+        log(slog + '（香料 +1）', 'event');
+      } else if (G.res.spice && G.res.spice.mx > 0) {
+        var flog = MERCHANT_SPICE_FAIL_LOGS[Math.floor(Math.random() * MERCHANT_SPICE_FAIL_LOGS.length)];
+        log(flog, 'echo');
+      }
+    }
+  }
 }
 
 function tryEvent() {
@@ -837,6 +1093,10 @@ function resetG() {
   G.blueprints = []; G.bldSpec = {}; G.jobTalent = {};
   // v0.14 风俗与习俗
   G.customs = {}; G.bonfireSeason = -1; G.silentSeason = -1; G.springExpDone = 0;
+  // v0.16 政体与政策
+  G.polity = null; G.polityChanges = 0;
+  G.polityPenaltySeason = -1; G.polityPenaltyYear = -1;
+  G.policies = {}; G.policyCooldowns = {};
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -911,6 +1171,14 @@ function migrate() {
   G.merchantSpiceAcc = G.merchantSpiceAcc || 0;
   G.moonStageActive = G.moonStageActive ?? true;
   G.artistryActive = G.artistryActive ?? true;
+
+  // v0.16 政体与政策
+  G.polity = G.polity || null;
+  G.polityChanges = G.polityChanges || 0;
+  G.polityPenaltySeason = G.polityPenaltySeason ?? -1;
+  G.polityPenaltyYear = G.polityPenaltyYear ?? -1;
+  G.policies = G.policies || {};
+  G.policyCooldowns = G.policyCooldowns || {};
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };

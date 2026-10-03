@@ -67,7 +67,7 @@ function bldEffects(e) {
   for (var k in e) {
     var v = e[k];
     if (k === 'maxFox') r.push('每座容纳 ' + v + ' 只狐狸');
-    else if (k.endsWith('P')) { var rv = v * 0.5; r.push((RD[k.slice(0, -1)]?.n || k) + ' ' + (rv >= 0 ? '+' : '') + fmt(rv) + '/s'); }
+    else if (k.endsWith('P')) { var rv = v * 0.5; r.push((RD[k.slice(0, -1)]?.n || k) + ' ' + (rv >= 0 ? '+' : '') + fmtRate(rv) + '/s'); }
     else if (k.endsWith('Mx')) r.push((RD[k.slice(0, -2)]?.n || k) + ' 上限 +' + v);
     else if (k === 'hapB') r.push('满意度 +' + (v * 100 | 0) + '%');
     else if (k === 'allM') r.push('全资源产量 +' + (v * 100 | 0) + '%');
@@ -125,14 +125,23 @@ function toggleDetail(id) {
 
 // 格式化带符号的速率
 function fmtR(v) {
-  return (v >= 0 ? '+' : '') + fmt(v) + '/s';
+  return (v >= 0 ? '+' : '') + fmtRate(v) + '/s';
+}
+
+// 速率专用格式化：不用阈值隐藏——第三位小数有效时显示三位，否则两位
+// （大数值仍用 fmt 的 K/M 缩写）
+function fmtRate(v) {
+  if (Math.abs(v) >= 1000) return fmt(v);
+  var s2 = v.toFixed(2);
+  var s3 = v.toFixed(3);
+  return (parseFloat(s3) === parseFloat(s2)) ? s2 : s3;
 }
 
 // 资源速率来源明细
 function resBreakdown(k) {
   var lines = [];
-  // 无速率且无自动制作 → 不显示
-  var hasRate = Math.abs(G.res[k].r) > 0.001;
+  // 无速率且无自动制作 → 不显示（仅过滤浮点残留）
+  var hasRate = Math.abs(G.res[k].r) >= 0.0005;
   var hasAuto = false;
   if (G.upg.craftMastery?.done) {
     for (var cid in CD) {
@@ -191,6 +200,8 @@ function resBreakdown(k) {
       if (k === 'scroll' && specData.scrollProdMul) baseVal = e[k + 'P'] * specData.scrollProdMul;
       if (k === 'charm' && specData.charmProdMul) baseVal = e[k + 'P'] * specData.charmProdMul;
     }
+    // v0.15.1 月歌台半效：断供时符咒产出 ×0.25
+    if (bid === 'moonStage' && k === 'charm' && !G.moonStageActive) baseVal *= 0.25;
     var rate = baseVal * bc * fullMul * 0.5;
     var label = BD[bid].n + ' ×' + bc;
     if (specData) label += '「' + specData.n + '」';
@@ -313,6 +324,16 @@ function resBreakdown(k) {
     }
   }
 
+  // === v0.15.1 建筑维持消耗 ===
+  if (k === 'wine' && G.bld.moonStage?.c > 0) {
+    lines.push('月歌台维持 ×' + G.bld.moonStage.c + '  -' + G.bld.moonStage.c + '/年' +
+      (G.moonStageActive ? '' : ' ⚠ 断供'));
+  }
+  if (k === 'dye' && G.bld.artistry?.c > 0) {
+    lines.push('艺工坊维持 ×' + G.bld.artistry.c + '  -' + G.bld.artistry.c + '/季' +
+      (G.artistryActive ? '' : ' ⚠ 断供'));
+  }
+
   return lines;
 }
 
@@ -370,8 +391,8 @@ function rRes() {
     if (d.c !== lc) { lc = d.c; h += '<div class="res-cat">' + d.c + '</div>'; }
     var rr = '';
     var realRate = s.r * 0.5;
-    if (Math.abs(realRate) > 0.0005) rr = '<span class="rr ' + (realRate >= 0 ? 'pos' : 'neg') + '">' +
-      (realRate >= 0 ? '+' : '') + fmt(realRate) + '/s</span>';
+    if (Math.abs(realRate) >= 0.0005) rr = '<span class="rr ' + (realRate >= 0 ? 'pos' : 'neg') + '">' +
+      (realRate >= 0 ? '+' : '') + fmtRate(realRate) + '/s</span>';
 
     // resource hover panel
     var sec = { tip: pickTip('res_' + k, d.tip) };
@@ -473,6 +494,11 @@ function rTC() {
         h += '<span class="spec-tag">「' + specN + '」</span>';
       }
       h += '</span>';
+      // v0.15.1 建筑维持状态标签
+      if (id === 'moonStage' && G.bld.moonStage.c > 0 && !G.moonStageActive)
+        h += '<span class="maint-warn"> ⚠ 半效</span>';
+      if (id === 'artistry' && G.bld.artistry.c > 0 && !G.artistryActive)
+        h += '<span class="maint-warn"> ⚠ 半效</span>';
       h += '<span class="bld-cost">' + costs + '</span>';
       h += '<button class="bld-btn" onclick="build(\'' + id + '\')" ' + (ok ? '' : 'disabled') + '>建造</button>';
       if (G.bld[id].c > 0) h += '<button class="bld-btn sell-btn" onclick="sell(\'' + id + '\')">出售</button>';
@@ -559,6 +585,12 @@ function rTC() {
       var trainLv = G.train[id] || 0;
       var eff = jobEffects(id, d.e);
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
+      // v0.15.1 商贩路边生意进度条
+      if (id === 'merchant' && G.bld.tradePost?.c > 0 && G.res.spice?.mx > 0) {
+        var acc = G.merchantSpiceAcc || 0;
+        var pct = Math.min(100, (acc / 15 * 100));
+        eff.push('路边生意进度：' + fmt(acc) + ' / 15（' + Math.floor(pct) + '%）');
+      }
       var sec = {
         desc: (d.desc && d.desc === d.d) ? '' : d.d,
         effects: eff,
@@ -610,6 +642,18 @@ function rTC() {
         nameHtml +
         '<span class="jd">' + d.d + '</span>' +
         trainHtml + '</div>';
+      // v0.15.1 商贩路边生意进度条（可见，位于商贩行下方）
+      if (id === 'merchant' && G.job.merchant.c > 0 && G.bld.tradePost?.c > 0 && G.res.spice?.mx > 0) {
+        var acc = G.merchantSpiceAcc || 0;
+        var pct = Math.min(100, (acc / 15 * 100));
+        var filled = Math.round(pct / 10);
+        var bar = '';
+        for (var bi = 0; bi < 10; bi++) bar += (bi < filled ? '█' : '░');
+        h += '<div class="merchant-spice-bar">' +
+          '<span class="msb-label">路边生意</span> ' +
+          '<span class="msb-bar">[' + bar + ']</span> ' +
+          '<span class="msb-val">' + fmt(acc) + ' / 15</span></div>';
+      }
     }
     if (!any) h += '<div style="color:#aaa;font-size:13px;">建造设施来解锁职业。</div>';
   }
@@ -633,10 +677,10 @@ function rTC() {
         var autoRate = 1 / (50 * TMS / 1000);
         var autoEffects = [];
         var actualAcRate = (G._acRates && G._acRates[id]) ? G._acRates[id] * 0.5 : 0;
-        autoEffects.push('满速: ' + d.out.map(function(p) { return RD[p.r].n + ' +' + fmt(p.a * autoRate) + '/s'; }).join(', '));
+        autoEffects.push('满速: ' + d.out.map(function(p) { return RD[p.r].n + ' +' + fmtRate(p.a * autoRate) + '/s'; }).join(', '));
         if (running) {
           if (actualAcRate > 0 && actualAcRate < autoRate * 0.99) {
-            autoEffects.push('状态: 降速运行（' + d.out.map(function(p) { return RD[p.r].n + ' +' + fmt(p.a * actualAcRate) + '/s'; }).join(', ') + '）');
+            autoEffects.push('状态: 降速运行（' + d.out.map(function(p) { return RD[p.r].n + ' +' + fmtRate(p.a * actualAcRate) + '/s'; }).join(', ') + '）');
           } else {
             autoEffects.push('状态: 满速运行中');
           }
@@ -1002,6 +1046,11 @@ function rTC() {
     h += '</div>';
   }
 
+  // ===== v0.16 议政页签 =====
+  else if (curTab === 'g') {
+    h += renderPolityTab();
+  }
+
   document.getElementById('tc').innerHTML = toggle + h;
 }
 
@@ -1107,6 +1156,183 @@ function renderRiteCheckboxes(selected, includeShortageHint) {
   h += '<div class="rite-trinity-hint">三选齐 → 三全礼：满意度 +5% + 全产出 +3%</div>';
   h += '</div>';
   return h;
+}
+
+// ===== v0.16 议政 Tab 渲染 =====
+function renderPolityTab() {
+  var h = '';
+  // 议事录显示
+  var councilVal = G.res.council ? fmt(G.res.council.v) : '0';
+  h += '<div class="polity-council-bar">议事录：<b>' + councilVal + '</b></div>';
+
+  // ── 政体面板 ──
+  h += '<div class="polity-section">';
+  h += '<div class="polity-section-title">政体</div>';
+  if (!G.upg.polityLore?.done) {
+    h += '<div class="polity-locked">完成研究「' + (UD.polityLore?.n || '法度通论') + '」后解锁政体选择。</div>';
+  } else if (!G.polity) {
+    // 首次选择
+    h += '<div class="polity-choose-hint">尚未确立政体，请选择：</div>';
+    h += renderPolityGrid(true);
+  } else {
+    // 当前政体
+    var pd = POLITY[G.polity];
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    var phCount = G.bld.polityHall?.c || 0;
+    h += '<div class="polity-current">';
+    h += '<div class="polity-current-name">' + pd.n + '</div>';
+    h += '<div class="polity-current-desc">' + pd.d + '</div>';
+    h += '<div class="polity-current-effects">' + polityEffectLines(pd.e, polityBoost).join('<br>') + '</div>';
+    if (phCount > 0) h += '<div class="polity-boost">政堂 ×' + phCount + '：正面效果 +' + Math.round((polityBoost - 1) * 100) + '%</div>';
+    if (G.polityPenaltySeason === G.season && G.polityPenaltyYear === G.year) h += '<div class="polity-penalty">⚠ 政体变更中：满意度 -20%（本季）</div>';
+    h += '<button class="bld-btn polity-change-btn" onclick="showPolityChangeModal()">变更政体</button>';
+    h += '</div>';
+  }
+  h += '</div>';
+
+  // ── 政策面板 ──
+  h += '<div class="polity-section">';
+  h += '<div class="polity-section-title">政策</div>';
+  if (!G.upg.policyLore?.done) {
+    h += '<div class="polity-locked">完成研究「' + (UD.policyLore?.n || '集议传统') + '」后解锁政策系统。</div>';
+  } else {
+    for (var dom in POLICY) {
+      var pd = POLICY[dom];
+      var currentOpt = G.policies[dom];
+      var cooldown = G.policyCooldowns[dom] || 0;
+      var cost = policySwitchCost(dom);
+      h += '<div class="policy-domain">';
+      h += '<div class="policy-domain-name">' + pd.n + '</div>';
+      if (!currentOpt) {
+        h += '<span class="policy-unset">尚未选择</span>';
+      }
+      h += '<div class="policy-opts">';
+      for (var optId in pd.opts) {
+        var opt = pd.opts[optId];
+        var isCurrent = currentOpt === optId;
+        var canSwitch = !isCurrent && cooldown <= 0 && (isCurrent || !currentOpt || (G.res.council && G.res.council.v >= cost));
+        var isFirst = !currentOpt;
+        h += '<div class="policy-opt' + (isCurrent ? ' policy-opt-active' : '') + '">';
+        var sec = { effects: policyEffectLines(opt.e) };
+        var nameHtml = hpWrap('<span class="policy-opt-name">' + opt.n + '</span>', sec);
+        h += nameHtml;
+        if (isCurrent) {
+          h += '<span class="policy-opt-current">当前</span>';
+        } else {
+          h += '<button class="bld-btn policy-opt-btn" onclick="setPolicy(\'' + dom + '\',\'' + optId + '\')" ' +
+            (canSwitch ? '' : 'disabled') + '>' + (isFirst ? '选择' : '切换') + '</button>';
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+      // 费用与冷却
+      var infoStr = '';
+      if (currentOpt) {
+        infoStr = '切换费 ' + cost + ' 议事录';
+        if (cooldown > 0) infoStr += ' · 冷却：剩余 ' + cooldown + ' 年';
+        else infoStr += ' · 可切换 ✓';
+      }
+      if (infoStr) h += '<div class="policy-info">' + infoStr + '</div>';
+      h += '</div>';
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
+function polityEffectLines(e, boost) {
+  boost = boost || 1;
+  var lines = [];
+  var labels = {
+    hapM: '满意度', loreM: '学识产出', coinM: '铜钱产出', charmM: '符咒产出',
+    councilYear: '议事录年产', caravanProb: '商队来访', bpChance: '图纸携带',
+    allM: '全资源产出', policyCostMul: '政策切换费', buildCostM: '建筑造价',
+    gatherM: '手动采集', jobM: '职业产出', bldProdM: '建筑产出',
+    baseProdM: '基础资源', scoutM: '斥候加成', expReward: '远行奖励',
+  };
+  for (var k in e) {
+    var v = e[k];
+    var label = labels[k] || k;
+    var display;
+    if (k === 'councilYear') {
+      var bv = v > 0 ? Math.floor(v * boost) : v;
+      display = (bv >= 0 ? '+' : '') + bv + '/年';
+    } else if (k === 'policyCostMul') {
+      var pct = Math.round((1 - (1 - (1 - v)) * boost) * 100);
+      display = '-' + (100 - pct) + '%';
+    } else {
+      var bv = v > 0 ? v * boost : v;
+      display = (bv >= 0 ? '+' : '') + Math.round(bv * 100) + '%';
+    }
+    var cls = v >= 0 ? 'eff-pos' : 'eff-neg';
+    lines.push('<span class="' + cls + '">' + label + ' ' + display + '</span>');
+  }
+  return lines;
+}
+
+function policyEffectLines(e) {
+  var lines = [];
+  var labels = {
+    hapM: '满意度', berryM: '野莓', woodM: '圆木', stoneM: '碎石',
+    coinM: '铜钱', loreM: '学识', scrollM: '卷轴', charmM: '符咒',
+    caravanProb: '商队来访', bpChance: '图纸携带', baseProdM: '基础资源',
+    trainCostM: '授业费用', trainFlat: '授业加成(扁平)', gatherExpM: '采集经验',
+    jobM: '全职业产出', buildCostM: '建筑造价', tradePriceM: '商品价格',
+  };
+  for (var k in e) {
+    var v = e[k];
+    var label = labels[k] || k;
+    var display;
+    if (k === 'trainFlat') {
+      display = '+' + v;
+    } else {
+      display = (v >= 0 ? '+' : '') + Math.round(v * 100) + '%';
+    }
+    var cls = v >= 0 ? 'eff-pos' : 'eff-neg';
+    // trainCostM: 负值是好的（降低费用）
+    if (k === 'trainCostM' || k === 'tradePriceM' || k === 'buildCostM') cls = v <= 0 ? 'eff-pos' : 'eff-neg';
+    lines.push('<span class="' + cls + '">' + label + ' ' + display + '</span>');
+  }
+  return lines;
+}
+
+function renderPolityGrid(isFirstChoice) {
+  var h = '<div class="polity-grid">';
+  for (var id in POLITY) {
+    var pd = POLITY[id];
+    h += '<div class="polity-card">';
+    h += '<div class="polity-card-name">' + pd.n + '</div>';
+    h += '<div class="polity-card-desc">' + pd.d + '</div>';
+    h += '<div class="polity-card-effects">' + polityEffectLines(pd.e, 1).join('<br>') + '</div>';
+    if (isFirstChoice) {
+      h += '<button class="bld-btn" onclick="choosePolity(\'' + id + '\')">选择</button>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function showPolityChangeModal() {
+  var councilV = G.res.council ? Math.floor(G.res.council.v) : 0;
+  var ancCoinV = G.res.ancCoin ? Math.floor(G.res.ancCoin.v) : 0;
+  document.getElementById('modal-title').textContent = '变更政体';
+  var h = '<div style="margin-bottom:8px;font-size:12px;color:#888;">费用：300 议事录（现有 ' + councilV + '）+ 100 古币（现有 ' + ancCoinV + '）<br>变更后满意度 -20% 持续本季。</div>';
+  for (var id in POLITY) {
+    var pd = POLITY[id];
+    var isCurrent = G.polity === id;
+    h += '<div style="margin-bottom:8px;padding:6px 8px;border:1px solid ' + (isCurrent ? '#46739a' : '#ddd') + ';background:' + (isCurrent ? '#f0f4f8' : '#fafafa') + ';">';
+    h += '<div style="font-weight:bold;color:#333;">' + pd.n + (isCurrent ? ' <span style="color:#46739a;font-size:11px;">（当前）</span>' : '') + '</div>';
+    h += '<div style="font-size:11px;color:#888;margin:2px 0;">' + pd.d + '</div>';
+    h += '<div style="font-size:11px;color:#555;">' + polityEffectLines(pd.e, 1).join(' · ') + '</div>';
+    if (!isCurrent) {
+      var canChange = councilV >= 300 && ancCoinV >= 100;
+      h += '<button onclick="changePolity(\'' + id + '\');closeModal()" style="margin-top:4px;padding:3px 14px;cursor:pointer;border:1px solid #bbb;background:#fff;font-size:12px;"' + (canChange ? '' : ' disabled') + '>变更为此</button>';
+    }
+    h += '</div>';
+  }
+  document.getElementById('modal-body').innerHTML = h;
+  document.getElementById('modal-overlay').style.display = 'flex';
 }
 
 // ===== 渲染：日志 =====
