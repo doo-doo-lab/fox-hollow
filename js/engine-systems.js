@@ -133,8 +133,10 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：返回日志内容按叙事顺序编写，按远行完成次数顺序推进（第 N 次返回显示第 N 条，
+  // 超出条数后固定显示最后一条），不再随机抽取——否则第一次远行就可能显示"最后一趟"结局文案
+  var logIdx = Math.min(G.expDone[exp.dest] - 1, d.logs.length - 1);
+  var returnLog = d.logs[logIdx];
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
