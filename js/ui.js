@@ -10,6 +10,38 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板/页签折叠 =====
+// collapsed 键：res=资源面板，log=谷中见闻，tab_<id>=各页签内容（独立记忆）
+// 桌面端：列宽固定，折叠只隐藏内容，各列位置不动；
+// 手机端（纵向堆叠）：折叠后面板缩为标题行，下方内容自动上移。
+let collapsed = {};
+try { collapsed = JSON.parse(localStorage.getItem('fh_collapsed') || '{}') || {}; } catch (e) { collapsed = {}; }
+
+function saveCollapsed() {
+  try { localStorage.setItem('fh_collapsed', JSON.stringify(collapsed)); } catch (e) {}
+}
+
+function toggleCollapse(key) {
+  if (collapsed[key]) delete collapsed[key]; else collapsed[key] = 1;
+  saveCollapsed();
+  applyCollapse();
+  rTabs();
+}
+
+// 幂等、轻量：同步折叠 class 与指示文字（rAll/rTC 每次渲染后调用）
+function applyCollapse() {
+  var lp = document.getElementById('left-panel');
+  var lg = document.getElementById('log-panel');
+  var tc = document.getElementById('tc');
+  if (lp) lp.classList.toggle('collapsed', !!collapsed.res);
+  if (lg) lg.classList.toggle('collapsed', !!collapsed.log);
+  if (tc) tc.classList.toggle('collapsed', !!collapsed['tab_' + curTab]);
+  var ir = document.getElementById('ind-res');
+  if (ir) ir.textContent = collapsed.res ? '[展开]' : '[收起]';
+  var il = document.getElementById('ind-log');
+  if (il) il.textContent = collapsed.log ? '[展开]' : '[收起]';
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -243,7 +275,9 @@ function rTabs() {
   }).map(function(t) {
     return '<div class="tab' + (t.id === curTab ? ' on' : '') +
       '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
-  }).join('');
+  }).join('') +
+  '<div class="tab-collapse" onclick="toggleCollapse(\'tab_' + curTab + '\')">' +
+  (collapsed['tab_' + curTab] ? '[展开]' : '[收起]') + '</div>';
 }
 
 // ===== 渲染：资源面板 =====
@@ -674,6 +708,7 @@ function rTC() {
   }
 
   document.getElementById('tc').innerHTML = h;
+  applyCollapse();
 }
 
 // ===== 渲染：日志 =====
@@ -699,6 +734,7 @@ function rAll() {
   if (_blockTC > 0) { _blockTC--; }
   else { rTC(); }
   rSeason();
+  applyCollapse();
 }
 
 // ===== 抉择事件 Modal =====

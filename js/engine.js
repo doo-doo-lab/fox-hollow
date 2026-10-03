@@ -484,7 +484,8 @@ function tryEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  // 奖励含遗光时统一用 remnant 样式（文本已附遗光 +1）
+  log(msg, (picked.e && picked.e.remnant) ? 'remnant' : 'event');
 }
 
 function tryRewardEvent() {
@@ -511,7 +512,8 @@ function tryRewardEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  // 奖励含遗光时统一用 remnant 样式（文本已附遗光 +1）
+  log(msg, (picked.e && picked.e.remnant) ? 'remnant' : 'event');
 }
 
 function tryWorldEcho() {
@@ -531,7 +533,8 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  // 遗光获得日志统一样式：暗金斜体 +（遗光+1）提示
+  log(msg + '（遗光+1）', 'remnant');
 }
 
 // ===== 玩家操作 =====
@@ -816,7 +819,10 @@ function resolveExpedition(idx, silent) {
       G.res[rw.r].v += amt;
       if (!G.res[rw.r].on) G.res[rw.r].on = true;
       if (G.res[rw.r].mx > 0) G.res[rw.r].v = Math.min(G.res[rw.r].v, G.res[rw.r].mx);
-      rewards.push(RD[rw.r].n + ' +' + amt);
+      var rlab = RD[rw.r].n + ' +' + amt;
+      // 遗光在奖励汇总行中也统一变色
+      if (rw.r === 'remnant') rlab = '<span class="lg-remnant">' + rlab + '</span>';
+      rewards.push(rlab);
     }
     pool.splice(ri, 1);
   }
