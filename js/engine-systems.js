@@ -77,14 +77,25 @@ function resolveExpedition(idx, silent) {
   G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce(function(s, j) { return s + j.c; }, 0);
   // 计算奖励倍率：在岗斥候 +5%/人 + 授业次数 +10%/级
   var scoutBonus = 1 + (G.job.scout?.c || 0) * 0.05 + (G.train.scout || 0) * 0.10;
+  // v0.16 武德同斥候加成
+  if (G.polity === 'martial' && POLITY.martial.e.scoutM) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    scoutBonus += POLITY.martial.e.scoutM * polityBoost;
+  }
   var researchBonus = G.upg.longJourney?.done ? 1.5 : 1;
+  // v0.16 武德同远行奖励
+  var polityExpBonus = 1;
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.expReward) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    polityExpBonus += POLITY[G.polity].e.expReward * polityBoost;
+  }
   var choiceRewardMul = 1;
   var cb = G.choiceBuffs || {};
   if (cb.nextRewardMul && cb.nextRewardMul[exp.dest]) {
     choiceRewardMul = cb.nextRewardMul[exp.dest];
     delete cb.nextRewardMul[exp.dest];
   }
-  var mul = scoutBonus * researchBonus * choiceRewardMul;
+  var mul = scoutBonus * researchBonus * choiceRewardMul * polityExpBonus;
   // 抽取奖励（2-3项）
   var rewardCount = 2 + (Math.random() < 0.5 ? 1 : 0);
   var pool = d.rewards.slice();
@@ -265,6 +276,30 @@ function applyChoice(eventIdx, optIdx) {
 }
 
 // ===== 商队系统 =====
+// v0.15.1：商队到访概率 = 0.5 基础 + 共聚堂 +2%/座（上限 +10%）
+// v0.16：+ 政体/政策加成，总概率硬上限 65%
+function caravanArrivalProb() {
+  var bonus = Math.min(0.10, (G.bld.assembly?.c || 0) * 0.02);
+  // 政体
+  if (G.polity && POLITY[G.polity]) {
+    var pe = POLITY[G.polity].e;
+    if (pe.caravanProb) {
+      var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+      bonus += (pe.caravanProb > 0 ? pe.caravanProb * polityBoost : pe.caravanProb);
+    }
+  }
+  // 政策
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.caravanProb) bonus += pe.caravanProb;
+    }
+  }
+  return Math.min(0.65, 0.5 + bonus);
+}
+
 function trySpawnCaravan(silent) {
   // 筛选可出现的商队
   var pool = [];
@@ -273,22 +308,57 @@ function trySpawnCaravan(silent) {
   }
   if (!pool.length) return;
   var picked = pool[Math.floor(Math.random() * pool.length)];
-  G.caravan = { id: picked, bought: {}, blueprint: null };
+  G.caravan = { id: picked, bought: {}, blueprint: null, gift: null };
   G.caravanTimer = 0;
   G.caravanEverVisited = true;  // §14.5 修复 5：玩家见过商队后才显示商队 UI 区域
-  // 图纸掉落判定
+  // 图纸携带概率：基础 50% + 商贩野路子（+10%）+ 藏书阁（+2%/座 上限 +10%）+ 墨契（+15% 一次性）
   var bpChance = 0.5;
   if (G.jobTalent.merchant === 'B') bpChance += SPEC_JD.merchant.B.bpChanceBonus;
+  bpChance += Math.min(0.10, (G.bld.library?.c || 0) * 0.02);
+  if (G.inkPactBp) bpChance += 0.15;
+  // v0.16 政体/政策 bpChance 加成
+  if (G.polity && POLITY[G.polity] && POLITY[G.polity].e.bpChance) {
+    var polityBoost = 1 + Math.min(5, G.bld.polityHall?.c || 0) * 0.05;
+    var val = POLITY[G.polity].e.bpChance;
+    bpChance += (val > 0 ? val * polityBoost : val);
+  }
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.bpChance) bpChance += pe.bpChance;
+    }
+  }
+  bpChance = Math.min(0.95, bpChance);
   if (Math.random() < bpChance) rollBlueprint(picked);
+  G.inkPactBp = false;  // 墨契图纸加成一次性消耗（无论是否实际抽到）
+  // v0.15.1：商队到访 40% 概率附赠 1 香料（需 spice.mx > 0）
+  if (G.res.spice && G.res.spice.mx > 0 && G.res.spice.v < G.res.spice.mx && Math.random() < 0.4) {
+    G.caravan.gift = { r: 'spice', a: 1 };
+    G.res.spice.v = Math.min(G.res.spice.v + 1, G.res.spice.mx);
+    if (!G.res.spice.on) G.res.spice.on = true;
+  }
   if (!silent) {
     log(CVD[picked].arriveLog, 'event');
     if (G.caravan.blueprint) log('商队带来了一张图纸。', 'important');
+    if (G.caravan.gift) log('随商队捎来一小撮路上采的香草。（香料 +1）', 'echo');
   }
 }
 
 function caravanCostMul() {
-  if (G.choiceBuffs && G.choiceBuffs.ruinfolkDiscount && G.caravan && G.caravan.id === 'ruinfolk') return 0.5;
-  return 1;
+  var mul = 1;
+  if (G.choiceBuffs && G.choiceBuffs.ruinfolkDiscount && G.caravan && G.caravan.id === 'ruinfolk') mul *= 0.5;
+  // v0.16 政策 tradePriceM（管控通商 -10%）
+  if (G.policies) {
+    for (var dom in G.policies) {
+      var optId = G.policies[dom];
+      if (!optId || !POLICY[dom] || !POLICY[dom].opts[optId]) continue;
+      var pe = POLICY[dom].opts[optId].e;
+      if (pe && pe.tradePriceM) mul *= (1 + pe.tradePriceM);
+    }
+  }
+  return mul;
 }
 
 function canBuyFromCaravan(itemIdx) {
