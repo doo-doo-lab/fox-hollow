@@ -11,6 +11,9 @@ function gather(type) {
   // 轻手天赋：手动采集量 +50%
   if (type === 'berry' && G.jobTalent.gatherer === 'B')
     amt *= SPEC_JD.gatherer.B.gatherMul;
+  // 回响洞见「拾爪记忆」：手动采集 ×2
+  if (G.insights && G.insights.ins3)
+    amt *= 2;
   const s = G.res[type];
   s.v = Math.min(s.v + amt, s.mx);
   if (!s.on) s.on = true;
@@ -42,7 +45,7 @@ function research(id) {
 
 function craft(id) {
   if (!canC(id)) return;
-  for (const p of CD[id].inp) G.res[p.r].v -= p.a;
+  for (const p of CD[id].inp) G.res[p.r].v -= cInpAmt(p.a);
   for (const p of CD[id].out)
     G.res[p.r].v = Math.min(G.res[p.r].v + p.a, G.res[p.r].mx);
   log('制作了' + CD[id].n);
@@ -150,6 +153,39 @@ function castSpell(id) {
     for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
     G.feastSeason = G.season;
     log('山谷宴席开始了，狐狸们的满意度提升！', 'important');
+    rAll();
+    return;
+  }
+  if (id === 'weave') {
+    if (G.weaveSeason === G.season) { log('本季已经织过灵了。', 'warn'); return; }
+    if (G.weaveStacks >= 25) { log('织灵已达上限（25 层）。', 'warn'); return; }
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
+    G.weaveSeason = G.season;
+    G.weaveStacks++;
+    log('织灵完成：全资源产量永久 +1%（当前共 +' + G.weaveStacks + '%）。', 'important');
+    rAll();
+    return;
+  }
+  if (id === 'commune') {
+    if (G.communeSeason === G.season) { log('本季已经交感过了。', 'warn'); return; }
+    for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
+    G.communeSeason = G.season;
+    // 聆听一段当季世界回响
+    var pool = [];
+    for (var wi = 0; wi < WD.length; wi++)
+      if (WD[wi].s === G.season) pool.push(WD[wi]);
+    if (pool.length)
+      log(pool[Math.floor(Math.random() * pool.length)].t, 'echo');
+    // 25% 凝结遗光，否则学识 +8
+    if (Math.random() < 0.25) {
+      G.res.remnant.v += 1;
+      if (!G.res.remnant.on) G.res.remnant.on = true;
+      log('（占位叙事：交感中遗光凝结，待审核）（遗光 +1）', 'echo');
+    } else {
+      G.res.lore.v = Math.min(G.res.lore.v + 8, G.res.lore.mx > 0 ? G.res.lore.mx : G.res.lore.v + 8);
+      if (!G.res.lore.on) G.res.lore.on = true;
+      log('回响散开，狐狸们的头脑格外清明。（学识 +8）', 'important');
+    }
     rAll();
     return;
   }

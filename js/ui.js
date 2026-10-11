@@ -154,13 +154,19 @@ function resBreakdown(k) {
     mul += b;
     mulParts.push(BD[bid].n + ' ×' + G.bld[bid].c + ' +' + Math.round(b * 100) + '%');
   }
+  if (G.weaveStacks) {
+    mul += 0.01 * G.weaveStacks;
+    mulParts.push('织灵 ×' + G.weaveStacks + ' +' + G.weaveStacks + '%');
+  }
 
-  // 野莓季节/祈雨
+  // 野莓季节/祈雨/回响洞见
   var sMul = 1;
   if (k === 'berry') {
     sMul = SM[G.season];
+    if (G.season === 0 && G.insights && G.insights.ins1) sMul = 1.65;
     if (G.season === 3 && G.upg.spiritShelter?.done) sMul = 0.4;
     if (G.season === 3 && G.bldSpec.warehouse === 'B') sMul *= (1 + SPEC_BD.warehouse.B.winterBuff);
+    if (G.season === 3 && G.insights && G.insights.ins2) sMul *= 1.25;
     mulParts.push(SN[G.season] + ' ×' + sMul.toFixed(3).replace(/0+$/, '').replace(/\.$/, ''));
     if (G.rainSeason === G.season) { sMul *= 1.5; mulParts.push('祈雨 ×1.5'); }
   }
@@ -200,12 +206,12 @@ function resBreakdown(k) {
     }
   }
 
-  // === 建筑专精消耗（drain）===
+  // === 建筑专精消耗（drain，固定消耗，不受产量加成放大）===
   for (var bid in BD) {
     var bc = G.bld[bid].c; if (!bc) continue;
     var specData = G.bldSpec[bid] && SPEC_BD[bid] ? SPEC_BD[bid][G.bldSpec[bid]] : null;
     if (specData && specData.drain && specData.drain[k]) {
-      var rate = -specData.drain[k] * bc * 0.5;
+      var rate = -specData.drain[k] * bc;
       lines.push(BD[bid].n + '「' + specData.n + '」消耗  ' + fmtR(rate));
     }
   }
@@ -259,10 +265,10 @@ function resBreakdown(k) {
     }
   }
 
-  // === 采集者勤爪额外消耗 ===
+  // === 采集者边吃边摘额外消耗（固定消耗）===
   if (k === 'berry' && G.jobTalent.gatherer === 'A' && G.job.gatherer.c > 0) {
-    var extraRate = -SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * 0.5;
-    lines.push('采集者「勤爪」消耗  ' + fmtR(extraRate));
+    var extraRate = -SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c;
+    lines.push('采集者「边吃边摘」消耗  ' + fmtR(extraRate));
   }
 
   // === 薄削持续转化 ===
@@ -297,7 +303,7 @@ function resBreakdown(k) {
       var ar = (G._acRates && G._acRates[cid]) ? G._acRates[cid] * 0.5 : 0;
       for (var i = 0; i < CD[cid].inp.length; i++) {
         if (CD[cid].inp[i].r === k)
-          lines.push('自动' + CD[cid].n + '  ' + fmtR(-CD[cid].inp[i].a * ar));
+          lines.push('自动' + CD[cid].n + '  ' + fmtR(-cInpAmt(CD[cid].inp[i].a) * ar));
       }
       for (var i = 0; i < CD[cid].out.length; i++) {
         if (CD[cid].out[i].r === k)
@@ -363,7 +369,12 @@ function rRes() {
     if (d.c !== lc) { lc = d.c; h += '<div class="res-cat">' + d.c + '</div>'; }
     var rr = '';
     var realRate = s.r * 0.5;
-    if (Math.abs(realRate) > 0.0005) rr = '<span class="rr ' + (realRate >= 0 ? 'pos' : 'neg') + '">' +
+    // 实际增减：封顶时不再增长，耗尽时不再减少
+    var atCap = s.mx > 0 && s.v >= s.mx - 1e-9;
+    var atZero = s.v <= 1e-9;
+    if (atCap && realRate > 0.0005) rr = '<span class="rr" style="color:#aaa">（已满）</span>';
+    else if (atZero && realRate < -0.0005) rr = '<span class="rr" style="color:#aaa">（已耗尽）</span>';
+    else if (Math.abs(realRate) > 0.0005) rr = '<span class="rr ' + (realRate >= 0 ? 'pos' : 'neg') + '">' +
       (realRate >= 0 ? '+' : '') + fmt(realRate) + '/s</span>';
 
     // resource hover panel
@@ -490,6 +501,12 @@ function rTC() {
       if (sid === 'feast' && G.feastSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
       if (sid === 'tradeWind' && G.tradeWindYear === G.year) extra = ' <span style="color:#888;font-size:11px;">（今年已施）</span>';
       if (sid === 'tradeWind' && G.caravan) extra = ' <span style="color:#888;font-size:11px;">（商队在场）</span>';
+      if (sid === 'weave') {
+        extra = ' <span style="color:#888;font-size:11px;">（层数 ' + (G.weaveStacks || 0) + '/25）</span>';
+        if (G.weaveSeason === G.season) extra += ' <span style="color:#888;font-size:11px;">（本季已织）</span>';
+        if ((G.weaveStacks || 0) >= 25) extra += ' <span style="color:#888;font-size:11px;">（已达上限）</span>';
+      }
+      if (sid === 'commune' && G.communeSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已交感）</span>';
       if (sid === 'spiritPath') {
         var hasTarget = false;
         for (var ei = 0; ei < (G.expeditions||[]).length; ei++)
@@ -511,12 +528,53 @@ function rTC() {
         '<button class="bld-btn" onclick="castSpell(\'' + sid + '\')" ' +
         (ok ? '' : 'disabled') + '>施法</button></div></div>';
     }
+
+    // 回响洞见（需回响石碑）
+    if ((G.bld.echoStele?.c || 0) > 0) {
+      h += '<div class="res-cat" style="margin-top:10px;">回响洞见 <span style="font-size:11px;color:#aaa;">（石碑 ' + G.bld.echoStele.c + ' 座，逐层点亮）</span></div>';
+      for (var ii = 0; ii < INSD.length; ii++) {
+        var ins = INSD[ii];
+        var owned = !!(G.insights && G.insights[ins.id]);
+        var canBuy = canBuyInsight(ii);
+        var insCost = ins.cost.map(function(p) {
+          var have = G.res[p.r].v;
+          return (have < p.a ? '<span class="short">' : '') +
+            RD[p.r].n + ' ' + p.a + (have < p.a ? '</span>' : '');
+        }).join(', ');
+        var lockNote = '';
+        if (!owned) {
+          if ((G.bld.echoStele?.c || 0) < ins.stele) lockNote = '需回响石碑 ≥' + ins.stele + ' 座';
+          else if (ii > 0 && !G.insights[INSD[ii - 1].id]) lockNote = '需先点亮「' + INSD[ii - 1].n + '」';
+        }
+        var insSec = {
+          desc: '永久生效' + (ins.stele ? '（需回响石碑 ≥' + ins.stele + ' 座）' : ''),
+          effects: [ins.d],
+          notes: lockNote ? [lockNote] : [],
+        };
+        var insNameHtml = hpWrap('<span class="bld-name">' + ins.n + '</span>', insSec);
+        h += '<div class="bld-row"><div class="bld-top">' +
+          insNameHtml +
+          '<span class="bld-cost">' + (owned ? '' : insCost) + '</span>' +
+          (owned
+            ? '<span style="color:#070;font-size:12px;margin-left:auto;">✓ 已点亮</span>'
+            : '<button class="bld-btn" onclick="buyInsight(' + ii + ')" ' + (canBuy ? '' : 'disabled') + '>点亮</button>') +
+          '</div></div>';
+      }
+    }
+
+    // 灰毛访客在场提示
+    if (G.ashFox && G.ashFox.present) {
+      h += '<div class="bld-row" style="margin-top:8px;"><div class="bld-top">' +
+        '<span style="color:#556;font-style:italic;">' + ASHFOX.stay + '</span>' +
+        '<span style="color:#888;font-size:11px;margin-left:auto;">剩余 ' + Math.ceil(G.ashFox.ticksLeft / TPD) + ' 天</span>' +
+        '</div></div>';
+    }
   }
 
   else if (curTab === 'v') {
     // 满意度计算明细
     var hapNotes = ['基础：100%'];
-    if (G.foxes > 5) hapNotes.push('人口惩罚（' + G.foxes + '-5）：-' + ((G.foxes - 5) * 2) + '%');
+    if (G.foxes > 5) hapNotes.push('人口惩罚（' + G.foxes + '-5）×' + (hapPenaltyPerFox() * 100) + '%：-' + ((G.foxes - 5) * hapPenaltyPerFox() * 100) + '%');
     for (var bid in G.bld) {
       if (G.bld[bid].c && BD[bid].e?.hapB) {
         var base = BD[bid].e.hapB * G.bld[bid].c * 100 | 0;
@@ -603,9 +661,10 @@ function rTC() {
       if (!chk(d.uq)) continue; any = 1;
       var ok = canC(id);
       var cost = d.inp.map(function(p) {
+        var amt = cInpAmt(p.a);
         var have = G.res[p.r].v;
-        return (have < p.a ? '<span class="short">' : '') +
-          RD[p.r].n + ' ' + p.a + (have < p.a ? '</span>' : '');
+        return (have < amt ? '<span class="short">' : '') +
+          RD[p.r].n + ' ' + amt + (amt !== p.a ? '<span style="color:#070;">（原' + p.a + '）</span>' : '') + (have < amt ? '</span>' : '');
       }).join(', ');
       var out = d.out.map(function(p) { return RD[p.r].n + ' ' + p.a; }).join(', ');
       var sec = { desc: d.d, tip: pickTip('craft_' + id, d.tip) };
@@ -864,6 +923,7 @@ function rTC() {
       var narrSections = [
         { key: 'oldRuin', label: '旧墟手记' },
         { key: 'cloudRidge', label: '云岭石刻' },
+        { key: 'southRiver', label: '南河谷手记' },
       ];
       for (var ni = 0; ni < narrSections.length; ni++) {
         var ns = narrSections[ni];

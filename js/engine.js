@@ -31,6 +31,12 @@ const G = {
   blueprints: [],        // 已持有图纸 [{ id, target, spec, type }]
   bldSpec: {},           // 已激活建筑专精 { berryPatch: 'A', ... }
   jobTalent: {},         // 已激活职业天赋 { gatherer: 'B', ... }
+  // v0.14.0 回响与南行
+  insights: {},          // 已点亮回响洞见 { ins1: 1, ... }
+  weaveStacks: 0,        // 织灵层数（全资源产量 +1%/层）
+  weaveSeason: -1,
+  communeSeason: -1,
+  ashFox: { visits: 0, present: false, ticksLeft: 0, tracePending: false, traceFound: false },
 };
 
 let lastRealTime = Date.now();
@@ -99,8 +105,14 @@ function canU(id) {
 
 function canC(id) {
   for (const p of CD[id].inp)
-    if (G.res[p.r].v < p.a) return false;
+    if (G.res[p.r].v < cInpAmt(p.a)) return false;
   return true;
+}
+
+// 工坊原料实际消耗量（回响洞见「百工默契」-15%，向下取整）
+function cInpAmt(a) {
+  if (G.insights && G.insights.ins4) return Math.max(1, Math.floor(a * 0.85));
+  return a;
 }
 
 function chk(q) {
@@ -111,6 +123,10 @@ function chk(q) {
     if (!G.upg[k]?.done) return false;
   if (q.exp) for (const [k, n] of Object.entries(q.exp))
     if ((G.expDone[k] || 0) < n) return false;
+  if (q.res) for (const [k, n] of Object.entries(q.res))
+    if ((G.res[k]?.v || 0) < n) return false;
+  if (q.narr) for (const [k, n] of Object.entries(q.narr))
+    if (((G.narratives && G.narratives[k]) || []).length < n) return false;
   return true;
 }
 
@@ -172,11 +188,7 @@ function calcR() {
       for (var ek in specData.extraP)
         r[ek] = (r[ek] || 0) + specData.extraP[ek] * s.c * TPD;
     }
-    // 建筑专精消耗（drain）
-    if (specData && specData.drain) {
-      for (var dk in specData.drain)
-        r[dk] = (r[dk] || 0) - specData.drain[dk] * s.c * TPD;
-    }
+    // 注：专精消耗（drain）已移到乘数应用之后，不被产量加成放大（v0.14.0）
   }
 
   // 职业产出（含培训加成 × 满意度 × 天赋加成）
@@ -244,13 +256,31 @@ function calcR() {
       m[k] = (m[k] || 1) + e.allM * s.c;
   }
 
+  // 织灵层数（全资源产量 +1%/层）
+  if (G.weaveStacks) {
+    for (const k of Object.keys(r))
+      m[k] = (m[k] || 1) + 0.01 * G.weaveStacks;
+  }
+
   // 应用乘数
   for (const k of Object.keys(r)) r[k] *= (m[k] || 1);
 
-  // 季节倍率（含灵狐庇护冬季加成 + 霜藏专精）
+  // 建筑专精消耗（drain）：乘数之后扣减，为固定消耗，与描述一致（显示 = drain/s/座）
+  for (const [id, s] of Object.entries(G.bld)) {
+    if (!s.c) continue;
+    var specD = G.bldSpec[id] && SPEC_BD[id] ? SPEC_BD[id][G.bldSpec[id]] : null;
+    if (specD && specD.drain) {
+      for (var dk in specD.drain)
+        r[dk] = (r[dk] || 0) - specD.drain[dk] * s.c * 2;
+    }
+  }
+
+  // 季节倍率（含灵狐庇护冬季加成 + 霜藏专精 + 回响洞见）
   var berrySeasonMul = SM[G.season];
+  if (G.season === 0 && G.insights && G.insights.ins1) berrySeasonMul = 1.65;
   if (G.season === 3 && G.upg.spiritShelter?.done) berrySeasonMul = 0.4;
   if (G.season === 3 && G.bldSpec.warehouse === 'B') berrySeasonMul *= (1 + SPEC_BD.warehouse.B.winterBuff);
+  if (G.season === 3 && G.insights && G.insights.ins2) berrySeasonMul *= 1.25;
   r.berry *= berrySeasonMul;
 
   // 祈雨术加成
@@ -259,15 +289,15 @@ function calcR() {
   // 狐狸消耗野莓（外出狐狸不消耗）
   r.berry -= (G.foxes - (G.foxAway || 0)) * foxEatRate();
 
-  // 采集者勤爪额外消耗（独立加项，不受厚韧放大）
+  // 采集者勤爪额外消耗（独立加项，不受厚韧放大；固定消耗，显示 = extraEat/s/人）
   if (G.jobTalent.gatherer === 'A' && G.job.gatherer.c > 0)
-    r.berry -= SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * TPD;
+    r.berry -= SPEC_JD.gatherer.A.extraEat * G.job.gatherer.c * 2;
 
-  // 鞣革坊薄削持续转化（兽皮→铜钱，不同速率）
+  // 鞣革坊二道贩子持续转化（兽皮→铜钱，固定速率：显示值 = drainRate/gainRate 每秒）
   if (G.bldSpec.tannery === 'B' && G.res.leather.v > 0 && G.res.coin.v < G.res.coin.mx) {
     var cvt = SPEC_BD.tannery.B.convert;
-    r[cvt.from] = (r[cvt.from] || 0) - cvt.drainRate * TPD;
-    r[cvt.to] = (r[cvt.to] || 0) + cvt.gainRate * TPD;
+    r[cvt.from] = (r[cvt.from] || 0) - cvt.drainRate * 2;
+    r[cvt.to] = (r[cvt.to] || 0) + cvt.gainRate * 2;
   }
 
   // 工坊自动制作（连续速率，受限于原料产量以保证显示准确）
@@ -280,11 +310,11 @@ function calcR() {
       if (!G.autoCraft[id]) { G.acOn[id] = false; G._acRates[id] = 0; G._acStop[id] = ''; continue; }
       if (!chk(CD[id].uq)) { G.acOn[id] = false; G._acRates[id] = 0; G._acStop[id] = ''; continue; }
 
-      // 检查原料是否足够启动（至少够一次制作）
+      // 检查原料是否足够启动（至少够一次制作；含百工默契折扣）
       var canRun = true;
       var stopReason = '';
       for (var i = 0; i < CD[id].inp.length; i++) {
-        if (G.res[CD[id].inp[i].r].v < CD[id].inp[i].a) { canRun = false; stopReason = 'input'; break; }
+        if (G.res[CD[id].inp[i].r].v < cInpAmt(CD[id].inp[i].a)) { canRun = false; stopReason = 'input'; break; }
       }
       // 检查产出是否有空间
       if (canRun) {
@@ -305,7 +335,7 @@ function calcR() {
         var p = CD[id].inp[i];
         var inputRate = r[p.r] || 0;
         if (inputRate > 0) {
-          var maxRate = inputRate * 0.95 / p.a;
+          var maxRate = inputRate * 0.95 / cInpAmt(p.a);
           acRate = Math.min(acRate, maxRate);
         } else {
           hasNegInput = true;
@@ -315,7 +345,7 @@ function calcR() {
       if (hasNegInput) {
         var canReserve = true;
         for (var i = 0; i < CD[id].inp.length; i++) {
-          if (G.res[CD[id].inp[i].r].v < CD[id].inp[i].a * 3) { canReserve = false; break; }
+          if (G.res[CD[id].inp[i].r].v < cInpAmt(CD[id].inp[i].a) * 3) { canReserve = false; break; }
         }
         acRate = canReserve ? Math.min(acRate, fullAcRate * 0.25) : 0;
       }
@@ -324,7 +354,7 @@ function calcR() {
 
       for (var i = 0; i < CD[id].inp.length; i++) {
         var p = CD[id].inp[i];
-        r[p.r] = (r[p.r] || 0) - p.a * acRate;
+        r[p.r] = (r[p.r] || 0) - cInpAmt(p.a) * acRate;
       }
       for (var i = 0; i < CD[id].out.length; i++) {
         var p = CD[id].out[i];
@@ -363,7 +393,7 @@ function calcMx() {
 
 function calcH() {
   let h = 1;
-  if (G.foxes > 5) h -= (G.foxes - 5) * 0.02;
+  if (G.foxes > 5) h -= (G.foxes - 5) * hapPenaltyPerFox();
   for (const [id, s] of Object.entries(G.bld)) {
     if (!s.c) continue;
     if (BD[id].e?.hapB) h += BD[id].e.hapB * s.c;
@@ -377,6 +407,11 @@ function calcH() {
   // 抉择事件掌印墙 +10%
   if (G.choiceBuffs && G.choiceBuffs.happySeason === G.season) h += 0.1;
   G.happy = Math.max(0.1, Math.min(2, h));
+}
+
+// 人口满意度惩罚系数（回响洞见「狐知其狐」-2%→-1%/狐）
+function hapPenaltyPerFox() {
+  return (G.insights && G.insights.ins5) ? 0.01 : 0.02;
 }
 
 // ===== 解锁检查 =====
@@ -442,6 +477,8 @@ function simulateOffline(seconds) {
     G.freeFox = G.foxes - (G.foxAway || 0) - Object.values(G.job).reduce(function(s, j) { return s + j.c; }, 0);
     // 远行倒计时（静默）
     tickExpeditions(true);
+    // 灰毛访客倒计时（静默；离线期间不新到访）
+    tickAshFox(true);
     // 工坊自动制作：连续速率在 calcR() 中处理（v0.13.2 移除了 runAutoCraft 离散批次）
     // 商队季节到期在季节更替中处理
   }
@@ -540,8 +577,11 @@ function tick() {
   // 世界的回响（极稀有叙事，约 3 小时一次）
   if (Math.random() < 0.00002) tryWorldEcho();
 
-  // 遗光被动掉落（极低概率，约每 55 分钟一次）
-  if (Math.random() < 0.00006) tryRemnant();
+  // 遗光被动掉落（极低概率，约每 55 分钟一次；回响共鸣洞见 ×2）
+  if (Math.random() < 0.00006 * ((G.insights && G.insights.ins6) ? 2 : 1)) tryRemnant();
+
+  // 灰毛访客（稀有神秘事件）
+  tickAshFox();
 }
 
 function tryEvent() {
@@ -645,6 +685,9 @@ function resetG() {
   G.pendingChoice = null; G.choicesDone = []; G.choiceBuffs = {};
   // v0.12.0 图纸与专精
   G.blueprints = []; G.bldSpec = {}; G.jobTalent = {};
+  // v0.14.0 回响与南行
+  G.insights = {}; G.weaveStacks = 0; G.weaveSeason = -1; G.communeSeason = -1;
+  G.ashFox = { visits: 0, present: false, ticksLeft: 0, tracePending: false, traceFound: false };
 }
 function migrate() {
   // v0.8.1: 移除草药系统
@@ -693,6 +736,13 @@ function migrate() {
   G.blueprints = G.blueprints || [];
   G.bldSpec = G.bldSpec || {};
   G.jobTalent = G.jobTalent || {};
+  // v0.14.0 回响与南行
+  G.insights = G.insights || {};
+  G.weaveStacks = G.weaveStacks || 0;
+  G.weaveSeason = G.weaveSeason ?? -1;
+  G.communeSeason = G.communeSeason ?? -1;
+  G.ashFox = G.ashFox || { visits: 0, present: false, ticksLeft: 0, tracePending: false, traceFound: false };
+  if (G.narratives && !G.narratives.southRiver) G.narratives.southRiver = [];
 
   for (const k of Object.keys(RD))
     if (!G.res[k]) G.res[k] = { v: 0, mx: RD[k].mx, r: 0, on: !RD[k].lock };

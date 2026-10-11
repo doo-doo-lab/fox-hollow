@@ -24,6 +24,7 @@ function canSendExp(destId) {
 
 function sendExpedition(destId, foxCount) {
   var d = EXD[destId];
+  // 南河谷需叙事碎片集齐（chk 已覆盖，此处双重保险）
   foxCount = Math.min(foxCount || 1, Math.min(3, G.job.scout?.c || 0));
   if (foxCount <= 0) return;
   if (!canSendExp(destId)) return;
@@ -89,7 +90,10 @@ function resolveExpedition(idx, silent) {
   for (var r = 0; r < rewardCount && pool.length > 0; r++) {
     var ri = Math.floor(Math.random() * pool.length);
     var rw = pool[ri];
-    if (Math.random() > rw.prob) { pool.splice(ri, 1); continue; }
+    // 回响共鸣洞见：远行遗光概率 +10%
+    var rwProb = rw.prob;
+    if (rw.r === 'remnant' && G.insights && G.insights.ins6) rwProb = Math.min(1, rwProb + 0.1);
+    if (Math.random() > rwProb) { pool.splice(ri, 1); continue; }
     var amt = Math.floor((rw.min + Math.random() * (rw.max - rw.min + 1)) * mul);
     if (amt <= 0) amt = 1;
     if (G.res[rw.r]) {
@@ -133,13 +137,19 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志：返回日志内容按叙事顺序编写，按远行完成次数顺序推进（第 N 次返回显示第 N 条，
-  // 超出条数后固定显示最后一条），不再随机抽取——否则第一次远行就可能显示"最后一趟"结局文案
-  var logIdx = Math.min(G.expDone[exp.dest] - 1, d.logs.length - 1);
-  var returnLog = d.logs[logIdx];
+  // 返回日志：仅系统文本（叙事由叙事碎片承担，v0.14.0 移除了每目的地的返回叙事日志，
+  // 远端 v0.13.3 的「按次数顺序选取返回日志」修复随之不再需要）
   if (!silent) {
-    log(returnLog, 'event');
+    log('远行队伍从' + d.n + '返回了。', 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
+    // 灰毛访客踪迹（一次性，占位叙事）
+    if (G.ashFox && G.ashFox.tracePending) {
+      G.ashFox.tracePending = false;
+      G.ashFox.traceFound = true;
+      G.res.lore.v += 10;
+      if (!G.res.lore.on) G.res.lore.on = true;
+      log(ASHFOX.trace + '（学识 +10）', 'echo');
+    }
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();
@@ -150,6 +160,68 @@ function resolveExpedition(idx, silent) {
   }
   // 移除
   G.expeditions.splice(idx, 1);
+}
+
+// ===== 回响洞见（遗光消耗） =====
+function canBuyInsight(i) {
+  var ins = INSD[i];
+  if (!ins) return false;
+  if (G.insights[ins.id]) return false;
+  if ((G.bld.echoStele?.c || 0) < ins.stele) return false;
+  // 需按顺序点亮前一层
+  if (i > 0 && !G.insights[INSD[i - 1].id]) return false;
+  for (var ci = 0; ci < ins.cost.length; ci++)
+    if (G.res[ins.cost[ci].r].v < ins.cost[ci].a) return false;
+  return true;
+}
+
+function buyInsight(i) {
+  if (!canBuyInsight(i)) return;
+  var ins = INSD[i];
+  for (var ci = 0; ci < ins.cost.length; ci++)
+    G.res[ins.cost[ci].r].v -= ins.cost[ci].a;
+  G.insights[ins.id] = 1;
+  log('（占位叙事：点亮洞见「' + ins.n + '」，待审核）', 'echo');
+  log('洞见生效：' + ins.d, 'important');
+  rAll();
+}
+
+// ===== 灰毛访客（稀有神秘事件） =====
+// 旧墟叙事 ≥5 段后可能到访；共到访 2 次，之后不再出现；
+// 第二次离开后，下次远行返回时斥候发现其踪迹（一次性）。
+function tickAshFox(silent) {
+  if (!G.ashFox) G.ashFox = { visits: 0, present: false, ticksLeft: 0, tracePending: false, traceFound: false };
+  var af = G.ashFox;
+  if (af.present) {
+    af.ticksLeft--;
+    if (af.ticksLeft <= 0) {
+      af.present = false;
+      af.visits++;
+      // 离开时留下遗光 ×1
+      G.res.remnant.v += 1;
+      if (!G.res.remnant.on) G.res.remnant.on = true;
+      if (!silent) {
+        var msg = (af.visits >= 2) ? ASHFOX.leaveLast : ASHFOX.leave;
+        log(msg + '（遗光 +1）', 'echo');
+        if (af.visits >= 2) af.tracePending = true;
+      } else {
+        if (af.visits >= 2) af.tracePending = true;
+        if (!G.pendingNarr) G.pendingNarr = [];
+        G.pendingNarr.push('（占位叙事：灰毛访客在你离开期间来过并离开了，待审核）（遗光 +1）');
+      }
+    }
+    return;
+  }
+  // 到访判定（离线期间不新到访）
+  if (silent) return;
+  if (af.visits >= 2) return;
+  if (((G.narratives && G.narratives.oldRuin) || []).length < 5) return;
+  // 约每 2.5 小时一次（0.000055/tick），到访后停留 3 天（30 tick）
+  if (Math.random() < 0.000055) {
+    af.present = true;
+    af.ticksLeft = 30;
+    log(ASHFOX.arrive, 'echo');
+  }
 }
 
 // ===== 抉择事件系统 =====
