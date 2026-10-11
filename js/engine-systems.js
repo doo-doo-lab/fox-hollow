@@ -216,8 +216,8 @@ function tickAshFox(silent) {
   if (silent) return;
   if (af.visits >= 2) return;
   if (((G.narratives && G.narratives.oldRuin) || []).length < 5) return;
-  // 约每 2.5 小时一次（0.000055/tick），到访后停留 3 天（30 tick）
-  if (Math.random() < 0.000055) {
+  // 约每 2.5 小时一次（0.000022/tick ≈ 1/(9000s×5tick/s)），到访后停留 3 天（30 tick）
+  if (Math.random() < 0.000022) {
     af.present = true;
     af.ticksLeft = 30;
     log(ASHFOX.arrive, 'echo');
@@ -289,7 +289,7 @@ function applyChoice(eventIdx, optIdx) {
       // A: 消耗圆木×3碎石×2，本季满意度+10%
       G.res.wood.v = Math.max(0, G.res.wood.v - 3);
       G.res.stone.v = Math.max(0, G.res.stone.v - 2);
-      cb.happySeason = G.season;
+      cb.happySeason = seasonStamp();
       log('村口的掌印墙立起来了。第一个按上去的幼崽，爪子还沾着泥。', 'event');
     } else {
       // B: 学识+15，下次旧墟返回卷轴+1

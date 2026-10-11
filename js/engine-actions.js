@@ -109,15 +109,15 @@ function canSpell(id) {
 function castSpell(id) {
   if (!canSpell(id)) return;
 
-  if (id === 'rain' && G.rainSeason === G.season) {
+  if (id === 'rain' && G.rainSeason === seasonStamp()) {
     log('本季已经祈过雨了。', 'warn');
     return;
   }
-  if (id === 'summon' && G.spiritSeason === G.season) {
+  if (id === 'summon' && G.spiritSeason === seasonStamp()) {
     log('本季已经召唤过祖灵了。', 'warn');
     return;
   }
-  if (id === 'harvest' && G.harvestSeason === G.season) {
+  if (id === 'harvest' && G.harvestSeason === seasonStamp()) {
     log('本季已经举办过丰收祭了。', 'warn');
     return;
   }
@@ -149,27 +149,27 @@ function castSpell(id) {
     return;
   }
   if (id === 'feast') {
-    if (G.feastSeason === G.season) { log('本季已经举办过宴席了。', 'warn'); return; }
+    if (G.feastSeason === seasonStamp()) { log('本季已经举办过宴席了。', 'warn'); return; }
     for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
-    G.feastSeason = G.season;
+    G.feastSeason = seasonStamp();
     log('山谷宴席开始了，狐狸们的满意度提升！', 'important');
     rAll();
     return;
   }
   if (id === 'weave') {
-    if (G.weaveSeason === G.season) { log('本季已经织过灵了。', 'warn'); return; }
+    if (G.weaveSeason === seasonStamp()) { log('本季已经织过灵了。', 'warn'); return; }
     if (G.weaveStacks >= 25) { log('织灵已达上限（25 层）。', 'warn'); return; }
     for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
-    G.weaveSeason = G.season;
+    G.weaveSeason = seasonStamp();
     G.weaveStacks++;
     log('织灵完成：全资源产量永久 +1%（当前共 +' + G.weaveStacks + '%）。', 'important');
     rAll();
     return;
   }
   if (id === 'commune') {
-    if (G.communeSeason === G.season) { log('本季已经交感过了。', 'warn'); return; }
+    if (G.communeSeason === seasonStamp()) { log('本季已经交感过了。', 'warn'); return; }
     for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
-    G.communeSeason = G.season;
+    G.communeSeason = seasonStamp();
     // 聆听一段当季世界回响
     var pool = [];
     for (var wi = 0; wi < WD.length; wi++)
@@ -193,13 +193,13 @@ function castSpell(id) {
   for (const p of SD[id].cost) G.res[p.r].v -= Math.ceil(p.a * spellCostMul());
 
   if (id === 'rain') {
-    G.rainSeason = G.season;
+    G.rainSeason = seasonStamp();
     log('符咒燃尽，天空飘来细雨，野莓产量提升！', 'important');
   } else if (id === 'summon') {
-    G.spiritSeason = G.season;
+    G.spiritSeason = seasonStamp();
     log('先祖的身影若隐若现，所有职业产出大幅提升！', 'important');
   } else if (id === 'harvest') {
-    G.harvestSeason = G.season;
+    G.harvestSeason = seasonStamp();
     log('丰收祭奏效了，本季建筑造价降低！', 'important');
     // 触发一次有数值奖励的山谷见闻
     tryRewardEvent();

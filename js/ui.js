@@ -168,10 +168,10 @@ function resBreakdown(k) {
     if (G.season === 3 && G.bldSpec.warehouse === 'B') sMul *= (1 + SPEC_BD.warehouse.B.winterBuff);
     if (G.season === 3 && G.insights && G.insights.ins2) sMul *= 1.25;
     mulParts.push(SN[G.season] + ' ×' + sMul.toFixed(3).replace(/0+$/, '').replace(/\.$/, ''));
-    if (G.rainSeason === G.season) { sMul *= 1.5; mulParts.push('祈雨 ×1.5'); }
+    if (G.rainSeason === seasonStamp()) { sMul *= 1.5; mulParts.push('祈雨 ×1.5'); }
   }
 
-  var spiritOn = G.spiritSeason === G.season;
+  var spiritOn = G.spiritSeason === seasonStamp();
   if (spiritOn) mulParts.push('祖灵 +50%');
 
   var fullMul = mul * sMul;
@@ -495,18 +495,18 @@ function rTC() {
           RD[p.r].n + ' ' + need + (have < need ? '</span>' : '');
       }).join(', ');
       var extra = '';
-      if (sid === 'rain' && G.rainSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
-      if (sid === 'summon' && G.spiritSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
-      if (sid === 'harvest' && G.harvestSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
-      if (sid === 'feast' && G.feastSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'rain' && G.rainSeason === seasonStamp()) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'summon' && G.spiritSeason === seasonStamp()) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'harvest' && G.harvestSeason === seasonStamp()) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
+      if (sid === 'feast' && G.feastSeason === seasonStamp()) extra = ' <span style="color:#888;font-size:11px;">（本季已施）</span>';
       if (sid === 'tradeWind' && G.tradeWindYear === G.year) extra = ' <span style="color:#888;font-size:11px;">（今年已施）</span>';
       if (sid === 'tradeWind' && G.caravan) extra = ' <span style="color:#888;font-size:11px;">（商队在场）</span>';
       if (sid === 'weave') {
         extra = ' <span style="color:#888;font-size:11px;">（层数 ' + (G.weaveStacks || 0) + '/25）</span>';
-        if (G.weaveSeason === G.season) extra += ' <span style="color:#888;font-size:11px;">（本季已织）</span>';
+        if (G.weaveSeason === seasonStamp()) extra += ' <span style="color:#888;font-size:11px;">（本季已织）</span>';
         if ((G.weaveStacks || 0) >= 25) extra += ' <span style="color:#888;font-size:11px;">（已达上限）</span>';
       }
-      if (sid === 'commune' && G.communeSeason === G.season) extra = ' <span style="color:#888;font-size:11px;">（本季已交感）</span>';
+      if (sid === 'commune' && G.communeSeason === seasonStamp()) extra = ' <span style="color:#888;font-size:11px;">（本季已交感）</span>';
       if (sid === 'spiritPath') {
         var hasTarget = false;
         for (var ei = 0; ei < (G.expeditions||[]).length; ei++)
@@ -590,8 +590,8 @@ function rTC() {
       if (G.upg[uid].done && UD[uid].e?.hapB)
         hapNotes.push(UD[uid].n + '：+' + (UD[uid].e.hapB * 100 | 0) + '%');
     }
-    if (G.feastSeason === G.season) hapNotes.push('山谷宴席：+15%');
-    if (G.choiceBuffs && G.choiceBuffs.happySeason === G.season) hapNotes.push('掌印墙：+10%');
+    if (G.feastSeason === seasonStamp()) hapNotes.push('山谷宴席：+15%');
+    if (G.choiceBuffs && G.choiceBuffs.happySeason === seasonStamp()) hapNotes.push('掌印墙：+10%');
     var hapSec = { effects: hapNotes, notes: ['当前职业产出倍率：×' + (G.happy * 100 | 0) + '%'] };
     var hapHtml = hpWrap('<b>' + (G.happy * 100 | 0) + '%</b>', hapSec);
 

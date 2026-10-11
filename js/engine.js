@@ -61,10 +61,16 @@ function fmt(n) {
   return n.toFixed(2);
 }
 
+// 季节戳：唯一标识每一个季节（修复「每季限一次」灵术在次年同季被误封的问题：
+// 旧存档存的是 0-3 循环值，第 1 年早春施法后第 2 年早春会被错误判定为已施）
+function seasonStamp() {
+  return G.year * 4 + G.season;
+}
+
 function bp(id, i) {
   const p = BD[id].p[i];
   var cost = Math.ceil(p.b * Math.pow(p.k, G.bld[id].c));
-  if (G.harvestSeason === G.season) cost = Math.ceil(cost * 0.7);
+  if (G.harvestSeason === seasonStamp()) cost = Math.ceil(cost * 0.7);
   cost = Math.ceil(cost * specCostMul(id, p.r));
   return cost;
 }
@@ -215,7 +221,7 @@ function calcR() {
   }
 
   // 祖灵加成（本季职业产出 +50%，含天赋加成）
-  if (G.spiritSeason === G.season) {
+  if (G.spiritSeason === seasonStamp()) {
     for (const [id, s] of Object.entries(G.job)) {
       if (!s.c) continue;
       var trainBonus = 1 + (G.train[id] || 0) * 0.1;
@@ -284,7 +290,7 @@ function calcR() {
   r.berry *= berrySeasonMul;
 
   // 祈雨术加成
-  if (G.rainSeason === G.season) r.berry *= 1.5;
+  if (G.rainSeason === seasonStamp()) r.berry *= 1.5;
 
   // 狐狸消耗野莓（外出狐狸不消耗）
   r.berry -= (G.foxes - (G.foxAway || 0)) * foxEatRate();
@@ -403,9 +409,9 @@ function calcH() {
   for (const [id, s] of Object.entries(G.upg))
     if (s.done && UD[id].e?.hapB) h += UD[id].e.hapB;
   // 山谷宴席 +15%
-  if (G.feastSeason === G.season) h += 0.15;
+  if (G.feastSeason === seasonStamp()) h += 0.15;
   // 抉择事件掌印墙 +10%
-  if (G.choiceBuffs && G.choiceBuffs.happySeason === G.season) h += 0.1;
+  if (G.choiceBuffs && G.choiceBuffs.happySeason === seasonStamp()) h += 0.1;
   G.happy = Math.max(0.1, Math.min(2, h));
 }
 
