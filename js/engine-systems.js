@@ -133,8 +133,12 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：按该目的地已完成次数顺序推进，与叙事碎片进度一致；
+  // 最后一条是收尾文案（"最后一趟…"），序列走完后在前面几条中随机抽取，不再重复出现
+  var doneCount = G.expDone[exp.dest];
+  var returnLog = doneCount <= d.logs.length
+    ? d.logs[doneCount - 1]
+    : d.logs[Math.floor(Math.random() * (d.logs.length - 1))];
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
