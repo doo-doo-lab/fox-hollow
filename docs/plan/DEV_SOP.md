@@ -9,13 +9,13 @@
 
 ## 〇、绝对纪律（不得违反）
 
-1. **不得跨步骤跳跃**：必须按 [roadmap-v2.md §四 实施进度表](roadmap-v2.md) 中 ⏳ 标记的下一步做。
+1. **不得跨步骤跳跃**：必须按 [roadmap-v3.md §五 任务表](roadmap-v3.md)（Phase 5 剩余 / R 返工批次 / Phase 6-7）中 ⏳ 标记的下一步做。
 2. **不得跳过验收**：任何 `[ ] 验收` 项 fail，立刻停下排查，不要继续下一步。
 3. **不得沉默选择**：遇到模棱两可、文档冲突、报错原因不明，立刻停下报告，不要 silently 选择一个方向继续。
 
 > **git push 政策**：commit 完成 + 验收过即**自动 push**到 origin/master（单人项目，GitHub Pages 自动部署需要 push 才能让玩家看到）。例外：刚 commit 想 revert 时先报告。
 
-> **关于修改设计文档**：必要时可以修改 roadmap-v2.md / branch-*.md（如发现冲突、勘误、或开发中需要细化设计）。但必须在 commit message 说明改了什么 + 原因，并保留最小必要范围。优先用 §十五 勘误表记录跨文档不一致。
+> **关于修改设计文档**：必要时可以修改 roadmap-v3.md / branch-*.md（如发现冲突、勘误、或开发中需要细化设计）。但必须在 commit message 说明改了什么 + 原因，并保留最小必要范围。优先用 roadmap-v3 §九 决策变更记录登记跨文档不一致。历史勘误（E1-E62）见 [archived/roadmap-v2.md](archived/roadmap-v2.md) §十五（只读）。
 
 ---
 
@@ -26,9 +26,9 @@
 按顺序读以下文件，建立认知：
 
 1. [docs/plan/INDEX.md](INDEX.md) — 项目导航总览
-2. [docs/plan/roadmap-v2.md](roadmap-v2.md) §四 实施进度表 — 找当前 ⏳ 任务
+2. [docs/plan/roadmap-v3.md](roadmap-v3.md) §〇 决议 + §五 任务表 — 找当前 ⏳ 任务
 3. [docs/RULES.md](../RULES.md) §五 开发约定 + §七 文档维护 + §八 常见错误
-4. 当前任务的"任务卡"（在 §四 内对应小节）
+4. 当前任务的"任务卡"（在 roadmap-v3 §五 内对应小节；Phase 5 已完成部分的历史任务卡在 archived/roadmap-v2.md）
 
 ### 1.2 检查任务卡
 
@@ -139,7 +139,7 @@ scope 取值：`engine`, `ui`, `data`, `docs`, `v0.16.X`（版本里程碑）
 
 ### 3.4 更新进度表
 
-打开 [roadmap-v2.md §四 实施进度表](roadmap-v2.md)，把当前任务的：
+打开 [roadmap-v3.md §五 任务表](roadmap-v3.md)，把当前任务的：
 - `状态` 从 ⏳ 改 ✅
 - `commit` 列填入 SHA（git log -1 --format=%h）
 

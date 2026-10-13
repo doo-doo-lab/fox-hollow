@@ -207,7 +207,7 @@
 
 ### v0.16.1 - 治理奠基重构（阶段一完成）
 
-> 本版本是 roadmap-v2 §四 阶段一的完整实施，对 v0.16.0 的政治系统进行了大幅重构。详见 [docs/plan/roadmap-v2.md](plan/roadmap-v2.md) §四。
+> 本版本是 roadmap-v2 §四 阶段一的完整实施，对 v0.16.0 的政治系统进行了大幅重构。详见 [docs/plan/archived/roadmap-v2.md](plan/archived/roadmap-v2.md) §四（历史；最新决议见 plan/roadmap-v3.md）。
 
 **破坏性变更**
 - **议事录资源已删除**：`council` 资源从游戏中移除，旧存档自动清理

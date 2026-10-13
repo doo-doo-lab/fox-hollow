@@ -11,14 +11,14 @@
 复制下面整段发给 mulerun：
 
 ```
-按 docs/plan/DEV_SOP.md 流程，执行 docs/plan/roadmap-v2.md §四-§十 中
+按 docs/plan/DEV_SOP.md 流程，执行 docs/plan/roadmap-v3.md §五 中
 下一个 ⏳ 任务（或当前 ⏳ 进行中任务）。
 
 阅读顺序（不可跳）：
 1. docs/plan/INDEX.md
-2. docs/plan/roadmap-v2.md
-   - §三 阶段总览（确认当前 phase）
-   - 当前 phase 章节内的实施进度表 + 对应任务卡
+2. docs/plan/roadmap-v3.md
+   - §〇 2026-10-13 设计决议（最新结论）
+   - §五 任务表（确认当前任务：Phase 5 剩余 / R 返工批次 / Phase 6-7）+ 对应任务卡
 3. docs/plan/DEV_SOP.md
 4. docs/RULES.md §五 + §七 + §八
 5. 任务涉及的 branch-*.md 章节（按任务卡"涉及文件清单"推断）
@@ -80,7 +80,7 @@
    - 旧存档兼容（如有 migrate 改动，验证旧版本字段不崩）
 
 3. 文档同步
-   - roadmap-v2.md §四 进度表：当前任务状态 ⏳→✅，commit SHA 已填
+   - roadmap-v3.md §五 任务表：当前任务状态 ⏳→✅，commit SHA 已填
    - 下一个任务状态从 ⬜→⏳（提示下一步）
    - 设计文档（branch-*.md）相关改动是否同步
    - 跨文档命名一致性（grep 关键 ID 看是否散落不一致）
@@ -207,7 +207,7 @@ multi-model-query.py 的 `MODELS` 列表已固定为前 4 个。重推理模型�
    - 旧存档兼容（如改 G 字段或 schema → 检查 migrate 函数补全字段）
 
 2. 文档同步
-   - roadmap-v2 当前阶段（§三 阶段总览定位）进度表：状态 ⏳→✅ + 填了 commit SHA
+   - roadmap-v3 §五 任务表：状态 ⏳→✅ + 填了 commit SHA
    - 验证 SHA 真实存在（git cat-file -e <sha>）
    - 设计文档（branch-*.md）若有相关改动是否同步
    - 跨文档关键 ID 一致性（grep 主要建筑/资源/职业 ID 看代码 vs 文档）
@@ -239,11 +239,10 @@ multi-model-query.py 的 `MODELS` 列表已固定为前 4 个。重推理模型�
 
 ## 进度表更新示例
 
-mulerun 完成 1.3 后应该这样更新 [roadmap-v2.md §四 进度表](roadmap-v2.md)：
+mulerun 完成 5.3e 后应该这样更新 [roadmap-v3.md §五 5.2 任务表](roadmap-v3.md)：
 
 ```markdown
-| 1.0/1.1/1.2 | 议事录废弃 + ... | ✅ 已完成 | c11920d | §四 1.0/1.1/1.2 |
-| 1.3 | POLITY/POLICY 数据结构重写 | ✅ 已完成 | <新 SHA> | §四 1.3 |     ← 状态 ⏳→✅，填 SHA
-| **1.4** | **Tier 路线树 UI** | ⏳ **下一步** | - | §四 1.4 |              ← 下一个 ⬜→⏳
-| 1.5 | 研究链前置调整 | ⬜ 未开始 | - | §四 1.5 |
+| **5.3e** | 秘仪研究 12 + 配方 5 | ✅ 已完成 | <新 SHA> | §五 5.2 |
+| 5.3f | 秘仪升级 35 项 + 飞升 3-4 门 | ⏳ **下一步** | - | §五 5.2 |              ← 下一个 ⬜→⏳
+| 5.3g | 神启 C 整体验收 | ⬜ | - | §五 5.2 |
 ```

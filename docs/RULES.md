@@ -100,7 +100,7 @@ fox-hollow/
 │   ├── changelog.md    # 变更日志
 │   └── plan/           # 开发规划文档
 │       ├── INDEX.md                  # 导航总入口（按 Phase 索引必读文档）
-│       ├── roadmap-v2.md             # 阶段制路线图（v0.16 → v0.22，7 阶段）
+│       ├── roadmap-v3.md             # 主路线图（2026-10-13 整合版：决议/页签/阶段/分支/谷声经济/政体/剩余任务）
 │       ├── branch-industry.md        # 工业主线详设（27 资源 / 29 建筑 / 22 配方 / 135 升级）
 │       ├── branch-mystic.md          # 灵修主线详设（27 资源 / 35 建筑 / 27 配方 / 155 升级 / 18 灵术）
 │       ├── branch-divine.md          # 神启副线总览（神恩 / 教团 vs 秘仪 + 仪式 / 占卜 / 6 神占位）
@@ -111,8 +111,9 @@ fox-hollow/
 │           ├── README.md             # 归档说明
 │           ├── v0.14+文本重写方案v2.md # 未实施待决
 │           ├── v0.15-plan.md         # 已实施
-│           ├── v0.16-plan.md         # 被 roadmap-v2 §四替代
-│           └── v0.16-rewrite.md      # 被 roadmap-v2 §四替代
+│           ├── roadmap-v2.md         # 旧路线图（2026-10-13 归档；Phase 1-4 任务卡 + 勘误 E1-E62 历史）
+│           ├── v0.16-plan.md         # 历史方案（见 archived/README.md）
+│           └── v0.16-rewrite.md      # 历史方案（见 archived/README.md）
 └── reference/          # 猫国建设者（Kittens Game）中文 Wiki 参考资料（⚠ 不推送）
     ├── _navigation.md  # Wiki 导航目录
     ├── 首页.md          # Wiki 首页
@@ -185,7 +186,7 @@ fox-hollow/
 | 专精 | `bldSpec[id], jobTalent[id]` | 'A'/'B'/undefined |
 | 远行 | `expeditions[], expDone{}, narratives{}` | 进行中/完成次数/叙事收集 |
 | 商队 | `caravan, caravanTimer, blueprints[]` | 当前商队/计时器/图纸背包 |
-| 政体 | `polity, policies{}, tier1, mainLine` | 当前政体/政策/Tier1 路线/主线('industry'\|'mystic') |
+| 政体 | `polity, policies{}, tier1, mainLine` | 当前政体/政策/Tier1 路线/主线('industry'\|'mystic')。⚠ 2026-10-13 决议：`tier1` 待移除（R3）、`mainLine` 待转 4 平行分支（R5）、`valleyVoice` 待恢复（R2）——见 roadmap-v3 §〇/§五 5.5 |
 | 能量 | `energyProd, energyCons, energyRatio` | 工业线能量系统 |
 | 灵脉 | `leylineProd, leylineCons, leylineRatio` | 灵修线灵脉系统 |
 | 污染 | `pollution, pollutionRate` | 工业线负面系统 |
@@ -205,19 +206,21 @@ fox-hollow/
 
 ### 版本演进方向
 
-当前版本 v0.16.0。完整 7 阶段路线图见 [docs/plan/roadmap-v2.md](plan/roadmap-v2.md)，按 Phase 索引必读文档见 [docs/plan/INDEX.md](plan/INDEX.md)。
+开发进度：Phase 1-4 已完成，Phase 5 进行中（约 v0.20）。完整路线图见 [docs/plan/roadmap-v3.md](plan/roadmap-v3.md)（2026-10-13 整合版），任务索引见 [docs/plan/INDEX.md](plan/INDEX.md)。
 
-| Phase | 版本 | 主题 | 活跃线 |
-|-------|------|------|--------|
-| 1 | v0.16 | 治理奠基（政体/政策/典制改版） | 0 |
-| 2 | v0.17 | 双线觉醒（工业 A + 灵修 A） | 2 |
-| 3 | v0.18 | 信仰与通商（神启 A + 通达 A + 占卜 + 枯风口） | 4 |
-| 4 | v0.19 | 分化之路（工业 C + 灵修 C + 教团/秘仪分叉 + 通达邦交 + 6 神） | 4 |
-| 5 | v0.20 | 深盟与成熟（D 阶段 + 神启 C + 通达深盟） | 4 |
-| 6 | v0.21 | 远望（终局前夜 + 神启 D + 通达共谷） | 4 |
-| 7 | v0.22 | 终局与轮回（5 终局 + 重生系统） | 2 |
+| Phase | 版本 | 主题 | 状态 |
+|-------|------|------|------|
+| 1 | v0.16 | 治理奠基（政体/政策/典制改版） | ✅ |
+| 2 | v0.17 | 双线觉醒（工业 A + 灵修 A） | ✅ |
+| 3 | v0.18 | 信仰与通商（神启 A + 通达 A + 占卜 + 枯风口） | ✅ |
+| 4 | v0.19 | 分化之路（工业 C + 灵修 C + 教团/秘仪分叉 + 通达邦交 + 6 神） | ✅ |
+| 5 | v0.20 | 深盟与成熟（D 阶段 + 神启 C + 通达深盟） | 🔶 进行中 |
+| 5.5 | v0.20.5（建议） | R 返工批次（页签/谷声/政体/平行分支，roadmap-v3 §五 5.5） | ⬜ 待排期 |
+| 6 | v0.21 | 远望（终局前夜 + 神启 D + 通达共谷） | ⬜ |
+| 7 | v0.22 | 终局与轮回（5 终局 + 重生系统） | ⬜ |
 
-> 旧版 v0.16-plan.md / v0.16-rewrite.md 已归档至 `plan/archived/`。"谷声"机制已废弃，改为研究链门控（roadmap-v2 §四 1.1 + E18）。
+> 玩家侧三大阶段（山谷→远望→轮回，猫国式渐进解锁页签）见 roadmap-v3 §二。
+> 旧版 v0.16-plan.md / v0.16-rewrite.md / roadmap-v2.md 已归档至 `plan/archived/`。「谷声」曾被 E18 废弃，**2026-10-13 决议恢复**（累积进度指标 + 治理页签名），研究链门控保留、谷声门槛叠加：见 roadmap-v3 §〇 决议 1 + §三。
 
 ---
 
@@ -232,7 +235,7 @@ fox-hollow/
 | 协作规则 / 仓库结构 / G 字段速查 / 命名禁区 | `docs/RULES.md` | 永久 |
 | 核心机制 / 数据规范 / 已完成版本回顾 | `docs/design.md` | 永久 |
 | 版本发布日志（每个 v0.X.Y 一条） | `docs/changelog.md` | 追加 |
-| 全局路线图（7 Phase） | `docs/plan/roadmap-v2.md` | 演进 |
+| 全局路线图 | `docs/plan/roadmap-v3.md` | 演进 |
 | 主线/副线详设 | `docs/plan/branch-{name}.md` | 演进 |
 | 路线分叉子文档 | `docs/plan/branch-{parent}-{child}.md` | 演进 |
 | 已废弃 / 已实施旧方案 | `docs/plan/archived/` | 只读保留 |
@@ -241,10 +244,10 @@ fox-hollow/
 
 ### 7.2 文档创建规则
 
-1. **不为单一 Phase 新建文档**——写进 `roadmap-v2.md` 对应 §四–§十 章节
+1. **不为单一 Phase 新建文档**——写进 `roadmap-v3.md` 对应章节
 2. **不为单一机制新建文档**——写进对应 `branch-*.md`
 3. **只在新增主线/副线时**才新建 `branch-*.md`
-4. **禁止创建 `v0.X-plan.md` / `*-stub.md` / `*-rewrite.md` / `*-v2.md` 形式文档**——这类命名暗示"临时/迭代/未定稿"，容易过期混乱。roadmap-v2 §对应章节足够承载阶段性方案
+4. **禁止创建 `v0.X-plan.md` / `*-stub.md` / `*-rewrite.md` / `*-v2.md` 形式文档**——这类命名暗示"临时/迭代/未定稿"，容易过期混乱。roadmap-v3 §对应章节足够承载阶段性方案
 5. **临时方案 / 草案**——写在 commit message 或 PR 描述中，不进 `docs/`
 6. **触发归档**——以下任一条件即移至 `plan/archived/` 并更新 `archived/README.md`，**不直接删除**：
    - 设计被新方案完全替代
@@ -257,7 +260,7 @@ fox-hollow/
 |------|------|---------|
 | **单一信息源** | 每个事实只在一处记录 | 多处提及用 `[link](path)`，不复制内容 |
 | **状态明确** | 每段设计标"状态：占位 / 设计中 / 待实施 / 已实施" | 占位状态才写"待补完清单"，已实施状态移除清单 |
-| **勘误集中** | 跨文档不一致汇总到 `roadmap-v2.md` §十五 表格 | 不散落在各文档脚注 |
+| **勘误集中** | 跨文档不一致汇总到 `roadmap-v3.md` §九 决策变更记录 | 不散落在各文档脚注 |
 | **AI 入口固定** | `docs/plan/INDEX.md` 是 AI 第一站 | 进入项目先读 INDEX，按需展开 |
 
 ### 7.4 AI 工作流程（修改 docs/plan/ 时严格遵守）
@@ -266,7 +269,7 @@ fox-hollow/
 2. 用 `Grep "^##"` 摸具体文档大纲
 3. 用 `Read offset/limit` 读相关章节
 4. 修改时同步检查是否需要更新：
-   - `roadmap-v2.md` §十五 勘误（发现跨文档不一致时）
+   - `roadmap-v3.md` §九 决策变更记录（发现跨文档不一致时）
    - `INDEX.md`（文档结构变化时）
    - `changelog.md`（版本级变更时）
    - 其他 branch（如改了某个共通系统的命名）
@@ -285,7 +288,7 @@ fox-hollow/
 ### 7.6 文件命名规范
 
 - `RULES.md`, `design.md`, `changelog.md`——根级核心文档，名称固定
-- `roadmap-v2.md`——路线图主入口（如未来需大改，命名为 `roadmap-v3.md` 并把 v2 归档）
+- `roadmap-v3.md`——路线图主入口（v2 已归档；如未来需大改，命名为 `roadmap-v4.md` 并把 v3 归档）
 - `branch-{name}.md`——主/副分支详设（每条线一个）
 - `branch-{parent}-{child}.md`——分叉子文档（如 `branch-divine-doctrine`）
 - `archived/{原名}.md`——归档不改名，保留辨识度
@@ -295,28 +298,28 @@ fox-hollow/
 跨文档信息不一致时，权威顺序（高→低）：
 
 1. **branch-{name}.md 设计表**（如 §六全建筑表 / §十四全职业表）——分支设计的最终权威数据，作为后续开发的目标
-2. **roadmap-v2.md 主体章节**——全局阶段映射、副线门控、共通系统公式（神恩/声望等）
+2. **roadmap-v3.md 主体章节**——决议记录、页签架构、阶段/分支模型、谷声经济、政体设计、剩余任务
 3. **代码现状**（`js/data.js` 等）——**已实施且无 rename 计划**的部分以代码为准；若与设计表冲突，见 §7.8 双轨规则
 4. **branch 文档中的"实现记录" / "过时警告"段**——反映某次施工的代码状态，**不是权威数据源**，仅供对比参考
-5. **roadmap-v2 §十五 勘误**——已发现并记录的不一致，按勘误的"修正"列处理
+5. **roadmap-v3 §九 决策变更记录**——已登记的不一致与决议追溯（历史勘误 E1-E62 见 archived/roadmap-v2.md §十五，只读）
 6. **design.md**——历史回顾、已完成内容描述
 7. **archived/**——历史参考，不作权威
 
-发现冲突时：**修高优先级文档以匹配实际，并在 roadmap-v2 §十五 加一条勘误记录**。
+发现冲突时：**修高优先级文档以匹配实际，并在 roadmap-v3 §九 加一条变更记录**。
 
 ### 7.8 代码 ID 与设计目标 ID 不一致（双轨规则）
 
-当代码已上线但设计想 rename 时（如代码 `spiritChanneler` → 设计 `spiritSenser`，见 [E48](plan/roadmap-v2.md)）：
+当代码已上线但设计想 rename 时（如代码 `spiritChanneler` → 设计 `spiritSenser`，历史案例见 [archived/roadmap-v2.md E48](plan/archived/roadmap-v2.md)）：
 
 1. 在 branch-{name}.md 顶部加 **"过时警告" 块**，显式列出差异（参见 [branch-mystic.md 行 56](plan/branch-mystic.md)）
 2. **设计章节使用目标 ID**（spiritSenser）——这是后续开发的权威
 3. **"实现记录"章节使用代码现状 ID**（spiritChanneler）——这是当前代码的诚实记录
-4. roadmap-v2 §十五 加勘误条记录 rename 计划及目标 Phase
+4. roadmap-v3 §九 加变更记录，注明 rename 计划及目标任务
 5. **rename 落地时**（在某个 Phase 完成 migrate 后）：
    - 删除"过时警告"中对应行
    - 把"实现记录"改成目标 ID
    - changelog 加 rename 记录
-   - roadmap-v2 §十五 勘误条标 ✅ 已修正
+   - roadmap-v3 §九 变更条目标 ✅ 已修正
 
 **AI 读到代码与设计 ID 不同时**：先查 branch-{name}.md 顶部的"过时警告"，按其指向判定权威。无过时警告时，按 §7.7 优先级（设计表 > 代码）。
 
@@ -331,14 +334,14 @@ fox-hollow/
 
 | # | 限制 | 违反后果 |
 |---|------|---------|
-| 1 | **不得跨步骤跳跃**：必须按 [roadmap-v2.md §四 实施进度表](plan/roadmap-v2.md) 中 ⏳ 的下一步做，禁止跳到后面的步骤 | 留半残状态、依赖错位、build 不通 |
+| 1 | **不得跨步骤跳跃**：必须按 [roadmap-v3.md §五 任务表](plan/roadmap-v3.md) 中 ⏳ 的下一步做，禁止跳到后面的步骤 | 留半残状态、依赖错位、build 不通 |
 
 > **关于 git push**：commit 完成 + 验收清单全过后**自动 push**。这是单人开发项目，不存在"远程被破坏"风险；GitHub Pages 自动部署需要 push 才能让玩家看到修复。
 > 例外：如果 commit 后发现 bug 想紧急 revert，先报告再决定（这种情况罕见，正常流程是 commit 前已经验收过）。
 
-> **关于修改设计文档**：mulerun 在**必要时**可以修改 roadmap-v2.md / branch-*.md 的设计内容（如发现冲突、勘误、或开发中需要细化设计）。但必须：
+> **关于修改设计文档**：mulerun 在**必要时**可以修改 roadmap-v3.md / branch-*.md 的设计内容（如发现冲突、勘误、或开发中需要细化设计）。但必须：
 > 1. 在 commit message 明确说明改了什么 + 原因
-> 2. 优先使用 [roadmap-v2.md §十五 勘误表](plan/roadmap-v2.md) 记录跨文档不一致
+> 2. 优先使用 [roadmap-v3.md §九 决策变更记录](plan/roadmap-v3.md) 登记跨文档不一致
 > 3. 改动应保留在最小必要范围（不顺手"改进"无关内容）
 > 4. 改设计文档的同时必须更新进度表与 changelog（如适用）
 
