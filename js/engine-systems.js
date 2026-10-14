@@ -116,6 +116,7 @@ function resolveExpedition(idx, silent) {
     delete cb.nextReturn[exp.dest];
   }
   // 叙事碎片
+  var storyJustCompleted = false; // 本次返回是否刚好集齐全部叙事碎片
   if (d.narrative && NARR[exp.dest]) {
     if (!G.narratives) G.narratives = { oldRuin: [], cloudRidge: [] };
     var narrList = G.narratives[exp.dest] || [];
@@ -123,6 +124,7 @@ function resolveExpedition(idx, silent) {
     if (nextIdx < NARR[exp.dest].length) {
       narrList.push(nextIdx);
       G.narratives[exp.dest] = narrList;
+      if (narrList.length >= NARR[exp.dest].length) storyJustCompleted = true;
       if (!silent) {
         log(NARR[exp.dest][nextIdx], 'echo');
       } else {
@@ -133,8 +135,17 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事目的地 logs 的最后一条是终章文案（如"最后一趟从旧墟回来……"），
+  // 只在集齐全部叙事碎片的那次返回时显示；未集齐前只从其余日志中随机抽取，
+  // 避免第一次远行就出现与进度不符的终章文本
+  var returnLog;
+  if (d.narrative && NARR[exp.dest] && d.logs.length > 1) {
+    returnLog = storyJustCompleted
+      ? d.logs[d.logs.length - 1]
+      : d.logs[Math.floor(Math.random() * (d.logs.length - 1))];
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');

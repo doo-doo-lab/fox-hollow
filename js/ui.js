@@ -551,7 +551,9 @@ function rTC() {
       var eff = jobEffects(id, d.e);
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
       var sec = {
-        desc: d.d,
+        // 斥候等职业的 jobEffects() 已返回与 d.d 相同的 desc 文本，
+        // 悬浮面板跳过描述行避免同一句话显示两次
+        desc: eff.indexOf(d.d) !== -1 ? '' : d.d,
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
