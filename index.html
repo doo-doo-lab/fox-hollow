@@ -19,16 +19,21 @@
 </div>
 <div id="game">
   <div id="left-panel">
-    <div id="fox-info"></div>
-    <div id="res-list"></div>
+    <div class="panel-hdr" onclick="togglePanel('res')"><span>资源</span><span class="p-arrow" id="res-arrow">▾</span></div>
+    <div class="panel-body" id="res-body">
+      <div id="fox-info"></div>
+      <div id="res-list"></div>
+    </div>
   </div>
   <div id="center-panel">
     <div id="tabs"></div>
     <div id="tc"></div>
   </div>
   <div id="log-panel">
-    <h3>谷中见闻</h3>
-    <div id="log-list"></div>
+    <div class="panel-hdr" onclick="togglePanel('log')"><h3>谷中见闻</h3><span class="p-arrow" id="log-arrow">▾</span></div>
+    <div class="panel-body" id="log-body">
+      <div id="log-list"></div>
+    </div>
   </div>
 </div>
 <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:500;display:none;align-items:center;justify-content:center;">

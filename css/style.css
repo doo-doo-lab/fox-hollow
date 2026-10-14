@@ -32,6 +32,15 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .tab{padding:4px 12px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent;}
 .tab:hover{color:#333;}
 .tab.on{color:#333;font-weight:bold;border-bottom-color:#333;}
+.tab-arrow{font-size:9px;color:#aaa;margin-left:3px;}
+
+/* 面板折叠 */
+.panel-hdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;margin-bottom:4px;}
+.panel-hdr:hover{color:#333;}
+#left-panel .panel-hdr{font-size:12px;color:#999;letter-spacing:1px;text-transform:uppercase;}
+#log-panel .panel-hdr h3{margin-bottom:0;}
+.p-arrow{font-size:10px;color:#bbb;}
+.panel-body.collapsed,#tc.collapsed{display:none;}
 
 /* GATHER BUTTONS */
 .gather-row{margin-bottom:8px;}
@@ -92,6 +101,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
+.log.remnant{color:#9a7b4f;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #eee6d8;}
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}
@@ -139,5 +149,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 @media(max-width:860px){
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  /* 中栏不撑满剩余视口（高度=内容高）：上方面板折叠后，下方内容自动往上顶 */
+  #center-panel{flex:0 1 auto;}
   .job-row .jd{display:none;}
 }

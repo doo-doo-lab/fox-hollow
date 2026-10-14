@@ -10,6 +10,40 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板折叠（UI 状态，独立于游戏存档 G）=====
+const panelCollapsed = { res: false, tc: false, log: false };
+
+function applyCollapse() {
+  var resBody = document.getElementById('res-body');
+  var logBody = document.getElementById('log-body');
+  var tc = document.getElementById('tc');
+  if (resBody) resBody.classList.toggle('collapsed', !!panelCollapsed.res);
+  if (logBody) logBody.classList.toggle('collapsed', !!panelCollapsed.log);
+  if (tc) tc.classList.toggle('collapsed', !!panelCollapsed.tc);
+  var ra = document.getElementById('res-arrow');
+  if (ra) ra.textContent = panelCollapsed.res ? '▸' : '▾';
+  var la = document.getElementById('log-arrow');
+  if (la) la.textContent = panelCollapsed.log ? '▸' : '▾';
+  try { localStorage.setItem('fhCollapse', JSON.stringify(panelCollapsed)); } catch (e) { }
+}
+
+function togglePanel(k) {
+  if (!(k in panelCollapsed)) return;
+  panelCollapsed[k] = !panelCollapsed[k];
+  applyCollapse();
+  rTabs();
+}
+
+// 页签点击：切换页签；再次点击当前页签则折叠/展开其内容
+function tabClick(id) {
+  if (id === curTab) { togglePanel('tc'); return; }
+  curTab = id;
+  panelCollapsed.tc = false; // 切到新页签强制展开，避免看不到内容
+  applyCollapse();
+  rTabs();
+  rTC();
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -241,8 +275,10 @@ function rTabs() {
   document.getElementById('tabs').innerHTML = TABS.filter(function(t) {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
-    return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
+    var isOn = t.id === curTab;
+    var arrow = isOn ? '<span class="tab-arrow">' + (panelCollapsed.tc ? '▸' : '▾') + '</span>' : '';
+    return '<div class="tab' + (isOn ? ' on' : '') +
+      '" onclick="tabClick(\'' + t.id + '\')">' + t.n + arrow + '</div>';
   }).join('');
 }
 
@@ -726,6 +762,13 @@ function showChoiceModal(idx) {
 function startGame() {
   initState();
   load();
+  // 恢复面板折叠状态（独立于游戏存档）
+  try {
+    var savedCollapse = JSON.parse(localStorage.getItem('fhCollapse') || 'null');
+    if (savedCollapse) for (var ck in panelCollapsed)
+      if (typeof savedCollapse[ck] === 'boolean') panelCollapsed[ck] = savedCollapse[ck];
+  } catch (e) { }
+  applyCollapse();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
   setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
