@@ -82,10 +82,15 @@ function resolveExpedition(idx, silent) {
     delete cb.nextRewardMul[exp.dest];
   }
   var mul = scoutBonus * researchBonus * choiceRewardMul;
-  // 抽取奖励（2-3项）
+  // 最后一趟判定：本次返回恰好收齐最后一段叙事碎片时即为「最后一趟」。
+  // 结局文案（“没带东西”）只在最后一趟显示，且该趟不发放资源奖励，保证文案与内容一致。
+  var finalTrip = !!(d.narrative && NARR[exp.dest] &&
+    (((G.narratives && G.narratives[exp.dest]) || []).length === NARR[exp.dest].length - 1));
+  // 抽取奖励（2-3项）；最后一趟不带回资源
+  var rewards = [];
+  if (!finalTrip) {
   var rewardCount = 2 + (Math.random() < 0.5 ? 1 : 0);
   var pool = d.rewards.slice();
-  var rewards = [];
   for (var r = 0; r < rewardCount && pool.length > 0; r++) {
     var ri = Math.floor(Math.random() * pool.length);
     var rw = pool[ri];
@@ -100,7 +105,7 @@ function resolveExpedition(idx, silent) {
     }
     pool.splice(ri, 1);
   }
-  // 抉择 buff：额外资源奖励
+  // 抉择 buff：额外资源奖励（最后一趟不消耗，顺延到下次远行）
   if (cb.nextReturn && cb.nextReturn[exp.dest]) {
     var bonusList = cb.nextReturn[exp.dest];
     for (var bi = 0; bi < bonusList.length; bi++) {
@@ -114,6 +119,7 @@ function resolveExpedition(idx, silent) {
       }
     }
     delete cb.nextReturn[exp.dest];
+  }
   }
   // 叙事碎片
   if (d.narrative && NARR[exp.dest]) {
@@ -133,17 +139,18 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志：叙事目的地（旧墟/云岭）按远行次数顺序取用，
-  // 最后一条为结局文案，仅在叙事碎片集满的那一趟返回时显示；其余目的地仍随机抽取
+  // 日志：叙事目的地（旧墟/云岭）按远行次数顺序取用（第 N 趟显示第 N 条），
+  // 最后一条为结局文案，仅在「最后一趟」（本次返回恰好收齐最后一段叙事碎片）显示；
+  // 日志序号用尽的中间趟次从非结局条目中随机（避免从头循环的既视感）；其余目的地仍随机抽取
   var returnLog;
   if (d.narrative && NARR[exp.dest] && d.logs.length > 1) {
-    var narrCnt = (G.narratives && G.narratives[exp.dest]) ? G.narratives[exp.dest].length : 0;
-    var narrTotal = NARR[exp.dest].length;
-    var tripNo = Math.max(1, G.expDone[exp.dest] || 1);
-    if (narrTotal > 0 && narrCnt >= narrTotal && tripNo === narrTotal) {
+    var tripNo = Math.max(1, G.expDone[exp.dest] || 1); // 已含本次
+    if (finalTrip) {
       returnLog = d.logs[d.logs.length - 1];
+    } else if (tripNo <= d.logs.length - 1) {
+      returnLog = d.logs[tripNo - 1];
     } else {
-      returnLog = d.logs[(tripNo - 1) % (d.logs.length - 1)];
+      returnLog = d.logs[Math.floor(Math.random() * (d.logs.length - 1))];
     }
   } else {
     returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
@@ -157,7 +164,7 @@ function resolveExpedition(idx, silent) {
     }
   } else {
     if (!G.pendingNarr) G.pendingNarr = [];
-    G.pendingNarr.push('离开期间，远行队伍从' + d.n + '返回了。（' + rewards.join('，') + '）');
+    G.pendingNarr.push('离开期间，远行队伍从' + d.n + '返回了。' + (rewards.length ? '（' + rewards.join('，') + '）' : ''));
   }
   // 移除
   G.expeditions.splice(idx, 1);
