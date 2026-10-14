@@ -359,12 +359,14 @@ function simulateOffline(seconds) {
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 检测降频/后台切回：浏览器会限流后台页签的定时器（约 1 次/秒甚至暂停），
+  // 若距上次 tick 超过 3 个 tick 时长，按真实流逝时间补算，
+  // 保证远行进度、资源产出在切到其他页签时也按真实时间推进。
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
-  if (gap > 5) {
-    simulateOffline(gap - TMS / 1000);
+  if (gap > 3 * TMS / 1000) {
+    simulateOffline(gap);
     rAll();
     return;
   }
