@@ -358,12 +358,17 @@ function simulateOffline(seconds) {
 }
 
 // ===== 主循环 =====
+// 后台补算阈值（秒）：浏览器会对后台标签页的 setInterval 限流（降至 1 次/秒甚至暂停），
+// 只要两次 tick 的真实时间差超过 3.5 个 tick 周期，就按真实时间静默补跑缺失的 tick，
+// 保证远行进度、资源产出在后台按真实时间推进，切回页签时进度条不会停滞。
+var CATCHUP_GAP = TMS * 3.5 / 1000;
+
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 检测降频/后台切回：按真实时间差补算中间的时间
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
-  if (gap > 5) {
+  if (gap > CATCHUP_GAP) {
     simulateOffline(gap - TMS / 1000);
     rAll();
     return;
@@ -438,6 +443,20 @@ function tick() {
 
   // 遗光被动掉落（极低概率，约每 55 分钟一次）
   if (Math.random() < 0.00006) tryRemnant();
+}
+
+// 切回前台时立即补算：不等下一次 setInterval（部分移动端浏览器暂停计时器后恢复有延迟）
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) return;
+    var now = Date.now();
+    var gap = (now - lastRealTime) / 1000;
+    if (gap > CATCHUP_GAP) {
+      lastRealTime = now;
+      simulateOffline(gap - TMS / 1000);
+      rAll();
+    }
+  });
 }
 
 function tryEvent() {
