@@ -471,7 +471,8 @@ function tryEvent() {
         if (!G.res[k].on) G.res[k].on = true;
         if (G.res[k].mx > 0) G.res[k].v = Math.min(G.res[k].v, G.res[k].mx);
         var sign = picked.e[k] >= 0 ? '+' : '';
-        rewards.push(RD[k].n + ' ' + sign + picked.e[k]);
+        var txt = RD[k].n + ' ' + sign + picked.e[k];
+        rewards.push(k === 'remnant' ? '<span class="remnant-txt">' + txt + '</span>' : txt);
       }
     }
   }
@@ -499,7 +500,8 @@ function tryRewardEvent() {
       if (!G.res[k].on) G.res[k].on = true;
       if (G.res[k].mx > 0) G.res[k].v = Math.min(G.res[k].v, G.res[k].mx);
       var sign = picked.e[k] >= 0 ? '+' : '';
-      rewards.push(RD[k].n + ' ' + sign + picked.e[k]);
+      var txt = RD[k].n + ' ' + sign + picked.e[k];
+      rewards.push(k === 'remnant' ? '<span class="remnant-txt">' + txt + '</span>' : txt);
     }
   }
   var msg = picked.t;
@@ -524,7 +526,7 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  log(msg + '（遗光 +1）', 'remnant');
 }
 
 // ===== 玩家操作 =====
@@ -809,7 +811,8 @@ function resolveExpedition(idx, silent) {
       G.res[rw.r].v += amt;
       if (!G.res[rw.r].on) G.res[rw.r].on = true;
       if (G.res[rw.r].mx > 0) G.res[rw.r].v = Math.min(G.res[rw.r].v, G.res[rw.r].mx);
-      rewards.push(RD[rw.r].n + ' +' + amt);
+      var rwTxt = RD[rw.r].n + ' +' + amt;
+      rewards.push(rw.r === 'remnant' ? '<span class="remnant-txt">' + rwTxt + '</span>' : rwTxt);
     }
     pool.splice(ri, 1);
   }
@@ -822,8 +825,8 @@ function resolveExpedition(idx, silent) {
         G.res[b.r].v += b.a;
         if (!G.res[b.r].on) G.res[b.r].on = true;
         if (G.res[b.r].mx > 0) G.res[b.r].v = Math.min(G.res[b.r].v, G.res[b.r].mx);
-        if (b.a > 0) rewards.push(RD[b.r].n + ' +' + b.a);
-        else rewards.push(RD[b.r].n + ' ' + b.a);
+        var bTxt = b.a > 0 ? RD[b.r].n + ' +' + b.a : RD[b.r].n + ' ' + b.a;
+        rewards.push(b.r === 'remnant' ? '<span class="remnant-txt">' + bTxt + '</span>' : bTxt);
       }
     }
     delete cb.nextReturn[exp.dest];

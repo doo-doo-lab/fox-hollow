@@ -242,8 +242,10 @@ function rTabs() {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
     return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
-  }).join('');
+      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC();applyTcCollapse()">' + t.n + '</div>';
+  }).join('') +
+  '<div class="tab-collapse" onclick="toggleTabContent()" title="折叠/展开本页签内容">' +
+  (uiPref.tcCollapsed[curTab] ? '▸' : '▾') + '</div>';
 }
 
 // ===== 渲染：资源面板 =====
@@ -676,6 +678,47 @@ function rTC() {
   document.getElementById('tc').innerHTML = h;
 }
 
+// ===== 面板折叠（UI 偏好存 localStorage 独立键，不进游戏存档） =====
+let uiPref = {};
+try { uiPref = JSON.parse(localStorage.getItem('fhUI') || '{}'); } catch (e) { uiPref = {}; }
+if (!uiPref || typeof uiPref !== 'object') uiPref = {};
+if (!uiPref.tcCollapsed || typeof uiPref.tcCollapsed !== 'object') uiPref.tcCollapsed = {};
+
+function saveUIPref() {
+  try { localStorage.setItem('fhUI', JSON.stringify(uiPref)); } catch (e) { }
+}
+
+function togglePanel(which) {
+  if (which === 'res') {
+    uiPref.resCollapsed = !uiPref.resCollapsed;
+    document.getElementById('left-panel').classList.toggle('collapsed', !!uiPref.resCollapsed);
+    document.getElementById('res-caret').textContent = uiPref.resCollapsed ? '▸' : '▾';
+  } else if (which === 'log') {
+    uiPref.logCollapsed = !uiPref.logCollapsed;
+    document.getElementById('log-panel').classList.toggle('collapsed', !!uiPref.logCollapsed);
+    document.getElementById('log-caret').textContent = uiPref.logCollapsed ? '▸' : '▾';
+  }
+  saveUIPref();
+}
+
+function toggleTabContent() {
+  uiPref.tcCollapsed[curTab] = !uiPref.tcCollapsed[curTab];
+  saveUIPref();
+  rTabs();
+  applyTcCollapse();
+}
+
+function applyTcCollapse() {
+  document.getElementById('tc').classList.toggle('collapsed', !!uiPref.tcCollapsed[curTab]);
+}
+
+function applyPanelCollapse() {
+  document.getElementById('left-panel').classList.toggle('collapsed', !!uiPref.resCollapsed);
+  document.getElementById('res-caret').textContent = uiPref.resCollapsed ? '▸' : '▾';
+  document.getElementById('log-panel').classList.toggle('collapsed', !!uiPref.logCollapsed);
+  document.getElementById('log-caret').textContent = uiPref.logCollapsed ? '▸' : '▾';
+}
+
 // ===== 渲染：日志 =====
 function rLog() {
   document.getElementById('log-list').innerHTML =
@@ -728,6 +771,8 @@ function startGame() {
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
+  applyPanelCollapse();
+  applyTcCollapse();
   setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
   setInterval(save, 30000);
 

@@ -206,7 +206,8 @@
   ├── docs/
   │   ├── RULES.md        # 协作规则（仓库结构、推送约定、开发约定）
   │   ├── design.md       # 本策划文档
-  │   └── changelog.md    # 变更日志
+  │   ├── changelog.md    # 变更日志
+  │   └── plan-panel-collapse.md  # 面板折叠功能实施方案（v0.12.0，已实施）
   └── reference/          # 猫国建设者中文 wiki 参考资料（仅本地，不纳入版本控制）
   ```
 - **模块依赖**：`data.js`（纯数据，无依赖）→ `engine.js`（读写数据与状态 G，提供 tick/操作函数）→ `ui.js`（读取 G 渲染 DOM，调用 engine 操作函数）；`index.html` 按此顺序引入
