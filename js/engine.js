@@ -296,7 +296,8 @@ function rmFox() {
 }
 
 // ===== 离线/后台进度补算 =====
-function simulateOffline(seconds) {
+// quiet=true 时为后台页签降频的静默补算：不输出「离开了」提示
+function simulateOffline(seconds, quiet) {
   // 限制最大补算时间为 24 小时
   seconds = Math.min(seconds, 86400);
   var ticksToRun = Math.floor(seconds * 1000 / TMS);
@@ -340,16 +341,17 @@ function simulateOffline(seconds) {
     if (G.upg.craftMastery?.done && G.tick % 50 === 0) runAutoCraft();
     // 商队季节到期在季节更替中处理
   }
-  // 显示补算结果（离开不足 30 秒不提示）
-  if (seconds < 30) return;
-  var mins = Math.floor(seconds / 60);
-  var hrs = Math.floor(mins / 60);
-  var msg;
-  if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
-  else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
-  else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
-  log(msg + '，资源已自动补算。', 'important');
-  // 显示离线期间返回的远行
+  // 显示补算结果（离开不足 30 秒不提示；后台降频静默补算不提示）
+  if (!quiet && seconds >= 30) {
+    var mins = Math.floor(seconds / 60);
+    var hrs = Math.floor(mins / 60);
+    var msg;
+    if (hrs > 0) msg = '离开了 ' + hrs + ' 小时 ' + (mins % 60) + ' 分钟';
+    else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
+    else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
+    log(msg + '，资源已自动补算。', 'important');
+  }
+  // 显示离线/后台期间返回的远行（叙事暂存队列，补算后即展示）
   if (G.pendingNarr && G.pendingNarr.length) {
     for (var i = 0; i < G.pendingNarr.length; i++)
       log(G.pendingNarr[i], 'echo');
@@ -359,12 +361,19 @@ function simulateOffline(seconds) {
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 真实时间同步：
+  // 1) 页面可见且距上次 tick 超过 5 秒（长时间离线切回）：补算并提示
+  // 2) 页签处于后台时浏览器会把 setInterval 降频（约 1s 甚至 1min 一次），
+  //    若只靠正常 tick，游戏时钟会变慢、远行进度条看似停滞；
+  //    因此后台期间按真实流逝时间静默补算，保证进度持续推进
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
   lastRealTime = now;
-  if (gap > 5) {
-    simulateOffline(gap - TMS / 1000);
+  var hidden = (typeof document !== 'undefined' && document.hidden);
+  if (gap > 5 || (hidden && gap > TMS / 500)) {
+    // 后台降频：按完整真实间隔补算（本次回调不再另跑正常 tick）；
+    // 可见长离线：保持原有行为
+    simulateOffline(hidden ? gap : gap - TMS / 1000, hidden);
     rAll();
     return;
   }
