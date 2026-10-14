@@ -358,17 +358,8 @@ function simulateOffline(seconds) {
 }
 
 // ===== 主循环 =====
-function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
-  var now = Date.now();
-  var gap = (now - lastRealTime) / 1000;
-  lastRealTime = now;
-  if (gap > 5) {
-    simulateOffline(gap - TMS / 1000);
-    rAll();
-    return;
-  }
-
+// 单步游戏逻辑（一个游戏 tick）
+function tickOnce() {
   G.tick++;
   G.day += 1 / TPD;
 
@@ -438,6 +429,24 @@ function tick() {
 
   // 遗光被动掉落（极低概率，约每 55 分钟一次）
   if (Math.random() < 0.00006) tryRemnant();
+}
+
+function tick() {
+  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  var now = Date.now();
+  var gap = (now - lastRealTime) / 1000;
+  lastRealTime = now;
+  if (gap > 5) {
+    simulateOffline(gap - TMS / 1000);
+    rAll();
+    return;
+  }
+  // 后台页签定时器被浏览器降频（如每秒 1 次）时，按真实经过时间补跑错过的 tick，
+  // 保证远行倒计时等游戏逻辑以真实时间速度推进（切页签进度条不再停滞）
+  var missed = Math.floor(gap * 1000 / TMS) - 1;
+  if (missed > 24) missed = 24; // 安全上限（gap ≤ 5s 时理论最大 24）
+  for (var i = 0; i < missed; i++) tickOnce();
+  tickOnce();
 }
 
 function tryEvent() {
