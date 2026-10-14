@@ -86,9 +86,9 @@ function bldUnlockNotes(d) {
 // 职业效果描述
 function jobEffects(id, e) {
   var r = [];
-  // 斥候等无产出职业用 desc 字段
+  // 斥候等无产出职业用 desc 字段；若 desc 与 d 相同则跳过，避免悬浮面板描述行重复显示
   if (JD[id] && JD[id].desc) {
-    r.push(JD[id].desc);
+    if (JD[id].desc !== JD[id].d) r.push(JD[id].desc);
     return r;
   }
   for (var k in e) {

@@ -133,8 +133,11 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事类目的地按远行完成次数顺序取日志（文本随剧情推进，避免第一次远行就出现"最后一趟"），其余随机抽取
+  var tripNo = G.expDone[exp.dest] || 1;
+  var returnLog = d.narrative
+    ? d.logs[Math.min(tripNo - 1, d.logs.length - 1)]
+    : d.logs[Math.floor(Math.random() * d.logs.length)];
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
