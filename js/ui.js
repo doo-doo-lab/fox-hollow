@@ -551,7 +551,8 @@ function rTC() {
       var eff = jobEffects(id, d.e);
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
       var sec = {
-        desc: d.d,
+        // 斥候等无产出职业：jobEffects 返回的文本与 d.d 相同，悬浮面板只保留 effects 一处，避免重复
+        desc: eff.indexOf(d.d) === -1 ? d.d : '',
         effects: eff,
         tip: pickTip('job_' + id, d.tip)
       };
