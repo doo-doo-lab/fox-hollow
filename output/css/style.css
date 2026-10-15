@@ -154,5 +154,8 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 @media(max-width:860px){
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  /* v0.12.1：窄屏下中栏不再拉伸填满 #game 的 min-height，
+     否则折叠面板后省出的空间会被中栏吸收，下方内容（谷中见闻）不会上移 */
+  #center-panel{flex:none;}
   .job-row .jd{display:none;}
 }

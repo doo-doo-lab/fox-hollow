@@ -365,14 +365,23 @@ function simulateOffline(seconds) {
 function tick() {
   // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
   var now = Date.now();
-  var gap = (now - lastRealTime) / 1000;
+  var gapMs = now - lastRealTime;
   lastRealTime = now;
+  var gap = gapMs / 1000;
   if (gap > 5) {
     simulateOffline(gap - TMS / 1000);
     rAll();
     return;
   }
+  // v0.12.1：浏览器后台页签会把定时器限流到约 1 次/秒，若每次只跑 1 tick，
+  // 游戏时间只有真实时间的 1/5，远行进度条在后台几乎停滞。
+  // 这里按真实耗时补跑对应数量的 tick（封顶 25，超过 5 秒的间隔走上面的离线补算），
+  // 保证切到其他浏览器页签期间，远行进度/季节/产量仍按真实时间推进。
+  var steps = Math.max(1, Math.min(Math.floor(gapMs / TMS), 25));
+  for (var i = 0; i < steps; i++) tickOnce();
+}
 
+function tickOnce() {
   G.tick++;
   G.day += 1 / TPD;
 
