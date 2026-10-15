@@ -676,6 +676,44 @@ function rTC() {
   }
 
   document.getElementById('tc').innerHTML = h;
+  rExpStrip();
+}
+
+// ===== 远行进度条（跨页签常驻） =====
+// 非山外页签时在 Tab 栏下方显示紧凑进度条，每 tick（200ms）更新宽度；
+// 山外页签内已有详细面板，不重复显示。点击可跳转到山外页签。
+var _stripSig = null;
+function rExpStrip() {
+  var el = document.getElementById('exp-strip');
+  if (!el) return;
+  var exps = G.expeditions || [];
+  if (curTab === 'w' || !exps.length) {
+    if (_stripSig !== null) { el.innerHTML = ''; _stripSig = null; }
+    return;
+  }
+  var sig = exps.map(function(e) {
+    return e.dest + ':' + e.foxCount + ':' + e.totalTicks + ':' + (e.usedSpiritPath ? 1 : 0);
+  }).join('|');
+  if (sig !== _stripSig) {
+    _stripSig = sig;
+    var h = '';
+    for (var i = 0; i < exps.length; i++) {
+      h += '<div class="exp-strip-row" onclick="curTab=\'w\';rTabs();rTC()" title="查看山外">' +
+        '<span class="exp-strip-name">→ ' + EXD[exps[i].dest].n + '</span>' +
+        '<span class="exp-strip-days" id="strip-days-' + i + '"></span>' +
+        '<span class="exp-bar-bg exp-strip-bar"><span class="exp-bar-fill" id="strip-fill-' + i + '"></span></span>' +
+        '</div>';
+    }
+    el.innerHTML = h;
+  }
+  for (var j = 0; j < exps.length; j++) {
+    var exp = exps[j];
+    var fill = document.getElementById('strip-fill-' + j);
+    var daysEl = document.getElementById('strip-days-' + j);
+    if (fill) fill.style.width = Math.max(0, Math.min(100,
+      (exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)).toFixed(2) + '%';
+    if (daysEl) daysEl.textContent = '剩余' + Math.ceil(exp.ticksLeft / TPD) + '天';
+  }
 }
 
 // ===== 渲染：日志 =====
@@ -730,7 +768,7 @@ function startGame() {
   load();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
-  setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
+  setInterval(function() { tick(); rExpStrip(); if (G.tick % 5 === 0) rAll(); }, TMS);
   setInterval(save, 30000);
 
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)

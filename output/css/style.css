@@ -106,6 +106,15 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 /* EXPEDITION - Active */
 .exp-active{padding:6px 0;border-bottom:1px solid #f0f0f0;}
+
+/* EXPEDITION - 跨页签常驻进度条 */
+#exp-strip:empty{display:none;}
+.exp-strip-row{display:flex;align-items:center;gap:8px;padding:3px 0;cursor:pointer;font-size:12px;border-bottom:1px solid #f4f4f4;}
+.exp-strip-row:hover{background:#fafafa;}
+.exp-strip-name{font-weight:bold;color:#333;flex-shrink:0;}
+.exp-strip-days{color:#888;font-size:11px;flex-shrink:0;}
+.exp-strip-bar{flex:1;min-width:60px;display:block;}
+.exp-strip-bar .exp-bar-fill{display:block;transition:width .25s linear;}
 .exp-active-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
 .exp-dest-name{font-weight:bold;color:#333;}
 .exp-info{font-size:11px;color:#888;}
