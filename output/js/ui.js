@@ -554,9 +554,11 @@ function rTC() {
       if (wt > 0) {
         h += '<div style="font-size:11px;color:#888;margin-bottom:6px;">瞭望塔 ×' + wt + '：远行时间 ×' + expTimeMul().toFixed(2) + '</div>';
       }
-      for (var did in EXD) {
+      var destIds = Object.keys(EXD).filter(function(id) { return chk(EXD[id].uq); });
+      destIds.sort(function(a, b) { return EXD[a].days - EXD[b].days; });
+      for (var di = 0; di < destIds.length; di++) {
+        var did = destIds[di];
         var dd = EXD[did];
-        if (!chk(dd.uq)) continue;
         var canSend = canSendExp(did);
         var days = Math.ceil(dd.days * expTimeMul());
         var costStr = dd.cost.map(function(p) {

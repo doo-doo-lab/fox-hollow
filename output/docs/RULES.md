@@ -3,17 +3,21 @@
 ## 仓库结构
 
 ```
-fox-hollow/
-├── index.html          # 入口页面
-├── css/
-│   └── style.css       # 样式
-├── js/
-│   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件）
-│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发）
-│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板）
-├── docs/
-│   ├── RULES.md        # 本文件
-│   └── design.md       # 策划文档
+workspace/              # 仓库根目录（.git 在此）
+├── .gitignore          # 排除 reference/ 与 uploads/
+├── output/             # 游戏本体（部署目录）
+│   ├── index.html      # 入口页面
+│   ├── README.md       # 项目简介
+│   ├── css/
+│   │   └── style.css   # 样式
+│   ├── js/
+│   │   ├── data.js     # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件/远行/商队/叙事）
+│   │   ├── engine.js   # 游戏引擎（状态/计算/tick/存档/事件触发/远行/商队/离线补算）
+│   │   └── ui.js       # 界面渲染（日志/面板/Tab/悬浮面板/山外Tab）
+│   └── docs/
+│       ├── RULES.md    # 本文件
+│       ├── design.md   # 策划文档
+│       └── changelog.md # 变更日志
 └── reference/          # 参考资料（仅本地，不纳入版本控制）
 ```
 
