@@ -10,6 +10,21 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板折叠状态（UI 偏好，独立于存档，见 docs/plan-panel-collapse.md） =====
+var collapsed = {};
+try { collapsed = JSON.parse(localStorage.getItem('fhCollapse') || '{}') || {}; } catch (e) { collapsed = {}; }
+function saveCollapsed() { try { localStorage.setItem('fhCollapse', JSON.stringify(collapsed)); } catch (e) { } }
+function toggleSec(key) {
+  collapsed[key] = !collapsed[key];
+  saveCollapsed();
+  rAll();
+  rLog();
+}
+function secHdr(key, label, extra) {
+  return '<div class="res-cat sec-hdr" onclick="toggleSec(\'' + key + '\')">' +
+    '<span class="sec-caret">' + (collapsed[key] ? '▸' : '▾') + '</span> ' + label + (extra || '') + '</div>';
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -276,6 +291,10 @@ function rRes() {
     '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
     (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
     (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
+  var resBody = document.getElementById('res-body');
+  if (resBody) resBody.style.display = collapsed.res ? 'none' : '';
+  var resCaret = document.getElementById('res-caret');
+  if (resCaret) resCaret.textContent = collapsed.res ? '▸' : '▾';
 }
 
 // ===== 渲染：Tab内容 =====
@@ -284,6 +303,8 @@ function rTC() {
 
   if (curTab === 'b') {
     // 手动采集按钮（悬浮面板）
+    h += secHdr('b_gather', '采集');
+    if (!collapsed.b_gather) {
     h += '<div class="gather-row">';
     var gatherBtns = [
       { key: 'berry', label: '采集野莓', onclick: "gather('berry')" },
@@ -300,8 +321,11 @@ function rTC() {
       );
     }
     h += '</div>';
+    }
 
     // 建筑列表
+    h += secHdr('b_build', '建筑');
+    if (!collapsed.b_build) {
     for (var id in BD) {
       var d = BD[id];
       if (!G.bld[id].on) continue;
@@ -336,12 +360,14 @@ function rTC() {
       h += '</div>';
       h += '</div>';
     }
+    }
 
     // 灵术按钮
     var anySpell = 0;
     for (var sid in SD) {
       if (!chk(SD[sid].uq)) continue;
-      if (!anySpell) { h += '<div class="res-cat" style="margin-top:10px;">灵术</div>'; anySpell = 1; }
+      if (!anySpell) { h += secHdr('b_spell', '灵术'); anySpell = 1; }
+      if (collapsed.b_spell) continue;
       var ok = canSpell(sid);
       var cost = SD[sid].cost.map(function(p) {
         var have = G.res[p.r].v;
@@ -395,10 +421,12 @@ function rTC() {
 
     h += '<div class="village-hdr">闲置：<b>' + Math.max(0, G.freeFox) +
       '</b> / 总计 ' + G.foxes + ' &nbsp; 满意度：' + hapHtml + '</div>';
+    h += secHdr('v_job', '职业');
     var any = 0;
     for (var id in JD) {
       var d = JD[id];
       if (!G.job[id].on) continue; any = 1;
+      if (collapsed.v_job) continue;
       var trainLv = G.train[id] || 0;
       var eff = jobEffects(id, d.e);
       if (trainLv > 0) eff.push('授业加成：+' + (trainLv * 10) + '%');
@@ -432,15 +460,17 @@ function rTC() {
         '<span class="jd">' + d.d + '</span>' +
         trainHtml + '</div>';
     }
-    if (!any) h += '<div style="color:#aaa;font-size:13px;">建造设施来解锁职业。</div>';
+    if (!any && !collapsed.v_job) h += '<div style="color:#aaa;font-size:13px;">建造设施来解锁职业。</div>';
   }
 
   else if (curTab === 'c') {
+    h += secHdr('c_craft', '制作配方');
     var any = 0;
     var hasAuto = G.upg.craftMastery?.done;
     for (var id in CD) {
       var d = CD[id];
       if (!chk(d.uq)) continue; any = 1;
+      if (collapsed.c_craft) continue;
       var ok = canC(id);
       var cost = d.inp.map(function(p) {
         var have = G.res[p.r].v;
@@ -484,14 +514,16 @@ function rTC() {
         (ok ? '' : 'disabled') + '>制作</button>' +
         autoBtn + '</div></div>';
     }
-    if (!any) h += '<div style="color:#aaa;font-size:13px;">继续研究来解锁配方。</div>';
+    if (!any && !collapsed.c_craft) h += '<div style="color:#aaa;font-size:13px;">继续研究来解锁配方。</div>';
   }
 
   else if (curTab === 'r') {
+    h += secHdr('r_avail', '可研究');
     var any = 0;
     for (var id in UD) {
       var d = UD[id];
       if (G.upg[id].done || !G.upg[id].on) continue; any = 1;
+      if (collapsed.r_avail) continue;
       var ok = canU(id);
       var cost = d.p.map(function(p) {
         var have = G.res[p.r].v;
@@ -508,8 +540,8 @@ function rTC() {
     }
     var done = Object.entries(G.upg).filter(function(e) { return e[1].done; });
     if (done.length) {
-      h += '<div class="res-cat" style="margin-top:8px;">已完成</div>';
-      for (var i = 0; i < done.length; i++) {
+      h += secHdr('r_done', '已完成');
+      for (var i = 0; !collapsed.r_done && i < done.length; i++) {
         var uid = done[i][0];
         var sec = { effects: upgEffects(UD[uid].e), tip: pickTip('upg_' + uid, UD[uid].tip) };
         var nameHtml = hpWrap('✓ ' + UD[uid].n, sec);
@@ -525,8 +557,8 @@ function rTC() {
 
     // --- 进行中的远行 ---
     if (G.expeditions && G.expeditions.length) {
-      h += '<div class="res-cat">进行中的远行</div>';
-      for (var ei = 0; ei < G.expeditions.length; ei++) {
+      h += secHdr('w_active', '进行中的远行');
+      for (var ei = 0; !collapsed.w_active && ei < G.expeditions.length; ei++) {
         var exp = G.expeditions[ei];
         var ed = EXD[exp.dest];
         var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
@@ -545,8 +577,9 @@ function rTC() {
     // --- 派遣远行 ---
     var maxExp = maxExpeditions();
     var curExp = G.expeditions ? G.expeditions.length : 0;
-    h += '<div class="res-cat" style="margin-top:10px;">远行目的地 <span style="font-size:11px;color:#aaa;">（队伍 ' + curExp + '/' + maxExp + '）</span></div>';
+    h += secHdr('w_dest', '远行目的地', ' <span style="font-size:11px;color:#aaa;">（队伍 ' + curExp + '/' + maxExp + '）</span>');
 
+    if (!collapsed.w_dest) {
     if (maxExp <= 0) {
       h += '<div style="color:#aaa;font-size:13px;">建造驿道来派出远行队伍。</div>';
     } else {
@@ -597,9 +630,11 @@ function rTC() {
         h += '</div></div>';
       }
     }
+    }
 
     // --- 商队面板 ---
-    h += '<div class="res-cat" style="margin-top:10px;">商队</div>';
+    h += secHdr('w_caravan', '商队');
+    if (!collapsed.w_caravan) {
     if (G.caravan) {
       var cv = CVD[G.caravan.id];
       h += '<div class="cv-name">' + cv.n + ' <span style="color:#888;font-size:11px;">（停留至本季结束）</span></div>';
@@ -644,6 +679,7 @@ function rTC() {
     } else {
       h += '<div style="color:#aaa;font-size:13px;">暂无商队到访。</div>';
     }
+    }
 
     // --- 叙事碎片 ---
     var hasNarr = false;
@@ -651,7 +687,8 @@ function rTC() {
       if (NARR[nk].length) { hasNarr = true; break; }
     }
     if (hasNarr) {
-      h += '<div class="res-cat" style="margin-top:10px;">山外拾遗</div>';
+      h += secHdr('w_narr', '山外拾遗');
+      if (!collapsed.w_narr) {
       var narrSections = [
         { key: 'oldRuin', label: '旧墟手记' },
         { key: 'cloudRidge', label: '云岭石刻' },
@@ -671,6 +708,7 @@ function rTC() {
           }
         }
         h += '</div>';
+      }
       }
     }
   }
@@ -722,6 +760,10 @@ function rLog() {
     logs.slice(0, 30).map(function(e) {
       return '<div class="log ' + (e.c || '') + '">' + e.m + '</div>';
     }).join('');
+  var logList = document.getElementById('log-list');
+  if (logList) logList.style.display = collapsed.log ? 'none' : '';
+  var logCaret = document.getElementById('log-caret');
+  if (logCaret) logCaret.textContent = collapsed.log ? '▸' : '▾';
 }
 
 // ===== 渲染：季节 =====

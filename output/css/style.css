@@ -13,6 +13,11 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 /* LEFT PANEL */
 #left-panel{width:200px;border-right:1px solid #ddd;padding:8px;overflow-y:auto;overflow-x:visible;flex-shrink:0;font-size:13px;position:relative;z-index:10;}
 .res-cat{font-size:11px;color:#aaa;letter-spacing:1px;margin:6px 0 2px;text-transform:uppercase;}
+
+/* 面板折叠 */
+.sec-hdr{cursor:pointer;user-select:none;-webkit-user-select:none;}
+.sec-caret{display:inline-block;width:10px;color:#aaa;font-size:10px;}
+#log-panel h3 .sec-caret{color:#bbb;}
 .res-row{display:flex;justify-content:space-between;padding:1px 0;}
 .res-row .rn{color:#666;}
 .rn-remnant{color:#9a7b4f !important;}
@@ -92,6 +97,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
+.log.remnant{color:#9a7b4f;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #ece5da;}
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}
