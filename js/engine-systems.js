@@ -86,6 +86,7 @@ function resolveExpedition(idx, silent) {
   var rewardCount = 2 + (Math.random() < 0.5 ? 1 : 0);
   var pool = d.rewards.slice();
   var rewards = [];
+  var remnantLine = null; // 遗光单独成行，统一暗金色日志
   for (var r = 0; r < rewardCount && pool.length > 0; r++) {
     var ri = Math.floor(Math.random() * pool.length);
     var rw = pool[ri];
@@ -96,7 +97,8 @@ function resolveExpedition(idx, silent) {
       G.res[rw.r].v += amt;
       if (!G.res[rw.r].on) G.res[rw.r].on = true;
       if (G.res[rw.r].mx > 0) G.res[rw.r].v = Math.min(G.res[rw.r].v, G.res[rw.r].mx);
-      rewards.push(RD[rw.r].n + ' +' + amt);
+      if (rw.r === 'remnant') remnantLine = RD[rw.r].n + ' +' + amt;
+      else rewards.push(RD[rw.r].n + ' +' + amt);
     }
     pool.splice(ri, 1);
   }
@@ -109,7 +111,10 @@ function resolveExpedition(idx, silent) {
         G.res[b.r].v += b.a;
         if (!G.res[b.r].on) G.res[b.r].on = true;
         if (G.res[b.r].mx > 0) G.res[b.r].v = Math.min(G.res[b.r].v, G.res[b.r].mx);
-        if (b.a > 0) rewards.push(RD[b.r].n + ' +' + b.a);
+        if (b.a > 0) {
+          if (b.r === 'remnant') remnantLine = RD[b.r].n + ' +' + b.a;
+          else rewards.push(RD[b.r].n + ' +' + b.a);
+        }
         else rewards.push(RD[b.r].n + ' ' + b.a);
       }
     }
@@ -148,13 +153,16 @@ function resolveExpedition(idx, silent) {
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
+    if (remnantLine) log('带回了：' + remnantLine, 'remnant');
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();
     }
   } else {
     if (!G.pendingNarr) G.pendingNarr = [];
-    G.pendingNarr.push('离开期间，远行队伍从' + d.n + '返回了。（' + rewards.join('，') + '）');
+    var allRw = rewards.slice();
+    if (remnantLine) allRw.push(remnantLine);
+    G.pendingNarr.push('离开期间，远行队伍从' + d.n + '返回了。（' + allRw.join('，') + '）');
   }
   // 移除
   G.expeditions.splice(idx, 1);

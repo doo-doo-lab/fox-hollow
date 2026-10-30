@@ -15,6 +15,9 @@ function toggleCollapse(key) {
   collapsed[key] = !collapsed[key];
   try { localStorage.setItem('fhCollapsed', JSON.stringify(collapsed)); } catch(e) {}
   rAll();
+  // rAll() 不含 rLog()：日志面板只在 log() 时重渲染，
+  // 折叠/展开谷中见闻必须显式重渲染，否则要等下一条日志才生效
+  rLog();
 }
 
 function log(m, c) {

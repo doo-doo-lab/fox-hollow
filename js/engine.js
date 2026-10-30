@@ -456,8 +456,12 @@ function simulateOffline(seconds) {
   log(msg + '，资源已自动补算。', 'important');
   // 显示离线期间返回的远行
   if (G.pendingNarr && G.pendingNarr.length) {
-    for (var i = 0; i < G.pendingNarr.length; i++)
-      log(G.pendingNarr[i], 'echo');
+    for (var i = 0; i < G.pendingNarr.length; i++) {
+      var pm = G.pendingNarr[i];
+      // 含遗光获得的离线返回汇总统一暗金色，与在线遗光日志一致
+      var pc = (pm.indexOf('离开期间') === 0 && pm.indexOf('遗光') !== -1) ? 'remnant' : 'echo';
+      log(pm, pc);
+    }
     G.pendingNarr = [];
   }
 }
@@ -589,7 +593,7 @@ function tryEvent() {
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
   var hasRemnant = picked.e && picked.e.remnant;
-  log(msg, hasRemnant ? 'echo' : 'event');
+  log(msg, hasRemnant ? 'remnant' : 'event');
 }
 
 function tryRewardEvent() {
@@ -617,7 +621,7 @@ function tryRewardEvent() {
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
   var hasRemnant = picked.e && picked.e.remnant;
-  log(msg, hasRemnant ? 'echo' : 'event');
+  log(msg, hasRemnant ? 'remnant' : 'event');
 }
 
 function tryWorldEcho() {
@@ -637,7 +641,7 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg + '（遗光 +1）', 'echo');
+  log(msg + '（遗光 +1）', 'remnant');
 }
 // 重置 G 到初始骨架（保留引用，清除所有属性后填入默认值）
 function resetG() {
