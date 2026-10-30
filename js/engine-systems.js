@@ -133,8 +133,18 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事目的地（旧墟/云岭）按完成次数顺序推进，
+  // 避免首趟就随机到「最后一趟」这类结尾文本；6 条播完后随机复用前段（结尾只出现一次）。
+  // 非叙事目的地（荒丘/密林）保持随机抽取。
+  var returnLog;
+  if (d.narrative) {
+    var logIdx = G.expDone[exp.dest] - 1;
+    returnLog = logIdx < d.logs.length
+      ? d.logs[logIdx]
+      : d.logs[Math.floor(Math.random() * (d.logs.length - 1))];
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
