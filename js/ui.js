@@ -953,6 +953,12 @@ function startGame() {
   setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
   setInterval(save, 30000);
 
+  // v0.13.5：回到前台时立即按真实耗时补算并刷新（不等下一个定时器间隔），
+  // 配合 tick() 的补跑逻辑，切到其他浏览器页签期间远行进度也按真实时间推进
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) { tick(); rAll(); }
+  });
+
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)
   var _hpCur = null;
   document.addEventListener('mouseover', function(ev) {
