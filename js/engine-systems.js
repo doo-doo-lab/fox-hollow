@@ -133,8 +133,24 @@ function resolveExpedition(idx, silent) {
   }
   // 记录完成次数
   G.expDone[exp.dest] = (G.expDone[exp.dest] || 0) + 1;
-  // 日志
-  var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  // 日志：叙事型目的地（旧墟/云岭）的返回日志按剧情进度顺序推进，
+  // 首条对应首访，末条为收尾日志、仅在叙事碎片集齐当次出现；
+  // 无叙事目的地（荒丘/密林）保持随机抽取
+  var returnLog;
+  if (d.narrative && NARR[exp.dest] && d.logs.length > 1) {
+    var doneCount = G.expDone[exp.dest];      // 含本次的完成次数
+    var narrTotal = NARR[exp.dest].length;    // 叙事碎片总数
+    var seqCount = d.logs.length - 1;         // 末条为收尾日志
+    if (doneCount === narrTotal) {
+      returnLog = d.logs[seqCount];           // 碎片集齐当次：收尾日志
+    } else if (doneCount < narrTotal && doneCount <= seqCount) {
+      returnLog = d.logs[doneCount - 1];      // 按远行次数顺序推进
+    } else {
+      returnLog = d.logs[Math.floor(Math.random() * seqCount)]; // 其余随机（不含收尾条）
+    }
+  } else {
+    returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
+  }
   if (!silent) {
     log(returnLog, 'event');
     if (rewards.length) log('带回了：' + rewards.join('，'), 'important');

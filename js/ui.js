@@ -50,8 +50,16 @@ function hpWrap(label, sections, opts) {
   h += label;
   h += '<div class="hp">';
   if (sections.desc) h += '<div class="hp-desc">' + sections.desc + '</div>';
-  if (sections.effects && sections.effects.length)
-    h += '<div class="hp-eff">' + sections.effects.join('<br>') + '</div>';
+  // 效果行去重：与 desc 相同或彼此重复的只保留一条（如斥候的 desc 与 jobEffects 文案相同）
+  var effList = [];
+  if (sections.effects) {
+    for (var ei = 0; ei < sections.effects.length; ei++) {
+      var et = sections.effects[ei];
+      if (et !== sections.desc && effList.indexOf(et) === -1) effList.push(et);
+    }
+  }
+  if (effList.length)
+    h += '<div class="hp-eff">' + effList.join('<br>') + '</div>';
   if (sections.notes && sections.notes.length)
     h += '<div class="hp-note">' + sections.notes.join('<br>') + '</div>';
   if (sections.tip) h += '<div class="hp-tip">' + sections.tip + '</div>';
