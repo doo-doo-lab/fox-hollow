@@ -246,7 +246,7 @@
   │   ├── design.md       # 本策划文档
   │   ├── changelog.md    # 变更日志
   │   ├── plan-panel-collapse.md # 面板折叠方案与验证清单（已实施）
-  │   └── plan-collapse-full-coverage.md # 折叠全覆盖方案（验收 E，待确认未实施）
+  │   └── plan-collapse-full-coverage.md # 折叠全覆盖方案（验收 E/F，已实施 v0.14.0–v0.14.1，含复核与检查矩阵记录）
   └── reference/          # 猫国建设者（Kittens Game）中文 Wiki 参考资料
       ├── _navigation.md  # Wiki 导航目录
       ├── 首页.md          # Wiki 首页
