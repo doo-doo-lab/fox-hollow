@@ -9,7 +9,9 @@ const logs = [];
 const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
-const collapsed = { res: false, tc: false, log: false };
+// 折叠状态（验收 E 全覆盖）：res 资源 / fox 村落狐口 / expbar 远行进度条 / tc 页签内容（栏级共享）/ log 谷中见闻
+// 持久化于 localStorage.fhCollapsed；旧版 {res,tc,log} 状态经 Object.assign 天然兼容，新键取默认展开
+const collapsed = { res: false, fox: false, expbar: false, tc: false, log: false };
 
 function toggleCollapse(key) {
   collapsed[key] = !collapsed[key];
@@ -334,13 +336,23 @@ function rTabs() {
   }).join('');
 }
 
-// ===== 渲染：远行进度（常驻，不依赖当前Tab） =====
+// ===== 渲染：远行进度（常驻，不依赖当前Tab；可折叠，折叠时标题行保留摘要） =====
 function rExpStatus() {
   var el = document.getElementById('exp-status');
   if (!el) return;
   if (!G.expeditions || !G.expeditions.length) { el.innerHTML = ''; return; }
-  var h = '';
-  for (var ei = 0; ei < G.expeditions.length; ei++) {
+  var n = G.expeditions.length;
+  if (collapsed.expbar) {
+    // 摘要：剩余 tick 最少（最紧迫）的一支；多支队伍时附总数。引擎推进不受折叠影响
+    var urg = G.expeditions[0];
+    for (var ui = 1; ui < n; ui++) { if (G.expeditions[ui].ticksLeft < urg.ticksLeft) urg = G.expeditions[ui]; }
+    var uDays = Math.ceil(urg.ticksLeft / TPD);
+    el.innerHTML = '<div class="collapse-toggle" onclick="toggleCollapse(\'expbar\')">▶︎ 远行（'
+      + EXD[urg.dest].n + ' · 剩余' + uDays + '天' + (n > 1 ? '，等' + n + '支' : '') + '）</div>';
+    return;
+  }
+  var h = '<div class="collapse-toggle" onclick="toggleCollapse(\'expbar\')">▼︎ 远行</div>';
+  for (var ei = 0; ei < n; ei++) {
     var exp = G.expeditions[ei];
     var ed = EXD[exp.dest];
     var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
@@ -359,15 +371,23 @@ function rExpStatus() {
 
 // ===== 渲染：资源面板 =====
 function rRes() {
-  document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res);
+  document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res || collapsed.fox);
+  // 村落狐口（可折叠）：折叠后标题行保留狐口摘要
+  var foxSum = '狐狸 ' + G.foxes + (G.maxFox > 0 ? '/' + G.maxFox : '') +
+    (G.foxAway > 0 ? ' · 外出 ' + G.foxAway : '') +
+    (G.freeFox > 0 ? ' · 闲置 ' + G.freeFox : '');
+  var foxHtml = '<div class="collapse-toggle" onclick="toggleCollapse(\'fox\')">'
+    + (collapsed.fox ? '▶︎ 村落狐口（' + foxSum + '）' : '▼︎ 村落狐口') + '</div>';
+  if (!collapsed.fox) {
+    foxHtml += '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
+      (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
+      (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
+  }
+  document.getElementById('fox-info').innerHTML = foxHtml;
   var toggle = '<div class="collapse-toggle" onclick="toggleCollapse(\'res\')">'
     + (collapsed.res ? '▶︎ 资源' : '▼︎ 资源') + '</div>';
   if (collapsed.res) {
     document.getElementById('res-list').innerHTML = toggle;
-    document.getElementById('fox-info').innerHTML =
-      '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
-      (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
-      (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
     return;
   }
   var panel = document.getElementById('res-list');
@@ -394,10 +414,6 @@ function rRes() {
       (s.mx > 0 ? '/' + fmt(s.mx) : '') + rr + '</span></div>';
   }
   document.getElementById('res-list').innerHTML = toggle + h;
-  document.getElementById('fox-info').innerHTML =
-    '狐狸村民：<b>' + G.foxes + (G.maxFox > 0 ? ' / ' + G.maxFox : '') + '</b>' +
-    (G.foxAway > 0 ? ' （外出 ' + G.foxAway + '）' : '') +
-    (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
 }
 
 // ===== 渲染：Tab内容 =====

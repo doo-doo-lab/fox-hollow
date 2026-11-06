@@ -158,6 +158,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
   #game{flex-direction:column;}
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
   #left-panel.collapsed,#log-panel.collapsed{max-height:none;height:auto;overflow:hidden;}
+  /* 验收 E：中栏永不拉伸吸收空间——折叠任一栏位（狐口/资源/远行条/页签内容）后，
+     下方内容都 1:1 自动上移补位；内容不足 min-height 时空白留在页尾而非被中栏吞掉 */
+  #center-panel{flex:0 0 auto;}
   #center-panel.collapsed{flex:0 0 auto;}
   .job-row .jd{display:none;}
 }
