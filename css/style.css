@@ -91,7 +91,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
-.log.remnant{color:#9a7b4f;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #ece5da;}
+.log.remnant{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;} /* 对齐日志视觉参考 5323.png：#555566 + #e8e8f0，与世界回响同款蓝灰；凭「（遗光 +1）」后缀区分 */
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}

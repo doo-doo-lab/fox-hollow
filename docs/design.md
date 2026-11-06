@@ -198,7 +198,7 @@
 - 折叠状态存 `localStorage.fhCollapsed`（UI 偏好，独立于存档/存档码），刷新后保留
 - **手机端（≤860px）**：纵向排列，折叠后下方内容自动上移，方便快速看到谷中见闻；窄屏下 `#center-panel.collapsed{flex:0 0 auto}` 防止中栏拉伸吸收省出的空间
 - **桌面端**：三栏 flex 布局宽度固定，折叠只隐藏栏内内容，各栏位置不动
-- 详细方案与验证清单见 `docs/plan-panel-collapse.md`
+- 详细方案与验证清单见 `docs/plan-panel-collapse.md`；全栏位覆盖扩展方案（待确认）见 `docs/plan-collapse-full-coverage.md`
 
 ### 3.5 日志配色
 
@@ -209,9 +209,9 @@
 | 山谷见闻/远行返回叙事 | `.log.event` | 深金 #b8860b |
 | 警告 | `.log.warn` | 红 #b00 |
 | 世界的回响/叙事碎片 | `.log.echo` | 蓝灰斜体 #556 |
-| 遗光获得（全部来源） | `.log.remnant` | 暗金斜体 #9a7b4f，与资源面板遗光同色 |
+| 遗光获得（全部来源） | `.log.remnant` | 蓝灰斜体 #555566，分隔线 #e8e8f0（对齐日志视觉参考 5323.png，与世界回响同款；凭「（遗光 +1）」后缀区分）。资源面板遗光仍为暗金 #9a7b4f |
 
-遗光日志统一规则（v0.13.6）：被动发现/手动采集触发（`tryRemnant`）、山谷见闻奖励（`tryEvent`/`tryRewardEvent`）、远行返回奖励（`resolveExpedition`，遗光单独成行「带回了：遗光 +1」）、离线返回汇总（含遗光时）——全部使用 `.log.remnant` 暗金色，并以「（遗光 +1）」或「遗光 +N」结尾。
+遗光日志统一规则（v0.13.6 建立，v0.13.10 按 5323.png 对齐配色）：被动发现/手动采集触发（`tryRemnant`）、山谷见闻奖励（`tryEvent`/`tryRewardEvent`）、远行返回奖励（`resolveExpedition`，遗光单独成行「带回了：遗光 +1」）、离线返回汇总（含遗光时）——全部使用 `.log.remnant`，并以「（遗光 +1）」或「遗光 +N」结尾。
 
 ---
 
@@ -237,7 +237,8 @@
   │   ├── RULES.md        # 协作规则
   │   ├── design.md       # 本策划文档
   │   ├── changelog.md    # 变更日志
-  │   └── plan-panel-collapse.md # 面板折叠方案与验证清单
+  │   ├── plan-panel-collapse.md # 面板折叠方案与验证清单（已实施）
+  │   └── plan-collapse-full-coverage.md # 折叠全覆盖方案（验收 E，待确认未实施）
   └── reference/          # 猫国建设者（Kittens Game）中文 Wiki 参考资料
       ├── _navigation.md  # Wiki 导航目录
       ├── 首页.md          # Wiki 首页
@@ -349,7 +350,7 @@
 - 季节系统、满意度系统、人口系统、授业系统
 - 远行系统（斥候出征）、商队系统、抉择事件系统、山外 Tab
 - 工坊自动化（连续速率模型）、建筑出售、存档码、离线补算（含远行/商队补算）
-- 悬浮信息面板、短句缓存系统、远行常驻进度条（后台实时推进）、三栏面板折叠（状态持久化）、遗光日志统一暗金变色
+- 悬浮信息面板、短句缓存系统、远行常驻进度条（后台实时推进）、三栏面板折叠（状态持久化）、遗光日志统一蓝灰变色（对齐 5323.png）
 - 引擎按职责拆分：engine.js（核心）/ engine-actions.js（玩家操作）/ engine-systems.js（子系统）
 
 ---
