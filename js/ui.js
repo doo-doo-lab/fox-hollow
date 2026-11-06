@@ -371,7 +371,7 @@ function rExpStatus() {
 
 // ===== 渲染：资源面板 =====
 function rRes() {
-  document.getElementById('left-panel').classList.toggle('collapsed', collapsed.res || collapsed.fox);
+  // 手机端左栏高度恒等于内容高度（限高在 #res-list 上），无需整栏 .collapsed 类（验收 F 修正）
   // 村落狐口（可折叠）：折叠后标题行保留狐口摘要
   var foxSum = '狐狸 ' + G.foxes + (G.maxFox > 0 ? '/' + G.maxFox : '') +
     (G.foxAway > 0 ? ' · 外出 ' + G.foxAway : '') +
