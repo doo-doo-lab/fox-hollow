@@ -451,7 +451,7 @@ const EXD = {
   },
   oldRuin: {
     n: '旧墟', days: 30, narrative: true,
-    d: '山谷北端的废弃古城。',
+    d: '山谷尽头一座沉默了很久的城。墙还在，住的人不在了。',
     cost: [{ r: 'berry', a: 50 }, { r: 'coin', a: 2 }],
     uq: { b: { trailroad: 1 } },
     rewards: [
@@ -471,7 +471,7 @@ const EXD = {
   },
   cloudRidge: {
     n: '云岭', days: 60, narrative: true,
-    d: '西北方常年云雾的高山。',
+    d: '高过云层的山脊，据说站在峰顶能同时看见旧墟和村子的炊烟。',
     cost: [{ r: 'berry', a: 100 }, { r: 'coin', a: 5 }, { r: 'charm', a: 1 }],
     uq: { b: { trailroad: 1, watchtower: 1 }, u: { longJourney: 1 } },
     rewards: [
