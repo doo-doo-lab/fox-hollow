@@ -340,6 +340,12 @@ function simulateOffline(seconds) {
     if (G.upg.craftMastery?.done && G.tick % 50 === 0) runAutoCraft();
     // 商队季节到期在季节更替中处理
   }
+  // 补算期间返回的远行叙事：无论离开时长都立即展示
+  if (G.pendingNarr && G.pendingNarr.length) {
+    for (var i = 0; i < G.pendingNarr.length; i++)
+      log(G.pendingNarr[i], 'echo');
+    G.pendingNarr = [];
+  }
   // 显示补算结果（离开不足 30 秒不提示）
   if (seconds < 30) return;
   var mins = Math.floor(seconds / 60);
@@ -349,25 +355,20 @@ function simulateOffline(seconds) {
   else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
   else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
   log(msg + '，资源已自动补算。', 'important');
-  // 显示离线期间返回的远行
-  if (G.pendingNarr && G.pendingNarr.length) {
-    for (var i = 0; i < G.pendingNarr.length; i++)
-      log(G.pendingNarr[i], 'echo');
-    G.pendingNarr = [];
-  }
 }
 
 // ===== 主循环 =====
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
+  // 后台页签限流/短暂卡顿：按真实耗时补跑 tick（含远行倒计时），保证进度实时推进
   var now = Date.now();
   var gap = (now - lastRealTime) / 1000;
-  lastRealTime = now;
-  if (gap > 5) {
-    simulateOffline(gap - TMS / 1000);
+  if (gap > 0.6) {
+    simulateOffline(gap);
+    lastRealTime = now - ((gap * 1000) % TMS); // 保留不足一个 tick 的余数，避免累计丢失
     rAll();
     return;
   }
+  lastRealTime = now;
 
   G.tick++;
   G.day += 1 / TPD;

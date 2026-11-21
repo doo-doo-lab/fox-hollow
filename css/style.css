@@ -104,6 +104,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .hp-wrap-res{position:static;}
 .hp-wrap-res .hp{width:280px;}
 
+/* EXPEDITION - Persistent strip (all tabs) */
+#exp-strip:not(:empty){border-bottom:1px solid #eee;margin-bottom:8px;padding-bottom:4px;cursor:pointer;}
+
 /* EXPEDITION - Active */
 .exp-active{padding:6px 0;border-bottom:1px solid #f0f0f0;}
 .exp-active-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
