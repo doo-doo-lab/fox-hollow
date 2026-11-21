@@ -10,6 +10,38 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板折叠状态（纯 UI 偏好，不入游戏存档 G；方案见 docs/plan-panel-collapse.md） =====
+const uiCollapse = { res: false, log: false, tabs: {} };
+try {
+  var _uiPrefs = JSON.parse(localStorage.getItem('fhUiPrefs') || '{}');
+  uiCollapse.res = !!_uiPrefs.res;
+  uiCollapse.log = !!_uiPrefs.log;
+  uiCollapse.tabs = _uiPrefs.tabs || {};
+} catch (e) { }
+
+function saveUiPrefs() {
+  try { localStorage.setItem('fhUiPrefs', JSON.stringify(uiCollapse)); } catch (e) { }
+}
+
+function applyCollapse() {
+  document.getElementById('left-panel').classList.toggle('collapsed', uiCollapse.res);
+  document.getElementById('log-panel').classList.toggle('collapsed', uiCollapse.log);
+  document.getElementById('res-arrow').textContent = uiCollapse.res ? '▸' : '▾';
+  document.getElementById('log-arrow').textContent = uiCollapse.log ? '▸' : '▾';
+}
+
+function togglePanel(key) {
+  uiCollapse[key] = !uiCollapse[key];
+  applyCollapse();
+  saveUiPrefs();
+}
+
+function toggleTabCollapse() {
+  uiCollapse.tabs[curTab] = !uiCollapse.tabs[curTab];
+  rTabs(); rTC();
+  saveUiPrefs();
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -241,8 +273,12 @@ function rTabs() {
   document.getElementById('tabs').innerHTML = TABS.filter(function(t) {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
-    return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
+    var active = t.id === curTab;
+    var onclick = active ? 'toggleTabCollapse()' : 'curTab=\'' + t.id + '\';rTabs();rTC()';
+    var arrow = active ? '<span class="tab-arrow">' + (uiCollapse.tabs[t.id] ? '▸' : '▾') + '</span>' : '';
+    return '<div class="tab' + (active ? ' on' : '') + '"' +
+      (active ? ' title="点击折叠/展开"' : '') +
+      ' onclick="' + onclick + '">' + t.n + arrow + '</div>';
   }).join('');
 }
 
@@ -322,6 +358,8 @@ function rExpStrip() {
 
 // ===== 渲染：Tab内容 =====
 function rTC() {
+  // 当前页签内容已折叠：置空并跳过渲染（状态驱动，重建不丢折叠态）
+  if (uiCollapse.tabs[curTab]) { document.getElementById('tc').innerHTML = ''; return; }
   var h = '';
 
   if (curTab === 'b') {
@@ -750,6 +788,7 @@ function showChoiceModal(idx) {
 function startGame() {
   initState();
   load();
+  applyCollapse();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
   setInterval(function() { tick(); rExpStrip(); if (G.tick % 5 === 0) rAll(); }, TMS);
