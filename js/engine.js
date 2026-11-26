@@ -358,17 +358,29 @@ function simulateOffline(seconds) {
 }
 
 // ===== 主循环 =====
+// 毫秒余数累加器：浏览器后台页签会把 setInterval 限流（如 1 秒一次），
+// 按真实耗时补跑 tick，保证远行倒计时与资源产出在后台也实时推进。
+let tickAcc = 0;
 function tick() {
-  // 检测后台切回：如果距上次 tick 超过 5 秒，补算中间的时间
   var now = Date.now();
-  var gap = (now - lastRealTime) / 1000;
+  var elapsed = now - lastRealTime;
   lastRealTime = now;
-  if (gap > 5) {
-    simulateOffline(gap - TMS / 1000);
+  // 长时间离开（>5 秒）：走离线补算（静默）
+  if (elapsed > 5000) {
+    tickAcc = 0;
+    simulateOffline(elapsed / 1000 - TMS / 1000);
     rAll();
     return;
   }
+  // 短间隔限流/卡顿：按真实耗时补跑完整 tick（含事件/远行/自动制作）
+  tickAcc += elapsed;
+  var steps = Math.floor(tickAcc / TMS);
+  tickAcc -= steps * TMS;
+  if (steps > 25) steps = 25; // 安全上限（5 秒）
+  for (var s = 0; s < steps; s++) tickOnce();
+}
 
+function tickOnce() {
   G.tick++;
   G.day += 1 / TPD;
 
