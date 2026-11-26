@@ -340,6 +340,14 @@ function simulateOffline(seconds) {
     if (G.upg.craftMastery?.done && G.tick % 50 === 0) runAutoCraft();
     // 商队季节到期在季节更替中处理
   }
+  // 补算期间返回的远行叙事：无论离开时长都立即展示（含遗光的汇总用遗光色）
+  if (G.pendingNarr && G.pendingNarr.length) {
+    for (var i = 0; i < G.pendingNarr.length; i++) {
+      var pn = G.pendingNarr[i];
+      log(pn, /遗光 \+/.test(pn) ? 'remnant' : 'echo');
+    }
+    G.pendingNarr = [];
+  }
   // 显示补算结果（离开不足 30 秒不提示）
   if (seconds < 30) return;
   var mins = Math.floor(seconds / 60);
@@ -349,12 +357,6 @@ function simulateOffline(seconds) {
   else if (mins > 0) msg = '离开了 ' + mins + ' 分钟';
   else msg = '离开了 ' + Math.floor(seconds) + ' 秒';
   log(msg + '，资源已自动补算。', 'important');
-  // 显示离线期间返回的远行
-  if (G.pendingNarr && G.pendingNarr.length) {
-    for (var i = 0; i < G.pendingNarr.length; i++)
-      log(G.pendingNarr[i], 'echo');
-    G.pendingNarr = [];
-  }
 }
 
 // ===== 主循环 =====
@@ -487,7 +489,7 @@ function tryEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
 }
 
 function tryRewardEvent() {
@@ -514,7 +516,7 @@ function tryRewardEvent() {
   }
   var msg = picked.t;
   if (rewards.length) msg += '（' + rewards.join('，') + '）';
-  log(msg, 'event');
+  log(msg, picked.e && picked.e.remnant ? 'remnant' : 'event');
 }
 
 function tryWorldEcho() {
@@ -534,7 +536,7 @@ function tryRemnant() {
   s.v += 1;
   if (!s.on) s.on = true;
   var msg = REMNANT_LOGS[Math.floor(Math.random() * REMNANT_LOGS.length)];
-  log(msg, 'echo');
+  log(msg + '（遗光 +1）', 'remnant');
 }
 
 // ===== 玩家操作 =====
@@ -809,6 +811,7 @@ function resolveExpedition(idx, silent) {
   var rewardCount = 2 + (Math.random() < 0.5 ? 1 : 0);
   var pool = d.rewards.slice();
   var rewards = [];
+  var gotRemnant = false;
   for (var r = 0; r < rewardCount && pool.length > 0; r++) {
     var ri = Math.floor(Math.random() * pool.length);
     var rw = pool[ri];
@@ -820,6 +823,7 @@ function resolveExpedition(idx, silent) {
       if (!G.res[rw.r].on) G.res[rw.r].on = true;
       if (G.res[rw.r].mx > 0) G.res[rw.r].v = Math.min(G.res[rw.r].v, G.res[rw.r].mx);
       rewards.push(RD[rw.r].n + ' +' + amt);
+      if (rw.r === 'remnant') gotRemnant = true;
     }
     pool.splice(ri, 1);
   }
@@ -860,7 +864,7 @@ function resolveExpedition(idx, silent) {
   var returnLog = d.logs[Math.floor(Math.random() * d.logs.length)];
   if (!silent) {
     log(returnLog, 'event');
-    if (rewards.length) log('带回了：' + rewards.join('，'), 'important');
+    if (rewards.length) log('带回了：' + rewards.join('，'), gotRemnant ? 'remnant' : 'important');
     // 抉择事件触发：斥候≥2，30%概率，无待处理抉择
     if ((G.job.scout?.c || 0) >= 2 && !G.pendingChoice && Math.random() < 0.3) {
       tryTriggerChoice();

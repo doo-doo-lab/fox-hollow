@@ -19,17 +19,22 @@
 </div>
 <div id="game">
   <div id="left-panel">
-    <div id="fox-info"></div>
-    <div id="res-list"></div>
+    <div class="panel-hdr" id="res-hdr" onclick="togglePanel('res')" title="点击折叠/展开"><span class="panel-arrow" id="res-arrow">▾</span>资源</div>
+    <div id="res-body">
+      <div id="fox-info"></div>
+      <div id="res-list"></div>
+    </div>
   </div>
   <div id="center-panel">
     <div id="tabs"></div>
-    <div id="exp-strip" onclick="if(curTab!=='w'){curTab='w';rTabs();rTC();}" title="点击查看山外"></div>
+    <div id="exp-strip" onclick="curTab='w';uiCollapse.tabs.w=false;rTabs();rTC();" title="点击查看山外"></div>
     <div id="tc"></div>
   </div>
   <div id="log-panel">
-    <h3>谷中见闻</h3>
-    <div id="log-list"></div>
+    <h3 class="panel-hdr" id="log-hdr" onclick="togglePanel('log')" title="点击折叠/展开"><span class="panel-arrow" id="log-arrow">▾</span>谷中见闻</h3>
+    <div id="log-body">
+      <div id="log-list"></div>
+    </div>
   </div>
 </div>
 <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:500;display:none;align-items:center;justify-content:center;">
