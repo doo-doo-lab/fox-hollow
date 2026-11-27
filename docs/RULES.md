@@ -4,16 +4,19 @@
 
 ```
 fox-hollow/
+├── .gitignore          # 忽略 reference/
 ├── index.html          # 入口页面
+├── README.md           # 项目介绍
 ├── css/
 │   └── style.css       # 样式
 ├── js/
-│   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件）
-│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发）
-│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板）
+│   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件/远行/商队/叙事）
+│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发/远行/商队/抉择）
+│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板/抉择弹窗）
 ├── docs/
 │   ├── RULES.md        # 本文件
-│   └── design.md       # 策划文档
+│   ├── design.md       # 策划文档
+│   └── changelog.md    # 变更日志
 └── reference/          # 参考资料（仅本地，不纳入版本控制）
 ```
 
