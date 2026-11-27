@@ -5,14 +5,14 @@
 ```
 fox-hollow/
 ├── .gitignore          # 忽略 reference/
-├── index.html          # 入口页面
 ├── README.md           # 项目介绍
+├── index.html          # 入口页面
 ├── css/
 │   └── style.css       # 样式
 ├── js/
 │   ├── data.js         # 数据定义（资源/建筑/职业/研究/工坊/灵术/事件/远行/商队/叙事）
-│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发/远行/商队/抉择）
-│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板/抉择弹窗）
+│   ├── engine.js       # 游戏引擎（状态/计算/tick/存档/事件触发/远行/商队）
+│   └── ui.js           # 界面渲染（日志/面板/Tab/悬浮面板/弹窗）
 ├── docs/
 │   ├── RULES.md        # 本文件
 │   ├── design.md       # 策划文档
@@ -29,7 +29,8 @@ fox-hollow/
 ## 快捷指令
 
 - **用户说「git push」时**：立即执行 `git add` + `git commit` + `git push origin main`，将当前所有改动推送到远程仓库。不需要额外确认。
-- **线上地址**：https://akira17189-create.github.io/fox-hollow/ （GitHub Pages，推送后自动更新）
+- **线上地址**：https://doo-doo-lab.github.io/fox-hollow/ （GitHub Pages，推送后自动更新）
+- **远程仓库**：https://github.com/doo-doo-lab/fox-hollow （原 akira17189-create/fox-hollow 已迁移，旧 Pages 地址 404，2026-11-26 实测确认）
 - **GitHub PAT**：（已移除，请勿提交到仓库）
 
 ## 开发约定

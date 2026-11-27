@@ -92,6 +92,16 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .log.event{color:#b8860b;}
 .log.warn{color:#b00;}
 .log.echo{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;}
+.log.remnant{color:#556;font-style:italic;line-height:1.6;padding:4px 0;border-bottom:1px solid #e8e8f0;} /* 对齐日志视觉参考 5323.png：蓝灰 #555566 + 分隔线 #e8e8f0，凭「（遗光 +N）」后缀与世界回响区分 */
+
+/* PANEL COLLAPSE */
+.panel-hdr{cursor:pointer;user-select:none;}
+.panel-hdr:hover{color:#333;}
+.panel-arrow{font-size:11px;color:#888;margin-right:4px;}
+#res-hdr{font-size:12px;color:#999;margin-bottom:4px;letter-spacing:1px;}
+#left-panel.collapsed #res-body{display:none;}
+#log-panel.collapsed #log-body{display:none;}
+.tab-arrow{font-size:11px;color:#888;margin-left:3px;}
 
 /* HOVER PANEL */
 .hp-wrap{position:relative;display:inline;}
@@ -103,6 +113,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .hp .hp-tip{color:#999;font-style:italic;border-top:1px solid #eee;padding-top:4px;margin-top:4px;}
 .hp-wrap-res{position:static;}
 .hp-wrap-res .hp{width:280px;}
+
+/* EXPEDITION - Persistent strip (all tabs) */
+#exp-strip:not(:empty){border-bottom:1px solid #eee;margin-bottom:8px;padding-bottom:4px;cursor:pointer;}
 
 /* EXPEDITION - Active */
 .exp-active{padding:6px 0;border-bottom:1px solid #f0f0f0;}
@@ -138,6 +151,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 
 @media(max-width:860px){
   #game{flex-direction:column;}
+  #center-panel{flex:none;}      /* 关键：取消中栏拉伸，折叠面板后下方内容才能真正上移 */
   #left-panel,#log-panel{width:100%;max-height:160px;border:none;border-bottom:1px solid #ddd;}
+  .panel-hdr{padding:6px 0;}      /* 手机端加大折叠栏头的点击区域 */
+  .tab{padding:7px 12px;}
   .job-row .jd{display:none;}
 }

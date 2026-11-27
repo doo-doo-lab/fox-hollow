@@ -71,7 +71,7 @@ fox-hollow/
 
 用浏览器打开 `index.html`，或访问线上版本：
 
-**https://akira17189-create.github.io/fox-hollow/**
+**https://doo-doo-lab.github.io/fox-hollow/**
 
 点击「采集野莓」。剩下的事，山谷会慢慢告诉你。
 

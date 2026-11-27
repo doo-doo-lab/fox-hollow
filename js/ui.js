@@ -10,6 +10,38 @@ const tipCache = {};
 let tipSeason = -1;
 const _expFoxSel = {};
 
+// ===== 面板折叠状态（纯 UI 偏好，不入游戏存档 G；方案见 docs/plan-panel-collapse.md） =====
+const uiCollapse = { res: false, log: false, tabs: {} };
+try {
+  var _uiPrefs = JSON.parse(localStorage.getItem('fhUiPrefs') || '{}');
+  uiCollapse.res = !!_uiPrefs.res;
+  uiCollapse.log = !!_uiPrefs.log;
+  uiCollapse.tabs = _uiPrefs.tabs || {};
+} catch (e) { }
+
+function saveUiPrefs() {
+  try { localStorage.setItem('fhUiPrefs', JSON.stringify(uiCollapse)); } catch (e) { }
+}
+
+function applyCollapse() {
+  document.getElementById('left-panel').classList.toggle('collapsed', uiCollapse.res);
+  document.getElementById('log-panel').classList.toggle('collapsed', uiCollapse.log);
+  document.getElementById('res-arrow').textContent = uiCollapse.res ? '▸' : '▾';
+  document.getElementById('log-arrow').textContent = uiCollapse.log ? '▸' : '▾';
+}
+
+function togglePanel(key) {
+  uiCollapse[key] = !uiCollapse[key];
+  applyCollapse();
+  saveUiPrefs();
+}
+
+function toggleTabCollapse() {
+  uiCollapse.tabs[curTab] = !uiCollapse.tabs[curTab];
+  rTabs(); rTC();
+  saveUiPrefs();
+}
+
 function log(m, c) {
   logs.unshift({ m, c: c || '' });
   if (logs.length > 60) logs.pop();
@@ -241,8 +273,12 @@ function rTabs() {
   document.getElementById('tabs').innerHTML = TABS.filter(function(t) {
     return !t.uq || chk(t.uq);
   }).map(function(t) {
-    return '<div class="tab' + (t.id === curTab ? ' on' : '') +
-      '" onclick="curTab=\'' + t.id + '\';rTabs();rTC()">' + t.n + '</div>';
+    var active = t.id === curTab;
+    var onclick = active ? 'toggleTabCollapse()' : 'curTab=\'' + t.id + '\';rTabs();rTC()';
+    var arrow = active ? '<span class="tab-arrow">' + (uiCollapse.tabs[t.id] ? '▸' : '▾') + '</span>' : '';
+    return '<div class="tab' + (active ? ' on' : '') + '"' +
+      (active ? ' title="点击折叠/展开"' : '') +
+      ' onclick="' + onclick + '">' + t.n + arrow + '</div>';
   }).join('');
 }
 
@@ -278,8 +314,52 @@ function rRes() {
     (G.freeFox > 0 ? ' （闲置 ' + G.freeFox + '）' : '');
 }
 
+// ===== 渲染：远行进度常驻条（所有页签可见，切页签不停滞） =====
+var _expStripKey = '';
+function rExpStrip() {
+  var el = document.getElementById('exp-strip');
+  if (!el) return;
+  var exps = G.expeditions || [];
+  if (!exps.length) {
+    if (_expStripKey !== '') { el.innerHTML = ''; _expStripKey = ''; }
+    return;
+  }
+  // 队伍集合变化时才重建 DOM（点击目标稳定、进度条过渡动画不被打断）
+  var key = exps.map(function(e) {
+    return e.dest + ':' + e.foxCount + ':' + e.totalTicks + ':' + (e.usedSpiritPath ? 1 : 0);
+  }).join('|');
+  if (key !== _expStripKey) {
+    _expStripKey = key;
+    var h = '<div class="res-cat">进行中的远行</div>';
+    for (var i = 0; i < exps.length; i++) {
+      var exp = exps[i], ed = EXD[exp.dest];
+      h += '<div class="exp-active">';
+      h += '<div class="exp-active-hdr">';
+      h += '<span class="exp-dest-name">' + ed.n + '</span>';
+      h += '<span class="exp-info"></span>';
+      if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
+      h += '</div>';
+      h += '<div class="exp-bar-bg"><div class="exp-bar-fill"></div></div>';
+      h += '</div>';
+    }
+    el.innerHTML = h;
+  }
+  // 原位更新进度与剩余天数（不重建 DOM，进度条平滑推进）
+  var rows = el.querySelectorAll('.exp-active');
+  for (var j = 0; j < rows.length && j < exps.length; j++) {
+    var e2 = exps[j];
+    var pct = Math.max(0, Math.min(100, (e2.totalTicks - e2.ticksLeft) / e2.totalTicks * 100));
+    var fill = rows[j].querySelector('.exp-bar-fill');
+    if (fill) fill.style.width = pct.toFixed(1) + '%';
+    var info = rows[j].querySelector('.exp-info');
+    if (info) info.textContent = e2.foxCount + '只狐狸 · 剩余' + Math.ceil(e2.ticksLeft / TPD) + '天';
+  }
+}
+
 // ===== 渲染：Tab内容 =====
 function rTC() {
+  // 当前页签内容已折叠：置空并跳过渲染（状态驱动，重建不丢折叠态）
+  if (uiCollapse.tabs[curTab]) { document.getElementById('tc').innerHTML = ''; return; }
   var h = '';
 
   if (curTab === 'b') {
@@ -522,30 +602,12 @@ function rTC() {
 
   else if (curTab === 'w') {
     // ===== 山外 Tab =====
-
-    // --- 进行中的远行 ---
-    if (G.expeditions && G.expeditions.length) {
-      h += '<div class="res-cat">进行中的远行</div>';
-      for (var ei = 0; ei < G.expeditions.length; ei++) {
-        var exp = G.expeditions[ei];
-        var ed = EXD[exp.dest];
-        var pct = Math.max(0, Math.min(100, ((exp.totalTicks - exp.ticksLeft) / exp.totalTicks * 100)));
-        var daysLeft = Math.ceil(exp.ticksLeft / TPD);
-        h += '<div class="exp-active">';
-        h += '<div class="exp-active-hdr">';
-        h += '<span class="exp-dest-name">' + ed.n + '</span>';
-        h += '<span class="exp-info">' + exp.foxCount + '只狐狸 · 剩余' + daysLeft + '天</span>';
-        if (exp.usedSpiritPath) h += '<span class="exp-spirit-used">灵路已用</span>';
-        h += '</div>';
-        h += '<div class="exp-bar-bg"><div class="exp-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>';
-        h += '</div>';
-      }
-    }
+    // 进行中的远行由常驻条 rExpStrip() 渲染（所有页签可见）
 
     // --- 派遣远行 ---
     var maxExp = maxExpeditions();
     var curExp = G.expeditions ? G.expeditions.length : 0;
-    h += '<div class="res-cat" style="margin-top:10px;">远行目的地 <span style="font-size:11px;color:#aaa;">（队伍 ' + curExp + '/' + maxExp + '）</span></div>';
+    h += '<div class="res-cat">远行目的地 <span style="font-size:11px;color:#aaa;">（队伍 ' + curExp + '/' + maxExp + '）</span></div>';
 
     if (maxExp <= 0) {
       h += '<div style="color:#aaa;font-size:13px;">建造驿道来派出远行队伍。</div>';
@@ -694,7 +756,7 @@ function rSeason() {
 // ===== 全量渲染 =====
 var _blockTC = 0;
 function rAll() {
-  rRes(); rTabs();
+  rRes(); rTabs(); rExpStrip();
   // select 交互期间跳过 rTC 重建
   if (_blockTC > 0) { _blockTC--; }
   else { rTC(); }
@@ -726,10 +788,18 @@ function showChoiceModal(idx) {
 function startGame() {
   initState();
   load();
+  applyCollapse();
   log('欢迎来到狐狸谷！采集资源，建造家园。', 'important');
   rAll();
-  setInterval(function() { tick(); if (G.tick % 5 === 0) rAll(); }, TMS);
+  setInterval(function() { tick(); rExpStrip(); if (G.tick % 5 === 0) rAll(); }, TMS);
   setInterval(save, 30000);
+
+  // 后台页签切回前台：立即按真实耗时补算并刷新（不等下一个被限流的 interval）
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) return;
+    tick();
+    rAll();
+  });
 
   // Position fixed hover panels — delegate via mouseenter (no bubbling noise)
   var _hpCur = null;
